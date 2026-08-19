@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "react-redux"
-import { register } from '../service/auth.api'
+import { register, login } from '../service/auth.api'
 import { setUser, setError, setLoading } from '../state/auth.slice'
 
 const useAuth = () => {
@@ -22,7 +22,24 @@ const useAuth = () => {
         }
     }
 
-    return { handleRegister, user, loading, error }
+    async function handleLogin({ email, password }) {
+        try {
+            dispatch(setLoading(true))
+            dispatch(setError(null))
+            const data = await login({ email, password })
+            dispatch(setUser(data?.user || data))
+            return { success: true, data }
+        } catch (err) {
+            const errorMessage = err?.response?.data?.message || err?.message || 'Login failed. Please check your credentials.'
+            dispatch(setError(errorMessage))
+            return { success: false, error: errorMessage }
+        } finally {
+            dispatch(setLoading(false))
+        }
+    }
+
+    return { handleRegister, handleLogin, user, loading, error }
 } 
 
-export default useAuth
+export default useAuth
+

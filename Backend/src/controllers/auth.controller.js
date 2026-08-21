@@ -1,6 +1,7 @@
 import { config } from "../config/config.js";
 import userModel from "../models/user.model.js";
 import jwt from "jsonwebtoken";
+import passport from "passport";
 
 async function sendTokenResponse(user, res, message) {
   const token = await jwt.sign(
@@ -80,3 +81,11 @@ export const login = async (req,res) => {
 
     await sendTokenResponse(user, res, "User logged in successfully")
 }
+
+// google callback
+export const googleCallback = async (req,res) =>{
+  console.log(req.user);
+  res.redirect("http://localhost:5173")
+}
+
+

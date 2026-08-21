@@ -3,8 +3,20 @@ import authRouter from "./routes/auth.routes.js"
 import cookieParser from "cookie-parser"
 import cors from "cors"
 import morgan from "morgan"
+import passport from 'passport'
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 
 const app = express()
+
+app.use(passport.initialize());
+
+passport.use(new GoogleStrategy({
+  clientID: process.env.GOOGLE_CLIENT_ID,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  callbackURL: '/api/auth/google/callback',
+}, (accessToken, refreshToken, profile, done) => {
+  return done(null, profile);
+}));
 
 app.use(morgan("dev"))
 app.use(express.json())

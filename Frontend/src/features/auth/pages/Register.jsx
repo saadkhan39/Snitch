@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router'
 import { FiEye, FiEyeOff, FiCheck, FiAlertCircle } from 'react-icons/fi'
+import { FcGoogle } from 'react-icons/fc'
 import useAuth from '../hooks/useAuth'
 import { useNavigate } from 'react-router'
 
@@ -121,187 +122,224 @@ const Register = () => {
           </Link>
         </div>
 
-        <div className="w-full max-w-md mx-auto">
-          
-          {/* Header */}
-          <div className="mb-6 xl:mb-8">
-            <span className="block text-[11px] xl:text-xs font-bold tracking-[0.2em] text-[#F59E0B] uppercase font-['Space_Grotesk'] mb-1.5">
-              WELCOME TO SNITCH
-            </span>
-            <h1 className="text-2xl sm:text-3xl xl:text-4xl font-bold text-white tracking-tight font-['Space_Grotesk']">
-              Elevate Your Style
-            </h1>
+       <div className="w-full max-w-sm mx-auto">
+
+  {/* Header */}
+  <div className="mb-4">
+    <span className="block text-[10px] font-bold tracking-[0.2em] text-[#F59E0B] uppercase font-['Space_Grotesk'] mb-1">
+      WELCOME TO SNITCH
+    </span>
+
+    <h1 className="text-2xl font-bold text-white tracking-tight font-['Space_Grotesk']">
+      Elevate Your Style
+    </h1>
+  </div>
+
+  {/* Error Message */}
+  {(localError || error) && (
+    <div className="mb-3 p-2.5 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center gap-2 text-red-400 text-xs">
+      <FiAlertCircle className="w-4 h-4 flex-shrink-0" />
+      <span>{localError || error}</span>
+    </div>
+  )}
+
+  {/* Success Message */}
+  {successMessage && (
+    <div className="mb-3 p-2.5 rounded-lg bg-amber-400/10 border border-amber-400/30 flex items-center gap-2 text-amber-300 text-xs">
+      <FiCheck className="w-4 h-4 flex-shrink-0 text-amber-400" />
+      <span>{successMessage}</span>
+    </div>
+  )}
+
+  <form onSubmit={handleSubmit} className="space-y-3">
+
+    {/* Full Name */}
+    <div className="space-y-1">
+      <label
+        htmlFor="fullname"
+        className="block text-[11px] font-medium text-slate-300 tracking-wide"
+      >
+        Full Name
+      </label>
+
+      <input
+        id="fullname"
+        type="text"
+        name="fullname"
+        value={formData.fullname}
+        onChange={handleChange}
+        placeholder="Rohan"
+        required
+        className="w-full bg-white/[0.03] text-white px-3 py-2 rounded-t-md border-b border-white/20 focus:border-[#F59E0B] text-sm placeholder-slate-500 focus:outline-none transition-colors duration-200"
+      />
+    </div>
+
+    {/* Contact Number */}
+    <div className="space-y-1">
+      <label
+        htmlFor="contact"
+        className="block text-[11px] font-medium text-slate-300 tracking-wide"
+      >
+        Contact Number
+      </label>
+
+      <input
+        id="contact"
+        type="tel"
+        name="contact"
+        value={formData.contact}
+        onChange={handleChange}
+        placeholder="+91 (98765) 43210"
+        required
+        className="w-full bg-white/[0.03] text-white px-3 py-2 rounded-t-md border-b border-white/20 focus:border-[#F59E0B] text-sm placeholder-slate-500 focus:outline-none transition-colors duration-200"
+      />
+    </div>
+
+    {/* Email */}
+    <div className="space-y-1">
+      <label
+        htmlFor="email"
+        className="block text-[11px] font-medium text-slate-300 tracking-wide"
+      >
+        Email Address
+      </label>
+
+      <input
+        id="email"
+        type="email"
+        name="email"
+        value={formData.email}
+        onChange={handleChange}
+        placeholder="hello@example.com"
+        required
+        className="w-full bg-white/[0.03] text-white px-3 py-2 rounded-t-md border-b border-white/20 focus:border-[#F59E0B] text-sm placeholder-slate-500 focus:outline-none transition-colors duration-200"
+      />
+    </div>
+
+    {/* Password */}
+    <div className="space-y-1">
+      <label
+        htmlFor="password"
+        className="block text-[11px] font-medium text-slate-300 tracking-wide"
+      >
+        Password
+      </label>
+
+      <div className="relative">
+        <input
+          id="password"
+          type={showPassword ? "text" : "password"}
+          name="password"
+          value={formData.password}
+          onChange={handleChange}
+          placeholder="••••••••"
+          required
+          className="w-full bg-white/[0.03] text-white pl-3 pr-9 py-2 rounded-t-md border-b border-white/20 focus:border-[#F59E0B] text-sm placeholder-slate-500 focus:outline-none transition-colors duration-200"
+        />
+
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-[#F59E0B]"
+        >
+          {showPassword ? (
+            <FiEyeOff className="w-4 h-4" />
+          ) : (
+            <FiEye className="w-4 h-4" />
+          )}
+        </button>
+      </div>
+    </div>
+
+    {/* Seller */}
+    <div className="pt-0.5">
+      <label
+        htmlFor="isSeller"
+        className="inline-flex items-center gap-2 cursor-pointer group"
+      >
+        <div className="relative flex items-center justify-center">
+          <input
+            id="isSeller"
+            type="checkbox"
+            name="isSeller"
+            checked={formData.isSeller}
+            onChange={handleChange}
+            className="sr-only"
+          />
+
+          <div
+            className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${
+              formData.isSeller
+                ? "bg-[#F59E0B] border-[#F59E0B] text-black"
+                : "border-slate-500 bg-transparent group-hover:border-slate-400"
+            }`}
+          >
+            {formData.isSeller && (
+              <FiCheck className="w-3 h-3 stroke-[3]" />
+            )}
           </div>
-
-          {/* Error Message */}
-          {(localError || error) && (
-            <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center gap-2.5 text-red-400 text-xs animate-fadeIn">
-              <FiAlertCircle className="w-4 h-4 flex-shrink-0" />
-              <span>{localError || error}</span>
-            </div>
-          )}
-
-          {/* Success Message */}
-          {successMessage && (
-            <div className="mb-4 p-3 rounded-lg bg-amber-400/10 border border-amber-400/30 flex items-center gap-2.5 text-amber-300 text-xs animate-fadeIn">
-              <FiCheck className="w-4 h-4 flex-shrink-0 text-amber-400" />
-              <span>{successMessage}</span>
-            </div>
-          )}
-
-          {/* Sign-Up Form with Seamless Underline Inputs */}
-          <form onSubmit={handleSubmit} className="space-y-4 xl:space-y-5">
-            
-            {/* Full Name */}
-            <div className="space-y-1">
-              <label
-                htmlFor="fullname"
-                className="block text-xs font-medium text-slate-300 tracking-wide"
-              >
-                Full Name
-              </label>
-              <input
-                id="fullname"
-                type="text"
-                name="fullname"
-                value={formData.fullname}
-                onChange={handleChange}
-                placeholder="Rohan"
-                required
-                className="w-full bg-white/[0.03] text-white px-3.5 py-2.5 rounded-t-md border-b-2 border-white/20 focus:border-[#F59E0B] text-sm placeholder-slate-500 focus:outline-none transition-colors duration-200"
-              />
-            </div>
-
-            {/* Contact Number */}
-            <div className="space-y-1">
-              <label
-                htmlFor="contact"
-                className="block text-xs font-medium text-slate-300 tracking-wide"
-              >
-                Contact Number
-              </label>
-              <input
-                id="contact"
-                type="tel"
-                name="contact"
-                value={formData.contact}
-                onChange={handleChange}
-                placeholder="+91 (98765) 43210"
-                required
-                className="w-full bg-white/[0.03] text-white px-3.5 py-2.5 rounded-t-md border-b-2 border-white/20 focus:border-[#F59E0B] text-sm placeholder-slate-500 focus:outline-none transition-colors duration-200"
-              />
-            </div>
-
-            {/* Email Address */}
-            <div className="space-y-1">
-              <label
-                htmlFor="email"
-                className="block text-xs font-medium text-slate-300 tracking-wide"
-              >
-                Email Address
-              </label>
-              <input
-                id="email"
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="hello@example.com"
-                required
-                className="w-full bg-white/[0.03] text-white px-3.5 py-2.5 rounded-t-md border-b-2 border-white/20 focus:border-[#F59E0B] text-sm placeholder-slate-500 focus:outline-none transition-colors duration-200"
-              />
-            </div>
-
-            {/* Password */}
-            <div className="space-y-1">
-              <label
-                htmlFor="password"
-                className="block text-xs font-medium text-slate-300 tracking-wide"
-              >
-                Password
-              </label>
-              <div className="relative">
-                <input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="••••••••"
-                  required
-                  className="w-full bg-white/[0.03] text-white pl-3.5 pr-10 py-2.5 rounded-t-md border-b-2 border-white/20 focus:border-[#F59E0B] text-sm placeholder-slate-500 focus:outline-none transition-colors duration-200"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-[#F59E0B] transition-colors focus:outline-none"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? <FiEyeOff className="w-4 h-4" /> : <FiEye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-
-            {/* Register as Seller Checkbox */}
-            <div className="pt-1">
-              <label
-                htmlFor="isSeller"
-                className="inline-flex items-center gap-2.5 cursor-pointer group"
-              >
-                <div className="relative flex items-center justify-center">
-                  <input
-                    id="isSeller"
-                    type="checkbox"
-                    name="isSeller"
-                    checked={formData.isSeller}
-                    onChange={handleChange}
-                    className="sr-only"
-                  />
-                  <div
-                    className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${
-                      formData.isSeller
-                        ? 'bg-[#F59E0B] border-[#F59E0B] text-black'
-                        : 'border-slate-500 bg-transparent group-hover:border-slate-400'
-                    }`}
-                  >
-                    {formData.isSeller && <FiCheck className="w-3 h-3 stroke-[3]" />}
-                  </div>
-                </div>
-                <span className="text-xs text-slate-300 group-hover:text-white transition-colors">
-                  Register as Seller
-                </span>
-              </label>
-            </div>
-
-            {/* Sign Up Button */}
-            <div className="pt-2">
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-[#F59E0B] hover:bg-[#e08e06] text-black font-semibold py-3 px-6 rounded-lg transition-all duration-200 flex items-center justify-center cursor-pointer shadow-[0_4px_14px_rgba(245,158,11,0.25)] hover:shadow-[0_6px_20px_rgba(245,158,11,0.35)] disabled:opacity-60 disabled:cursor-not-allowed text-sm font-['Space_Grotesk'] tracking-wide"
-              >
-                {loading ? (
-                  <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  'Sign Up'
-                )}
-              </button>
-            </div>
-
-            {/* Sign In Link */}
-            <div className="text-center pt-2">
-              <span className="text-xs text-slate-400">
-                Already have an account?{' '}
-                <Link
-                  to="/login"
-                  className="text-white hover:text-[#F59E0B] font-medium transition-colors ml-1 underline underline-offset-4 decoration-white/30 hover:decoration-[#F59E0B]"
-                >
-                  Sign In
-                </Link>
-              </span>
-            </div>
-          </form>
         </div>
+
+        <span className="text-[11px] text-slate-300 group-hover:text-white">
+          Register as Seller
+        </span>
+      </label>
+    </div>
+
+    {/* Sign Up */}
+    <div className="pt-1">
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full bg-[#F59E0B] hover:bg-[#e08e06] text-black font-semibold py-2.5 px-5 rounded-lg transition-all duration-200 flex items-center justify-center cursor-pointer shadow-[0_4px_14px_rgba(245,158,11,0.25)] text-sm font-['Space_Grotesk'] tracking-wide disabled:opacity-60"
+      >
+        {loading ? (
+          <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+        ) : (
+          "Sign Up"
+        )}
+      </button>
+    </div>
+
+    {/* Divider */}
+    <div className="flex items-center gap-3 py-1">
+      <div className="h-px flex-1 bg-white/10" />
+      <span className="text-[9px] text-slate-500 uppercase tracking-wider">
+        or
+      </span>
+      <div className="h-px flex-1 bg-white/10" />
+    </div>
+
+    {/* Google */}
+    <div>
+      <button
+        type="button"
+        onClick={() => {
+          window.location.href =
+            "http://localhost:3000/api/auth/google";
+        }}
+        className="w-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-white/20 text-white font-medium py-2.5 px-5 rounded-lg transition-all duration-200 flex items-center justify-center gap-3 cursor-pointer text-sm font-['Space_Grotesk']"
+      >
+        <FcGoogle className="w-5 h-5" />
+        Continue with Google
+      </button>
+    </div>
+
+    {/* Sign In */}
+    <div className="text-center pt-1">
+      <span className="text-[11px] text-slate-400">
+        Already have an account?{" "}
+        <Link
+          to="/login"
+          className="text-white hover:text-[#F59E0B]  font-medium transition-colors ml-1   decoration-white/30 hover:decoration-[#F59E0B]"
+        >
+          Sign In
+        </Link>
+      </span>
+    </div>
+
+  </form>
+</div>
       </div>
     </div>
   )

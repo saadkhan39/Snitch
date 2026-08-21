@@ -107,117 +107,125 @@ const Login = () => {
           </Link>
         </div>
 
-        <div className="w-full max-w-md mx-auto">
-          
-          {/* Header */}
-          <div className="mb-6 xl:mb-8">
-            <span className="block text-[11px] xl:text-xs font-bold tracking-[0.2em] text-[#F59E0B] uppercase font-['Space_Grotesk'] mb-1.5">
-              WELCOME BACK
-            </span>
-            <h1 className="text-2xl sm:text-3xl xl:text-4xl font-bold text-white tracking-tight font-['Space_Grotesk']">
-              Access Your Account
-            </h1>
-          </div>
+       <div className="w-full max-w-sm mx-auto">
 
-          {/* Error Message */}
-          {(localError || error) && (
-            <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center gap-2.5 text-red-400 text-xs animate-fadeIn">
-              <FiAlertCircle className="w-4 h-4 flex-shrink-0" />
-              <span>{localError || error}</span>
-            </div>
+  {/* Header */}
+  <div className="mb-4">
+    <span className="block text-[10px] font-bold tracking-[0.2em] text-[#F59E0B] uppercase font-['Space_Grotesk'] mb-1">
+      WELCOME BACK
+    </span>
+
+    <h1 className="text-2xl font-bold text-white tracking-tight font-['Space_Grotesk']">
+      Access Your Account
+    </h1>
+  </div>
+
+  {/* Error Message */}
+  {(localError || error) && (
+    <div className="mb-3 p-2.5 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center gap-2 text-red-400 text-xs animate-fadeIn">
+      <FiAlertCircle className="w-4 h-4 flex-shrink-0" />
+      <span>{localError || error}</span>
+    </div>
+  )}
+
+  {/* Success Message */}
+  {successMessage && (
+    <div className="mb-3 p-2.5 rounded-lg bg-amber-400/10 border border-amber-400/30 flex items-center gap-2 text-amber-300 text-xs animate-fadeIn">
+      <FiCheck className="w-4 h-4 flex-shrink-0 text-amber-400" />
+      <span>{successMessage}</span>
+    </div>
+  )}
+
+  {/* Sign-In Form */}
+  <form onSubmit={handleSubmit} className="space-y-3">
+
+    {/* Email Address */}
+    <div className="space-y-1">
+      <label
+        htmlFor="email"
+        className="block text-[11px] font-medium text-slate-300 tracking-wide"
+      >
+        Email Address
+      </label>
+
+      <input
+        id="email"
+        type="email"
+        name="email"
+        value={formData.email}
+        onChange={handleChange}
+        placeholder="hello@example.com"
+        required
+        className="w-full bg-white/[0.03] text-white px-3 py-2 rounded-t-md border-b border-white/20 focus:border-[#F59E0B] text-sm placeholder-slate-500 focus:outline-none transition-colors duration-200"
+      />
+    </div>
+
+    {/* Password */}
+    <div className="space-y-1">
+      <label
+        htmlFor="password"
+        className="block text-[11px] font-medium text-slate-300 tracking-wide"
+      >
+        Password
+      </label>
+
+      <div className="relative">
+        <input
+          id="password"
+          type={showPassword ? "text" : "password"}
+          name="password"
+          value={formData.password}
+          onChange={handleChange}
+          placeholder="••••••••"
+          required
+          className="w-full bg-white/[0.03] text-white pl-3 pr-9 py-2 rounded-t-md border-b border-white/20 focus:border-[#F59E0B] text-sm placeholder-slate-500 focus:outline-none transition-colors duration-200"
+        />
+
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-[#F59E0B] transition-colors focus:outline-none"
+          aria-label={showPassword ? "Hide password" : "Show password"}
+        >
+          {showPassword ? (
+            <FiEyeOff className="w-4 h-4" />
+          ) : (
+            <FiEye className="w-4 h-4" />
           )}
+        </button>
+      </div>
+    </div>
 
-          {/* Success Message */}
-          {successMessage && (
-            <div className="mb-4 p-3 rounded-lg bg-amber-400/10 border border-amber-400/30 flex items-center gap-2.5 text-amber-300 text-xs animate-fadeIn">
-              <FiCheck className="w-4 h-4 flex-shrink-0 text-amber-400" />
-              <span>{successMessage}</span>
-            </div>
-          )}
+    {/* Sign In Button */}
+    <div className="pt-1">
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full bg-[#F59E0B] hover:bg-[#e08e06] text-black font-semibold py-2.5 px-5 rounded-lg transition-all duration-200 flex items-center justify-center cursor-pointer shadow-[0_4px_14px_rgba(245,158,11,0.25)] hover:shadow-[0_6px_20px_rgba(245,158,11,0.35)] disabled:opacity-60 disabled:cursor-not-allowed text-sm font-['Space_Grotesk'] tracking-wide"
+      >
+        {loading ? (
+          <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+        ) : (
+          "Sign In"
+        )}
+      </button>
+    </div>
 
-          {/* Sign-In Form with Seamless Underline Inputs */}
-          <form onSubmit={handleSubmit} className="space-y-4 xl:space-y-5">
-            
-            {/* Email Address */}
-            <div className="space-y-1">
-              <label
-                htmlFor="email"
-                className="block text-xs font-medium text-slate-300 tracking-wide"
-              >
-                Email Address
-              </label>
-              <input
-                id="email"
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="hello@example.com"
-                required
-                className="w-full bg-white/[0.03] text-white px-3.5 py-2.5 rounded-t-md border-b-2 border-white/20 focus:border-[#F59E0B] text-sm placeholder-slate-500 focus:outline-none transition-colors duration-200"
-              />
-            </div>
+    {/* Sign Up Link */}
+    <div className="text-center pt-1">
+      <span className="text-[11px] text-slate-400">
+        Don&apos;t have an account?{" "}
+        <Link
+          to="/register"
+          className="text-white hover:text-[#F59E0B] font-medium transition-colors ml-1"
+        >
+          Sign Up
+        </Link>
+      </span>
+    </div>
 
-            {/* Password */}
-            <div className="space-y-1">
-              <label
-                htmlFor="password"
-                className="block text-xs font-medium text-slate-300 tracking-wide"
-              >
-                Password
-              </label>
-              <div className="relative">
-                <input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="••••••••"
-                  required
-                  className="w-full bg-white/[0.03] text-white pl-3.5 pr-10 py-2.5 rounded-t-md border-b-2 border-white/20 focus:border-[#F59E0B] text-sm placeholder-slate-500 focus:outline-none transition-colors duration-200"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-[#F59E0B] transition-colors focus:outline-none"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? <FiEyeOff className="w-4 h-4" /> : <FiEye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-
-
-            {/* Sign In Button */}
-            <div className="pt-2">
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-[#F59E0B] hover:bg-[#e08e06] text-black font-semibold py-3 px-6 rounded-lg transition-all duration-200 flex items-center justify-center cursor-pointer shadow-[0_4px_14px_rgba(245,158,11,0.25)] hover:shadow-[0_6px_20px_rgba(245,158,11,0.35)] disabled:opacity-60 disabled:cursor-not-allowed text-sm font-['Space_Grotesk'] tracking-wide"
-              >
-                {loading ? (
-                  <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  'Sign In'
-                )}
-              </button>
-            </div>
-
-            {/* Sign Up Link */}
-            <div className="text-center pt-2">
-              <span className="text-xs text-slate-400">
-                Don&apos;t have an account?{' '}
-                <Link
-                  to="/register"
-                  className="text-white hover:text-[#F59E0B] font-medium transition-colors ml-1 underline underline-offset-4 decoration-white/30 hover:decoration-[#F59E0B]"
-                >
-                  Sign Up
-                </Link>
-              </span>
-            </div>
-          </form>
-        </div>
+  </form>
+</div>
       </div>
     </div>
   )

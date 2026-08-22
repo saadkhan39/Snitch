@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router'
 import { FiEye, FiEyeOff, FiCheck, FiAlertCircle } from 'react-icons/fi'
-import { FcGoogle } from 'react-icons/fc'
 import useAuth from '../hooks/useAuth'
 import { useNavigate } from 'react-router'
+import ContinueWithGoogle from '../components/ContinueWithGoogle'
 
 const Register = () => {
   const { handleRegister, loading, error } = useAuth()
@@ -311,19 +311,7 @@ const Register = () => {
     </div>
 
     {/* Google */}
-    <div>
-      <button
-        type="button"
-        onClick={() => {
-          window.location.href =
-            "http://localhost:3000/api/auth/google";
-        }}
-        className="w-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-white/20 text-white font-medium py-2.5 px-5 rounded-lg transition-all duration-200 flex items-center justify-center gap-3 cursor-pointer text-sm font-['Space_Grotesk']"
-      >
-        <FcGoogle className="w-5 h-5" />
-        Continue with Google
-      </button>
-    </div>
+   <ContinueWithGoogle/>
 
     {/* Sign In */}
     <div className="text-center pt-1">

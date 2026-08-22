@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { FiEye, FiEyeOff, FiCheck, FiAlertCircle } from 'react-icons/fi'
 import useAuth from '../hooks/useAuth'
+import ContinueWithGoogle from '../components/ContinueWithGoogle'
 
 const Login = () => {
   const { handleLogin, loading, error } = useAuth()
@@ -210,6 +211,18 @@ const Login = () => {
         )}
       </button>
     </div>
+
+     {/* Divider */}
+    <div className="flex items-center gap-3 py-1">
+      <div className="h-px flex-1 bg-white/10" />
+      <span className="text-[9px] text-slate-500 uppercase tracking-wider">
+        or
+      </span>
+      <div className="h-px flex-1 bg-white/10" />
+    </div>
+
+    {/* Google */}
+   <ContinueWithGoogle/>
 
     {/* Sign Up Link */}
     <div className="text-center pt-1">

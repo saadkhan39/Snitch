@@ -96,60 +96,61 @@ const CreateProduct = () => {
     }
   }
 
-  /* ── shared input style matching Login/Register ── */
   const inputCls =
-    "w-full bg-white/[0.03] text-white px-3 py-2 rounded-t-md border-b border-white/20 focus:border-[#F59E0B] text-sm placeholder-slate-500 focus:outline-none transition-colors duration-200"
-  const labelCls = "block text-[11px] font-medium text-slate-300 tracking-wide"
+    "h-[34px] w-full rounded-[5px] border border-[#D8D1C8] bg-[#F8F6F2] px-3 text-[10px] text-[#211D1A] outline-none transition placeholder:text-[#AAA39B] focus:border-[#A95035] focus:ring-1 focus:ring-[#A95035]/10"
+  const labelCls = "mb-1 block text-[8px] font-bold uppercase tracking-[0.12em] text-[#625B55]"
 
   return (
-    <div className="h-screen w-screen bg-[#0D0E13] text-[#E2E8F0] overflow-hidden flex flex-col lg:flex-row font-['Plus_Jakarta_Sans',sans-serif] selection:bg-amber-500/30 selection:text-amber-300">
+    <main className="h-screen w-full overflow-hidden bg-[#D6D5D3] font-['Plus_Jakarta_Sans',sans-serif]">
+      <div className="flex h-full w-full">
 
       {/* ── Form Panel (full width) ── */}
-      <div className="flex-1 h-full flex flex-col justify-center px-6 sm:px-10 md:px-14 xl:px-16 py-6 bg-[#0D0E13] relative overflow-y-auto lg:overflow-hidden">
+      <section className="flex h-full w-full flex-col justify-center overflow-y-auto bg-[#dbd8d8] px-5 py-6 sm:px-10 md:px-14 lg:px-8 xl:px-16">
 
         {/* Mobile header */}
-        <div className="flex lg:hidden items-center justify-between mb-5">
-          <span className="text-xl font-bold tracking-[0.2em] text-[#F59E0B] font-['Space_Grotesk']">
-            SNITCH.
+        <div className="mx-auto mb-6 flex w-full max-w-[420px] items-center justify-between">
+          <span className="text-[18px] font-bold tracking-[0.3em] text-[#211D1A]">
+            SNITCH
           </span>
-          <Link to="/products" className="text-xs text-[#F59E0B] hover:underline">
-            ← Products
+          <Link to="/products" className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#211D1A] hover:underline">
+            Products
           </Link>
         </div>
 
-        <div className="w-full max-w-sm mx-auto">
+        <div className="mx-auto w-full max-w-[420px]">
 
           {/* Header */}
-          <div className="mb-4">
-            <span className="block text-[10px] font-bold tracking-[0.2em] text-[#F59E0B] uppercase font-['Space_Grotesk'] mb-1">
-              ADMIN — NEW LISTING
+          <div className="mb-5">
+            <span className="mb-2 block text-[7px] font-bold uppercase tracking-[0.28em] text-[#131212]">
+              New listing
             </span>
-            <h1 className="text-2xl font-bold text-white tracking-tight font-['Space_Grotesk']">
-              Create Product
+            <h1 className="font-serif text-[30px] leading-none tracking-[-0.03em] text-[#211D1A]">
+              Create your product
             </h1>
+            <div className="mt-3 h-[2px] w-7 bg-[#211D1A]" />
           </div>
 
           {/* Error */}
           {error && (
-            <div className="mb-3 p-2.5 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center gap-2 text-red-400 text-xs">
-              <FiAlertCircle className="w-4 h-4 flex-shrink-0" />
+            <div className="mb-3 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-2.5 py-1.5 text-[9px] text-red-600">
+              <FiAlertCircle className="h-3 w-3 shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
           {/* Success */}
           {success && (
-            <div className="mb-3 p-2.5 rounded-lg bg-amber-400/10 border border-amber-400/30 flex items-center gap-2 text-amber-300 text-xs">
-              <FiCheck className="w-4 h-4 flex-shrink-0 text-amber-400" />
+            <div className="mb-3 flex items-center gap-2 rounded-md border border-green-200 bg-green-50 px-2.5 py-1.5 text-[9px] text-green-700">
+              <FiCheck className="h-3 w-3 shrink-0" />
               <span>{success}</span>
             </div>
           )}
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-3">
+          <form onSubmit={handleSubmit} className="space-y-2.5">
 
             {/* Title */}
-            <div className="space-y-1">
+            <div>
               <label htmlFor="title" className={labelCls}>Product Title</label>
               <input
                 id="title"
@@ -164,7 +165,7 @@ const CreateProduct = () => {
             </div>
 
             {/* Description */}
-            <div className="space-y-1">
+            <div>
               <label htmlFor="description" className={labelCls}>Description</label>
               <textarea
                 id="description"
@@ -179,7 +180,7 @@ const CreateProduct = () => {
 
             {/* Price row */}
             <div className="flex gap-3">
-              <div className="space-y-1 w-[58%]">
+              <div className="w-[58%]">
                 <label htmlFor="priceAmount" className={labelCls}>Price</label>
                 <input
                   id="priceAmount"
@@ -193,7 +194,7 @@ const CreateProduct = () => {
                   className={inputCls}
                 />
               </div>
-              <div className="space-y-1 w-[42%]">
+              <div className="w-[42%]">
                 <label htmlFor="priceCurrency" className={labelCls}>Currency</label>
                 <select
                   id="priceCurrency"
@@ -203,17 +204,17 @@ const CreateProduct = () => {
                   className={`${inputCls} cursor-pointer`}
                 >
                   {CURRENCIES.map((c) => (
-                    <option key={c} value={c} className="bg-[#0D0E13] text-white">{c}</option>
+                    <option key={c} value={c} className="bg-[#F8F6F2] text-[#211D1A]">{c}</option>
                   ))}
                 </select>
               </div>
             </div>
 
             {/* Images */}
-            <div className="space-y-1">
+            <div>
               <div className="flex items-center justify-between">
                 <label className={labelCls}>Product Images</label>
-                <span className="text-[10px] text-slate-500 tracking-wide">
+                <span className="text-[9px] tracking-wide text-[#AAA29A]">
                   {images.length}/{MAX_IMAGES}
                 </span>
               </div>
@@ -226,15 +227,15 @@ const CreateProduct = () => {
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
                   onDrop={handleDrop}
-                  className={`w-full h-20 border border-dashed rounded-md flex items-center justify-center gap-3 transition-all duration-200 cursor-pointer group text-sm
+                  className={`flex h-20 w-full cursor-pointer items-center justify-center gap-3 rounded-[5px] border border-dashed text-sm transition-all duration-200 group
                     ${isDragging
-                      ? 'border-[#F59E0B]/60 bg-amber-500/[0.04] text-[#F59E0B]'
-                      : 'border-white/10 bg-white/[0.02] hover:border-white/25 hover:bg-white/[0.04] text-slate-500 hover:text-slate-300'
+                      ? 'border-[#A95035]/60 bg-[#A95035]/5 text-[#A95035]'
+                      : 'border-[#CFC7BE] bg-[#F8F6F2] text-[#9A928A] hover:border-[#A95035]/50 hover:text-[#625B55]'
                     }`}
                 >
-                  <FiUploadCloud size={18} className="flex-shrink-0 transition-colors duration-200" />
+                  <FiUploadCloud size={18} className="shrink-0 transition-colors duration-200" />
                   <span className="text-xs tracking-wide">
-                    Drag & drop or <span className="text-white underline underline-offset-2">browse</span>
+                    Drag & drop or <span className="text-[#211D1A] underline underline-offset-2">browse</span>
                     {' '}— up to {MAX_IMAGES} images
                   </span>
                   <input
@@ -254,7 +255,7 @@ const CreateProduct = () => {
                   {images.map((img, idx) => (
                     <div
                       key={img.id}
-                      className="relative group aspect-square rounded overflow-hidden bg-white/[0.04] border border-white/[0.06]"
+                      className="group relative aspect-square overflow-hidden rounded-[5px] border border-[#D8D1C8] bg-[#F8F6F2]"
                     >
                       <img
                         src={img.url}
@@ -271,7 +272,7 @@ const CreateProduct = () => {
                         <FiX size={9} />
                       </button>
                       {idx === 0 && (
-                        <span className="absolute bottom-0.5 left-0.5 text-[7px] font-semibold tracking-wide uppercase bg-[#F59E0B]/90 text-black px-1 py-0.5 rounded-sm">
+                        <span className="absolute bottom-0.5 left-0.5 rounded-sm bg-[#211D1A]/90 px-1 py-0.5 text-[7px] font-semibold uppercase tracking-wide text-white">
                           Cover
                         </span>
                       )}
@@ -286,10 +287,10 @@ const CreateProduct = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#F59E0B] hover:bg-[#e08e06] text-black font-semibold py-2.5 px-5 rounded-lg transition-all duration-200 flex items-center justify-center cursor-pointer shadow-[0_4px_14px_rgba(245,158,11,0.25)] hover:shadow-[0_6px_20px_rgba(245,158,11,0.35)] text-sm font-['Space_Grotesk'] tracking-wide disabled:opacity-60 disabled:cursor-not-allowed"
+                className="mt-0.5 flex h-[34px] w-full items-center justify-center rounded-[5px] bg-[#131212] px-4 text-[9px] font-bold uppercase tracking-[0.14em] text-white transition-all duration-200 hover:bg-[#2B2927] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {loading ? (
-                  <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                  <div className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
                 ) : (
                   'Publish Product'
                 )}
@@ -298,16 +299,16 @@ const CreateProduct = () => {
 
             {/* Divider */}
             <div className="flex items-center gap-3 py-0.5">
-              <div className="h-px flex-1 bg-white/10" />
-              <span className="text-[9px] text-slate-500 uppercase tracking-wider">or</span>
-              <div className="h-px flex-1 bg-white/10" />
+              <div className="h-px flex-1 bg-[#D8D1C8]" />
+              <span className="text-[7px] uppercase tracking-[0.15em] text-[#AAA29A]">or</span>
+              <div className="h-px flex-1 bg-[#D8D1C8]" />
             </div>
 
             {/* Cancel */}
             <div className="text-center">
               <Link
                 to="/products"
-                className="text-[11px] text-slate-400 hover:text-white transition-colors"
+                className="text-[10px] font-bold text-[#211D1A] transition-colors hover:text-[#A95035]"
               >
                 Cancel & go back to Products
               </Link>
@@ -315,8 +316,9 @@ const CreateProduct = () => {
 
           </form>
         </div>
+      </section>
       </div>
-    </div>
+    </main>
   )
 }
 

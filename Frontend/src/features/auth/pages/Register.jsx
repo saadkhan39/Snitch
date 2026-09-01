@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { FiEye, FiEyeOff, FiCheck, FiAlertCircle } from 'react-icons/fi'
 import useAuth from '../hooks/useAuth'
-import { useNavigate } from 'react-router'
 import ContinueWithGoogle from '../components/ContinueWithGoogle'
 
 const Register = () => {
@@ -24,10 +23,12 @@ const Register = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
+
     setFormData((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }))
+
     if (localError) setLocalError('')
   }
 
@@ -40,14 +41,17 @@ const Register = () => {
       setLocalError('Please enter your full name.')
       return
     }
+
     if (!formData.contact.trim()) {
       setLocalError('Please enter your contact number.')
       return
     }
+
     if (!formData.email.trim() || !formData.email.includes('@')) {
       setLocalError('Please enter a valid email address.')
       return
     }
+
     if (formData.password.length < 6) {
       setLocalError('Password must be at least 6 characters.')
       return
@@ -63,7 +67,7 @@ const Register = () => {
 
     if (result?.success) {
       setSuccessMessage('Account created successfully! Welcome to Snitch.')
-      // Navigate to home after 1.5 seconds to show success message
+
       setTimeout(() => {
         navigate('/')
       }, 1500)
@@ -71,265 +75,333 @@ const Register = () => {
   }
 
   return (
-    <div className="h-screen w-screen bg-[#0D0E13] text-[#E2E8F0] overflow-hidden flex flex-col lg:flex-row font-['Plus_Jakarta_Sans',sans-serif] selection:bg-amber-500/30 selection:text-amber-300">
-      
-      {/* ================= LEFT SIDE: MOODY EDITORIAL HERO IMAGE ================= */}
-      <div className="hidden lg:flex lg:w-1/2 relative h-full flex-col justify-between p-10 xl:p-14 overflow-hidden bg-[#0A0B0E]">
-        {/* Background Fashion Photo */}
-        <div className="absolute inset-0 z-0">
-          <img
-            src="/snitch-model.jpg"
-            alt="Snitch Fashion"
-            className="w-full h-full object-cover object-center filter grayscale contrast-[1.12] brightness-[0.85]"
+    <main className="h-screen w-full overflow-hidden bg-[#D6D5D3] font-['Plus_Jakarta_Sans',sans-serif]">
+      <div className="flex h-full w-full">
+
+        {/* =====================================================
+            LEFT — VIDEO
+        ====================================================== */}
+        <section className="relative hidden h-full w-[62%] overflow-hidden lg:block">
+
+          <video
+            className="absolute inset-0 h-full w-full object-cover"
+            src="/model.mp4"
+            autoPlay
+          muted
+            loop
+            playsInline
           />
-          {/* Subtle dark vignette overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0A0B0E] via-transparent to-[#0A0B0E]/40" />
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-[#0D0E13]" />
-        </div>
 
-        {/* Top-Left: SNITCH. Logo in Golden Yellow */}
-        <div className="relative z-10">
-          <span className="text-xl xl:text-2xl font-extrabold tracking-[0.2em] text-[#F59E0B] font-['Space_Grotesk']">
-            SNITCH.
-          </span>
-        </div>
+          {/* Soft editorial overlay */}
+          <div className="absolute inset-0 bg-[#201914]/[0.08]" />
 
-        {/* Bottom-Left: "Define your aesthetic." */}
-        <div className="relative z-10 space-y-2">
-          <h2 className="text-4xl xl:text-5xl font-bold tracking-tight text-white leading-none font-['Space_Grotesk']">
-            Define your <br />
-            <span className="text-[#F59E0B]">aesthetic.</span>
-          </h2>
-          <p className="text-sm xl:text-base text-slate-300 font-normal tracking-wide pt-1">
-            Join the exclusive movement of creators and brands
-          </p>
-        </div>
+          {/* Bottom readability gradient */}
+          <div className="absolute inset-x-0 bottom-0 h-[45%] bg-gradient-to-t from-[#1d1713]/25 via-transparent to-transparent" />
+
+          {/* Brand */}
+          <div className="absolute left-9 top-8 z-10 xl:left-11 xl:top-9">
+            <span className="text-[20px] font-bold tracking-[0.32em] text-white drop-shadow-sm xl:text-[22px]">
+              SNITCH
+            </span>
+          </div>
+
+          {/* Editorial copy */}
+          <div className="absolute bottom-10 left-9 z-10 max-w-[500px] xl:left-11 xl:bottom-12">
+
+            <h2 className="font-serif text-[58px] leading-[0.86] tracking-[-0.035em] text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.08)] xl:text-[76px]">
+              <span className="italic">Light, worn</span>
+              <br />
+              well.
+            </h2>
+
+            <div className="mt-6 flex items-center gap-3">
+              <div className="h-px w-8 bg-white/70" />
+
+              <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-white/90 xl:text-xs">
+                Curated drops for those who dress on purpose.
+              </p>
+            </div>
+          </div>
+
+          {/* Small bottom label */}
+          <div className="absolute bottom-5 right-7 z-10">
+            <span className="text-[9px] font-medium uppercase tracking-[0.22em] text-white/60">
+              SS / 26
+            </span>
+          </div>
+        </section>
+
+
+       
+       {/* =====================================================
+    RIGHT — REGISTER
+====================================================== */}
+<section className="flex h-full flex-1 items-center justify-center overflow-hidden bg-[#dbd8d8] px-5 sm:px-6 lg:px-8">
+
+  <div className="w-full max-w-[300px]">
+
+    {/* Mobile logo */}
+    <div className="mb-6 lg:hidden">
+      <span className="text-[18px] font-bold tracking-[0.3em] text-[#211D1A]">
+        SNITCH
+      </span>
+    </div>
+
+
+    {/* Header */}
+    <div className="mb-5">
+
+      <p className="mb-2 text-[7px] font-bold uppercase tracking-[0.28em] text-[#131212]">
+        Join the movement
+      </p>
+
+      <h1 className="font-serif text-[27px] leading-none tracking-[-0.03em] text-[#211D1A]">
+        Create your account
+      </h1>
+
+     
+      <div className="mt-3 h-[2px] w-7 bg-[#211D1A]" />
+
+    </div>
+
+
+    {/* Error */}
+    {(localError || error) && (
+      <div className="mb-3 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-2.5 py-1.5 text-[9px] text-red-600">
+        <FiAlertCircle className="h-3 w-3 shrink-0" />
+        <span>{localError || error}</span>
       </div>
+    )}
 
-      {/* ================= RIGHT SIDE: MINIMAL SIGN-UP FORM ================= */}
-      <div className="flex-1 h-full flex flex-col justify-center px-8 sm:px-14 md:px-20 xl:px-24 py-8 bg-[#0D0E13] relative overflow-hidden">
-        
-        {/* Mobile Header only */}
-        <div className="flex lg:hidden items-center justify-between mb-4">
-          <span className="text-xl font-bold tracking-[0.2em] text-[#F59E0B] font-['Space_Grotesk']">
-            SNITCH.
-          </span>
-          <Link
-            to="/login"
-            className="text-xs text-[#F59E0B] hover:underline"
-          >
-            Sign In
-          </Link>
-        </div>
 
-       <div className="w-full max-w-sm mx-auto">
+    {/* Success */}
+    {successMessage && (
+      <div className="mb-3 flex items-center gap-2 rounded-md border border-green-200 bg-green-50 px-2.5 py-1.5 text-[9px] text-green-700">
+        <FiCheck className="h-3 w-3 shrink-0" />
+        <span>{successMessage}</span>
+      </div>
+    )}
 
-  {/* Header */}
-  <div className="mb-4">
-    <span className="block text-[10px] font-bold tracking-[0.2em] text-[#F59E0B] uppercase font-['Space_Grotesk'] mb-1">
-      WELCOME TO SNITCH
-    </span>
 
-    <h1 className="text-2xl font-bold text-white tracking-tight font-['Space_Grotesk']">
-      Elevate Your Style
-    </h1>
-  </div>
+    <form onSubmit={handleSubmit} className="space-y-2.5">
 
-  {/* Error Message */}
-  {(localError || error) && (
-    <div className="mb-3 p-2.5 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center gap-2 text-red-400 text-xs">
-      <FiAlertCircle className="w-4 h-4 flex-shrink-0" />
-      <span>{localError || error}</span>
-    </div>
-  )}
 
-  {/* Success Message */}
-  {successMessage && (
-    <div className="mb-3 p-2.5 rounded-lg bg-amber-400/10 border border-amber-400/30 flex items-center gap-2 text-amber-300 text-xs">
-      <FiCheck className="w-4 h-4 flex-shrink-0 text-amber-400" />
-      <span>{successMessage}</span>
-    </div>
-  )}
-
-  <form onSubmit={handleSubmit} className="space-y-3">
-
-    {/* Full Name */}
-    <div className="space-y-1">
-      <label
-        htmlFor="fullname"
-        className="block text-[11px] font-medium text-slate-300 tracking-wide"
-      >
-        Full Name
-      </label>
-
-      <input
-        id="fullname"
-        type="text"
-        name="fullname"
-        value={formData.fullname}
-        onChange={handleChange}
-        placeholder="Rohan"
-        required
-        className="w-full bg-white/[0.03] text-white px-3 py-2 rounded-t-md border-b border-white/20 focus:border-[#F59E0B] text-sm placeholder-slate-500 focus:outline-none transition-colors duration-200"
-      />
-    </div>
-
-    {/* Contact Number */}
-    <div className="space-y-1">
-      <label
-        htmlFor="contact"
-        className="block text-[11px] font-medium text-slate-300 tracking-wide"
-      >
-        Contact Number
-      </label>
-
-      <input
-        id="contact"
-        type="tel"
-        name="contact"
-        value={formData.contact}
-        onChange={handleChange}
-        placeholder="+91 (98765) 43210"
-        required
-        className="w-full bg-white/[0.03] text-white px-3 py-2 rounded-t-md border-b border-white/20 focus:border-[#F59E0B] text-sm placeholder-slate-500 focus:outline-none transition-colors duration-200"
-      />
-    </div>
-
-    {/* Email */}
-    <div className="space-y-1">
-      <label
-        htmlFor="email"
-        className="block text-[11px] font-medium text-slate-300 tracking-wide"
-      >
-        Email Address
-      </label>
-
-      <input
-        id="email"
-        type="email"
-        name="email"
-        value={formData.email}
-        onChange={handleChange}
-        placeholder="hello@example.com"
-        required
-        className="w-full bg-white/[0.03] text-white px-3 py-2 rounded-t-md border-b border-white/20 focus:border-[#F59E0B] text-sm placeholder-slate-500 focus:outline-none transition-colors duration-200"
-      />
-    </div>
-
-    {/* Password */}
-    <div className="space-y-1">
-      <label
-        htmlFor="password"
-        className="block text-[11px] font-medium text-slate-300 tracking-wide"
-      >
-        Password
-      </label>
-
-      <div className="relative">
-        <input
-          id="password"
-          type={showPassword ? "text" : "password"}
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          placeholder="••••••••"
-          required
-          className="w-full bg-white/[0.03] text-white pl-3 pr-9 py-2 rounded-t-md border-b border-white/20 focus:border-[#F59E0B] text-sm placeholder-slate-500 focus:outline-none transition-colors duration-200"
-        />
-
-        <button
-          type="button"
-          onClick={() => setShowPassword(!showPassword)}
-          className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-[#F59E0B]"
+      {/* Full Name */}
+      <div>
+        <label
+          htmlFor="fullname"
+          className="mb-1 block text-[8px] font-bold uppercase tracking-[0.12em] text-[#625B55]"
         >
-          {showPassword ? (
-            <FiEyeOff className="w-4 h-4" />
-          ) : (
-            <FiEye className="w-4 h-4" />
-          )}
-        </button>
-      </div>
-    </div>
+          Full name
+        </label>
 
-    {/* Seller */}
-    <div className="pt-0.5">
+        <input
+          id="fullname"
+          type="text"
+          name="fullname"
+          value={formData.fullname}
+          onChange={handleChange}
+          placeholder="Rohan Mehra"
+          required
+          className="h-[34px] w-full rounded-[5px] border border-[#D8D1C8] bg-[#F8F6F2] px-3 text-[10px] text-[#211D1A] outline-none transition placeholder:text-[#AAA39B] focus:border-[#A95035] focus:ring-1 focus:ring-[#A95035]/10"
+        />
+      </div>
+
+
+      {/* Contact */}
+      <div>
+        <label
+          htmlFor="contact"
+          className="mb-1 block text-[8px] font-bold uppercase tracking-[0.12em] text-[#625B55]"
+        >
+          Contact number
+        </label>
+
+        <input
+          id="contact"
+          type="tel"
+          name="contact"
+          value={formData.contact}
+          onChange={handleChange}
+          placeholder="+91 (98765) 43210"
+          required
+          className="h-[34px] w-full rounded-[5px] border border-[#D8D1C8] bg-[#F8F6F2] px-3 text-[10px] text-[#211D1A] outline-none transition placeholder:text-[#AAA39B] focus:border-[#A95035] focus:ring-1 focus:ring-[#A95035]/10"
+        />
+      </div>
+
+
+      {/* Email */}
+      <div>
+        <label
+          htmlFor="email"
+          className="mb-1 block text-[8px] font-bold uppercase tracking-[0.12em] text-[#625B55]"
+        >
+          Email address
+        </label>
+
+        <input
+          id="email"
+          type="email"
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
+          placeholder="example@123.com"
+          required
+          className="h-[34px] w-full rounded-[5px] border border-[#D8D1C8] bg-[#F8F6F2] px-3 text-[10px] text-[#211D1A] outline-none transition placeholder:text-[#AAA39B] focus:border-[#A95035] focus:ring-1 focus:ring-[#A95035]/10"
+        />
+      </div>
+
+
+      {/* Password */}
+      <div>
+        <label
+          htmlFor="password"
+          className="mb-1 block text-[8px] font-bold uppercase tracking-[0.12em] text-[#625B55]"
+        >
+          Password
+        </label>
+
+        <div className="relative">
+
+          <input
+            id="password"
+            type={showPassword ? 'text' : 'password'}
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            placeholder="••••••••"
+            required
+            className="h-[34px] w-full rounded-[5px] border border-[#D8D1C8] bg-[#F8F6F2] px-3 pr-9 text-[10px] text-[#211D1A] outline-none transition placeholder:text-[#AAA39B] focus:border-[#A95035] focus:ring-1 focus:ring-[#A95035]/10"
+          />
+
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute inset-y-0 right-0 flex items-center px-2.5 text-[#9A928A] transition-colors duration-150 hover:text-[#211D1A]"
+          >
+            {showPassword ? (
+              <FiEyeOff className="h-3 w-3" />
+            ) : (
+              <FiEye className="h-3 w-3" />
+            )}
+          </button>
+
+        </div>
+      </div>
+
+
+      {/* Seller */}
       <label
         htmlFor="isSeller"
-        className="inline-flex items-center gap-2 cursor-pointer group"
+        className="flex cursor-pointer items-center gap-2 pt-0.5"
       >
-        <div className="relative flex items-center justify-center">
-          <input
-            id="isSeller"
-            type="checkbox"
-            name="isSeller"
-            checked={formData.isSeller}
-            onChange={handleChange}
-            className="sr-only"
-          />
 
-          <div
-            className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${
-              formData.isSeller
-                ? "bg-[#F59E0B] border-[#F59E0B] text-black"
-                : "border-slate-500 bg-transparent group-hover:border-slate-400"
-            }`}
-          >
-            {formData.isSeller && (
-              <FiCheck className="w-3 h-3 stroke-[3]" />
-            )}
-          </div>
+        <input
+          id="isSeller"
+          type="checkbox"
+          name="isSeller"
+          checked={formData.isSeller}
+          onChange={handleChange}
+          className="sr-only"
+        />
+
+        <div
+          className={`flex h-3 w-3 shrink-0 items-center justify-center rounded-[2px] border transition ${
+            formData.isSeller
+              ? 'border-[#211D1A] bg-[#211D1A] text-white'
+              : 'border-[#CFC7BE] bg-[#F8F6F2]'
+          }`}
+        >
+          {formData.isSeller && (
+            <FiCheck className="h-2 w-2 stroke-[3]" />
+          )}
         </div>
 
-        <span className="text-[11px] text-slate-300 group-hover:text-white">
-          Register as Seller
+        <span className="text-[8px] font-medium text-[#746D66]">
+          Register as a seller
         </span>
-      </label>
-    </div>
 
-    {/* Sign Up */}
-    <div className="pt-1">
+      </label>
+
+
+      {/* Submit */}
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-[#F59E0B] hover:bg-[#e08e06] text-black font-semibold py-2.5 px-5 rounded-lg transition-all duration-200 flex items-center justify-center cursor-pointer shadow-[0_4px_14px_rgba(245,158,11,0.25)] text-sm font-['Space_Grotesk'] tracking-wide disabled:opacity-60"
+        className="mt-0.5 flex h-[34px] w-full items-center justify-center rounded-[5px] bg-[#131212] px-4 text-[9px] font-bold uppercase tracking-[0.14em] text-white transition-all duration-200 hover:bg-[#2B2927] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading ? (
-          <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+          <div className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
         ) : (
-          "Sign Up"
+          'Create account'
         )}
       </button>
-    </div>
 
-    {/* Divider */}
-    <div className="flex items-center gap-3 py-1">
-      <div className="h-px flex-1 bg-white/10" />
-      <span className="text-[9px] text-slate-500 uppercase tracking-wider">
-        or
-      </span>
-      <div className="h-px flex-1 bg-white/10" />
-    </div>
 
-    {/* Google */}
-   <ContinueWithGoogle/>
+      {/* Divider */}
+      <div className="flex items-center gap-2 py-0.5">
 
-    {/* Sign In */}
-    <div className="text-center pt-1">
-      <span className="text-[11px] text-slate-400">
-        Already have an account?{" "}
+        <div className="h-px flex-1 bg-[#D8D1C8]" />
+
+        <span className="text-[7px] uppercase tracking-[0.15em] text-[#AAA29A]">
+          or
+        </span>
+
+        <div className="h-px flex-1 bg-[#D8D1C8]" />
+
+      </div>
+
+
+      {/* Google */}
+      <div
+        className="
+          [&_button]:!h-[34px]
+          [&_button]:!rounded-[5px]
+          [&_button]:!border-[#D8D1C8]
+          [&_button]:!bg-[#F8F6F2]
+          [&_button]:!text-[9px]
+          [&_button]:!text-[#4F4842]
+          [&_button:hover]:!bg-[#F1ECE6]
+          [&_button:hover]:!border-[#C9C0B7]
+          
+        "
+      >
+        <ContinueWithGoogle />
+      </div>
+
+
+      {/* Login */}
+      <div className="pt-0.5 text-center">
+
+        <span className="text-[10px] text-[#817A73]">
+          Already have an account?
+        </span>
+
         <Link
           to="/login"
-          className="text-white hover:text-[#F59E0B]  font-medium transition-colors ml-1   decoration-white/30 hover:decoration-[#F59E0B]"
+          className="ml-1.5 text-[10px] font-bold text-[#211D1A] transition-colors duration-150 hover:text-[#211D1A]"
         >
-          Sign In
+          Sign in
         </Link>
+
+      </div>
+
+    </form>
+
+
+    {/* Bottom */}
+    <div className="mt-4 text-center">
+      <span className="text-[6px] font-medium uppercase tracking-[0.25em] text-[#AAA29A]">
+        Dress with intention
       </span>
     </div>
 
-  </form>
-</div>
+  </div>
+
+</section>
+
       </div>
-    </div>
+    </main>
   )
 }
 

@@ -167,7 +167,7 @@ const Login = () => {
         onChange={handleChange}
         placeholder="hello@example.com"
         required
-        className="h-[34px] w-full rounded-[5px] border border-[#D8D1C8] bg-[#F8F6F2] px-3 text-[10px] text-[#211D1A] outline-none transition placeholder:text-[#AAA39B] focus:border-[#A95035] focus:ring-1 focus:ring-[#A95035]/10"
+        className="h-[34px] w-full rounded-[5px] border border-[#D8D1C8] bg-[#F8F6F2] px-3 text-[10px] text-[#211D1A] outline-none transition placeholder:text-[#AAA39B] focus:border-[#211D1A] focus:ring-1 focus:ring-[#211D1A]/10"
       />
     </div>
 
@@ -189,7 +189,7 @@ const Login = () => {
           onChange={handleChange}
           placeholder="••••••••"
           required
-          className="h-[34px] w-full rounded-[5px] border border-[#D8D1C8] bg-[#F8F6F2] px-3 pr-9 text-[10px] text-[#211D1A] outline-none transition placeholder:text-[#AAA39B] focus:border-[#A95035] focus:ring-1 focus:ring-[#A95035]/10"
+          className="h-[34px] w-full rounded-[5px] border border-[#D8D1C8] bg-[#F8F6F2] px-3 pr-9 text-[10px] text-[#211D1A] outline-none transition placeholder:text-[#AAA39B] focus:border-[#211D1A] focus:ring-1 focus:ring-[#211D1A]/10"
         />
 
         <button

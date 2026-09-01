@@ -123,12 +123,7 @@ const Register = () => {
             </div>
           </div>
 
-          {/* Small bottom label */}
-          <div className="absolute bottom-5 right-7 z-10">
-            <span className="text-[9px] font-medium uppercase tracking-[0.22em] text-white/60">
-              SS / 26
-            </span>
-          </div>
+         
         </section>
 
 
@@ -203,7 +198,7 @@ const Register = () => {
           onChange={handleChange}
           placeholder="Rohan Mehra"
           required
-          className="h-[34px] w-full rounded-[5px] border border-[#D8D1C8] bg-[#F8F6F2] px-3 text-[10px] text-[#211D1A] outline-none transition placeholder:text-[#AAA39B] focus:border-[#A95035] focus:ring-1 focus:ring-[#A95035]/10"
+          className="h-[34px] w-full rounded-[5px] border border-[#D8D1C8] bg-[#F8F6F2] px-3 text-[10px] text-[#211D1A] outline-none transition placeholder:text-[#AAA39B] focus:border-[#211D1A] focus:ring-1 focus:ring-[#211D1A]/10"
         />
       </div>
 
@@ -225,7 +220,7 @@ const Register = () => {
           onChange={handleChange}
           placeholder="+91 (98765) 43210"
           required
-          className="h-[34px] w-full rounded-[5px] border border-[#D8D1C8] bg-[#F8F6F2] px-3 text-[10px] text-[#211D1A] outline-none transition placeholder:text-[#AAA39B] focus:border-[#A95035] focus:ring-1 focus:ring-[#A95035]/10"
+          className="h-[34px] w-full rounded-[5px] border border-[#D8D1C8] bg-[#F8F6F2] px-3 text-[10px] text-[#211D1A] outline-none transition placeholder:text-[#AAA39B] focus:border-[#211D1A] focus:ring-1 focus:ring-[#211D1A]/10"
         />
       </div>
 
@@ -247,7 +242,7 @@ const Register = () => {
           onChange={handleChange}
           placeholder="example@123.com"
           required
-          className="h-[34px] w-full rounded-[5px] border border-[#D8D1C8] bg-[#F8F6F2] px-3 text-[10px] text-[#211D1A] outline-none transition placeholder:text-[#AAA39B] focus:border-[#A95035] focus:ring-1 focus:ring-[#A95035]/10"
+          className="h-[34px] w-full rounded-[5px] border border-[#D8D1C8] bg-[#F8F6F2] px-3 text-[10px] text-[#211D1A] outline-none transition placeholder:text-[#AAA39B] focus:border-[#211D1A] focus:ring-1 focus:ring-[#211D1A]/10"
         />
       </div>
 
@@ -271,7 +266,7 @@ const Register = () => {
             onChange={handleChange}
             placeholder="••••••••"
             required
-            className="h-[34px] w-full rounded-[5px] border border-[#D8D1C8] bg-[#F8F6F2] px-3 pr-9 text-[10px] text-[#211D1A] outline-none transition placeholder:text-[#AAA39B] focus:border-[#A95035] focus:ring-1 focus:ring-[#A95035]/10"
+            className="h-[34px] w-full rounded-[5px] border border-[#D8D1C8] bg-[#F8F6F2] px-3 pr-9 text-[10px] text-[#211D1A] outline-none transition placeholder:text-[#AAA39B] focus:border-[#211D1A] focus:ring-1 focus:ring-[#211D1A]/10"
           />
 
           <button

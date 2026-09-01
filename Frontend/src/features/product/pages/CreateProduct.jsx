@@ -97,7 +97,7 @@ const CreateProduct = () => {
   }
 
   const inputCls =
-    "h-[34px] w-full rounded-[5px] border border-[#D8D1C8] bg-[#F8F6F2] px-3 text-[10px] text-[#211D1A] outline-none transition placeholder:text-[#AAA39B] focus:border-[#A95035] focus:ring-1 focus:ring-[#A95035]/10"
+    "h-[34px] w-full rounded-[5px] border border-[#D8D1C8] bg-[#F8F6F2] px-3 text-[10px] text-[#211D1A] outline-none transition placeholder:text-[#AAA39B] focus:border-[#211D1A] focus:ring-1 focus:ring-[#211D1A]/10"
   const labelCls = "mb-1 block text-[8px] font-bold uppercase tracking-[0.12em] text-[#625B55]"
 
   return (
@@ -174,7 +174,7 @@ const CreateProduct = () => {
                 onChange={handleChange}
                 placeholder="Fabric, fit, feel..."
                 rows={2}
-                className={`${inputCls} resize-none`}
+                className={`${inputCls} resize-none p-2`}
               />
             </div>
 
@@ -229,8 +229,8 @@ const CreateProduct = () => {
                   onDrop={handleDrop}
                   className={`flex h-20 w-full cursor-pointer items-center justify-center gap-3 rounded-[5px] border border-dashed text-sm transition-all duration-200 group
                     ${isDragging
-                      ? 'border-[#A95035]/60 bg-[#A95035]/5 text-[#A95035]'
-                      : 'border-[#CFC7BE] bg-[#F8F6F2] text-[#9A928A] hover:border-[#A95035]/50 hover:text-[#625B55]'
+                      ? 'border-[#211D1A]/60 bg-[#211D1A]/5 text-[#211D1A]'
+                      : 'border-[#CFC7BE] bg-[#F8F6F2] text-[#9A928A] hover:border-[#211D1A]/50 hover:text-[#625B55]'
                     }`}
                 >
                   <FiUploadCloud size={18} className="shrink-0 transition-colors duration-200" />
@@ -308,7 +308,7 @@ const CreateProduct = () => {
             <div className="text-center">
               <Link
                 to="/products"
-                className="text-[10px] font-bold text-[#211D1A] transition-colors hover:text-[#A95035]"
+                className="text-[10px] font-bold text-[#211D1A] transition-colors hover:text-[#211D1A]"
               >
                 Cancel & go back to Products
               </Link>

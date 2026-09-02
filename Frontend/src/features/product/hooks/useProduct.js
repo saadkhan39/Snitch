@@ -18,8 +18,9 @@ export const useProduct = () => {
     async function handleGetSellerProducts() {
         try {
             const data = await getSellerProducts()
-            dispatch(setSellerProduct(data))
-            return { success: true, data }
+            const products = Array.isArray(data) ? data : data?.products ?? []
+            dispatch(setSellerProduct(products))
+            return { success: true, data: products }
         } catch (err) {
             const errorMessage = err?.response?.data?.message || err?.message || 'Failed to fetch seller products. Please try again.'
             return { success: false, error: errorMessage }

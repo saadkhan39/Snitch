@@ -12,5 +12,5 @@ export async function createProduct(formData) {
 
 export async function getSellerProducts() {
     const response = await api.get("/seller")
-    return response.data;
+    return response.data?.products ?? response.data;
 }

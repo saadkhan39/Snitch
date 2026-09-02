@@ -46,11 +46,18 @@ const Login = () => {
       password: formData.password,
     })
 
-    if (result?.success) {
-      setSuccessMessage('Welcome back to Snitch! Logging you in...')
-      setTimeout(() => {
-        navigate('/')
-      }, 1500)
+    if (!result?.success) {
+      return
+    }
+
+    const userRole = result?.data?.user?.role || result?.data?.role
+
+    setSuccessMessage('Welcome back to Snitch!')
+
+    if (userRole === 'seller') {
+      navigate('/seller/dashboard')
+    } else {
+      navigate('/')
     }
   }
 

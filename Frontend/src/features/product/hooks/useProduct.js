@@ -1,4 +1,4 @@
-import {createProduct, getSellerProducts ,getAllProducts} from "../service/product.service"
+import {createProduct, getSellerProducts ,getAllProducts ,getProductById} from "../service/product.service"
 import {setSellerProducts,setAllProducts} from "../state/product.slice"
 import {useDispatch} from "react-redux" 
 
@@ -38,6 +38,20 @@ export const useProduct = () => {
         }       
     }
 
-    return { handleCreateProduct, handleGetSellerProducts ,handleGetAllProducts }
-}
+    async function handleGetProductById(params) {
+        try {
+            const data = await getProductById(params)
+            return { success: true, data }
+        } catch (err) {
+            const errorMessage = err?.response?.data?.message || err?.message || 'Failed to fetch product details. Please try again.'
+            return { success: false, error: errorMessage }
+        }
+    }
+
+  
+
+    return { handleCreateProduct, handleGetSellerProducts ,handleGetAllProducts, handleGetProductById}
+
+     }
+
 

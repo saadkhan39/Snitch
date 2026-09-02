@@ -2,7 +2,7 @@ import express from "express"
 import multer  from 'multer'
 import { authenticateSeller } from "../middleware/auth.middleware.js"
 import { createProductValidator } from "../validator/product.validator.js"
-import { createProduct, getAllProduct, getSellerProducts } from "../controllers/product.controller.js"
+import { createProduct, getAllProduct, getSellerProducts ,getProductDetails} from "../controllers/product.controller.js"
 
 
 const upload = multer({
@@ -35,5 +35,13 @@ router.get("/seller",authenticateSeller,getSellerProducts)
  * @access Public
  */
 router.get("/", getAllProduct)
+
+/**
+ * @routes GET /api/products/detail/:id
+ * @desc Get a product details by ID (Public)
+ * @access Public
+ */
+router.get("/detail/:id", getProductDetails)
+
 
 export default router

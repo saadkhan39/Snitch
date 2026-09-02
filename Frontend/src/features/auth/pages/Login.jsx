@@ -75,10 +75,10 @@ const Login = () => {
           <div className="absolute inset-x-0 bottom-0 h-[45%] bg-gradient-to-t from-[#1d1713]/25 via-transparent to-transparent" />
         </div>
 
-        {/* Top-Left: SNITCH. Logo in Golden Yellow */}
+        {/* Brand */}
         <div className="relative z-10">
           <Link to="/">
-            <span className="text-[20px] xl:text-[22px] font-bold tracking-[0.32em] text-white drop-shadow-sm">
+            <span className="text-[20px] xl:text-[22px] font-bold tracking-[0.2em] text-white drop-shadow-sm">
               SNITCH
             </span>
           </Link>
@@ -106,7 +106,7 @@ const Login = () => {
         
         {/* Mobile Header only */}
         <div className="mb-6 flex w-full max-w-[300px] items-center justify-between lg:hidden">
-          <span className="text-[18px] font-bold tracking-[0.3em] text-[#211D1A]">
+          <span className="text-[18px] font-bold tracking-[0.1em] text-[#211D1A]">
             SNITCH
           </span>
           <Link

@@ -109,7 +109,7 @@ const CreateProduct = () => {
 
         {/* Mobile header */}
         <div className="mx-auto mb-6 flex w-full max-w-[420px] items-center justify-between">
-          <span className="text-[18px] font-bold tracking-[0.3em] text-[#211D1A]">
+          <span className="text-[18px] font-bold tracking-[0.1em] text-[#211D1A]">
             SNITCH
           </span>
           <Link to="/products" className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#211D1A] hover:underline">

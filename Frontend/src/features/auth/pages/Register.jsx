@@ -100,7 +100,7 @@ const Register = () => {
 
           {/* Brand */}
           <div className="absolute left-9 top-8 z-10 xl:left-11 xl:top-9">
-            <span className="text-[20px] font-bold tracking-[0.32em] text-white drop-shadow-sm xl:text-[22px]">
+            <span className="text-[20px] xl:text-[22px] font-bold tracking-[0.2em] text-white drop-shadow-sm">
               SNITCH
             </span>
           </div>
@@ -137,7 +137,7 @@ const Register = () => {
 
     {/* Mobile logo */}
     <div className="mb-6 lg:hidden">
-      <span className="text-[18px] font-bold tracking-[0.3em] text-[#211D1A]">
+      <span className="text-[18px] font-bold tracking-[0.1em] text-[#211D1A]">
         SNITCH
       </span>
     </div>

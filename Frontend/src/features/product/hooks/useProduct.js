@@ -1,5 +1,5 @@
-import {createProduct, getSellerProducts} from "../service/product.service"
-import {setSellerProduct} from "../state/product.slice"
+import {createProduct, getSellerProducts ,getAllProducts} from "../service/product.service"
+import {setSellerProducts,setAllProducts} from "../state/product.slice"
 import {useDispatch} from "react-redux" 
 
 export const useProduct = () => {
@@ -15,18 +15,29 @@ export const useProduct = () => {
         }
     }
 
-    async function handleGetSellerProducts() {
+   async function handleGetSellerProducts() {
+      try{
+         const data = await getSellerProducts()
+        dispatch(setSellerProducts(data.products))
+        return data.products
+      }catch(err){
+        const errorMessage = err?.response?.data?.message || err?.message || 'Failed to fetch seller products. Please try again.'
+        return { success: false, error: errorMessage }
+      } 
+    }
+
+    async function handleGetAllProducts() {
         try {
-            const data = await getSellerProducts()
+            const data = await getAllProducts()
             const products = Array.isArray(data) ? data : data?.products ?? []
-            dispatch(setSellerProduct(products))
+            dispatch(setAllProducts(products))
             return { success: true, data: products }
         } catch (err) {
-            const errorMessage = err?.response?.data?.message || err?.message || 'Failed to fetch seller products. Please try again.'
+            const errorMessage = err?.response?.data?.message || err?.message || 'Failed to fetch products. Please try again.'
             return { success: false, error: errorMessage }
         }       
     }
 
-    return { handleCreateProduct, handleGetSellerProducts }
+    return { handleCreateProduct, handleGetSellerProducts ,handleGetAllProducts }
 }
 

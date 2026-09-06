@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { Link } from 'react-router'
+import { useNavigate } from 'react-router'
 import {
   FiPlus,
   FiPackage,
@@ -34,6 +35,7 @@ const formatDate = (dateString) => {
 }
 
 const SellerDashboard = () => {
+  const navigate = useNavigate()
   const { handleGetSellerProducts } = useProduct()
 
   const sellerProducts = useSelector(
@@ -223,6 +225,15 @@ const SellerDashboard = () => {
 
               return (
                 <article
+                  onClick={() => navigate(`/seller/product/${product._id}`)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault()
+                      navigate(`/seller/product/${product._id}`)
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
                   key={product._id}
                   className="group overflow-hidden rounded-[20px] border border-[#CEC8C1] bg-[#F8F6F2] shadow-[0_8px_30px_rgba(33,29,26,0.035)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(33,29,26,0.09)]"
                 >
@@ -302,6 +313,10 @@ const SellerDashboard = () => {
 
                       <button
                         type="button"
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          navigate(`/seller/product/${product._id}`)
+                        }}
                         className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#D5CFC8] text-[#5D5751] transition hover:border-[#211D1A] hover:bg-[#211D1A] hover:text-white"
                       >
                         <FiArrowUpRight className="h-3.5 w-3.5" />

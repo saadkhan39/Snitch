@@ -2,7 +2,7 @@ import express from "express"
 import multer  from 'multer'
 import { authenticateSeller } from "../middleware/auth.middleware.js"
 import { createProductValidator } from "../validator/product.validator.js"
-import { createProduct, getAllProduct, getSellerProducts ,getProductDetails} from "../controllers/product.controller.js"
+import { createProduct, getAllProduct, getSellerProducts ,getProductDetails ,createProductVariant} from "../controllers/product.controller.js"
 
 
 const upload = multer({
@@ -42,6 +42,15 @@ router.get("/", getAllProduct)
  * @access Public
  */
 router.get("/detail/:id", getProductDetails)
+
+
+/**
+ * @routes POST /api/products/:productId/variants
+ * @desc Create a new variant for a product (Private - Seller only)
+ * @access Private (Seller only)
+ */
+router.post("/:productId/variants", authenticateSeller, upload.array("variantImages", 7), createProductVariant)
+
 
 
 export default router

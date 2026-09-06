@@ -24,3 +24,23 @@ export async function getProductById(productId) {
     const response = await api.get(`/detail/${productId}`);
     return response.data;
 }
+
+export async function createProductVariant(productId, variant) {
+    const formData = new FormData()
+
+    formData.append('stock', String(variant.stock ?? 0))
+    formData.append('priceAmount', String(variant.price?.amount ?? ''))
+    formData.append('priceCurrency', variant.price?.currency || 'INR')
+    formData.append('attributes', JSON.stringify(variant.attributes || {}))
+
+    for (const image of variant.images || []) {
+        if (image.file) {
+            formData.append('variantImages', image.file)
+        }
+    }
+
+    const response = await api.post(`/${productId}/variants`, formData)
+    return response.data
+}
+
+

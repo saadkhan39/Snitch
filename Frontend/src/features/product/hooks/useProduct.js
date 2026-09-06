@@ -1,4 +1,4 @@
-import {createProduct, getSellerProducts ,getAllProducts ,getProductById} from "../service/product.service"
+import {createProduct, getSellerProducts ,getAllProducts ,getProductById, createProductVariant} from "../service/product.service"
 import {setSellerProducts,setAllProducts} from "../state/product.slice"
 import {useDispatch} from "react-redux" 
 
@@ -18,8 +18,8 @@ export const useProduct = () => {
    async function handleGetSellerProducts() {
       try{
          const data = await getSellerProducts()
-        dispatch(setSellerProducts(data.products))
-        return data.products
+          dispatch(setSellerProducts(data))
+          return data
       }catch(err){
         const errorMessage = err?.response?.data?.message || err?.message || 'Failed to fetch seller products. Please try again.'
         return { success: false, error: errorMessage }
@@ -48,10 +48,18 @@ export const useProduct = () => {
         }
     }
 
+    async function handleCreateProductVariant(productId, variant) {
+        try {
+            const data = await createProductVariant(productId, variant)
+            return { success: true, data }
+        } catch (err) {
+            const errorMessage = err?.response?.data?.message || err?.message || 'Failed to create product variant.'
+            return { success: false, error: errorMessage }
+        }
+    }
   
+    return { handleCreateProduct, handleGetSellerProducts ,handleGetAllProducts, handleGetProductById, handleCreateProductVariant}
 
-    return { handleCreateProduct, handleGetSellerProducts ,handleGetAllProducts, handleGetProductById}
-
-     }
+}
 
 

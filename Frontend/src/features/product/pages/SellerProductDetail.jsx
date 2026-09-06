@@ -8,6 +8,8 @@ const SellerProductDetail = () => {
   const [ localVariants, setLocalVariants ] = useState([]);
   const [ isAddingVariant, setIsAddingVariant ] = useState(false);
   const [ loading, setLoading ] = useState(true);
+  const [ selectedImage, setSelectedImage ] = useState(0);
+  const [ hoveredImage, setHoveredImage ] = useState(null);
 
   // UI state for inputs to maintain focus
   const [ attributeInputs, setAttributeInputs ] = useState([ { key: '', value: '' } ]);
@@ -33,6 +35,8 @@ const SellerProductDetail = () => {
 
       const prod = result.data?.product || result.data;
       setProduct(prod);
+      setSelectedImage(0);
+      setHoveredImage(null);
       // Initialize variants locally
       if (prod?.variants) {
         setLocalVariants(prod.variants);
@@ -194,16 +198,25 @@ const SellerProductDetail = () => {
             {/* Gallery placeholder */}
             <div className="order-1 aspect-4/5 overflow-hidden rounded-[10px] bg-[#E9E4DE] sm:order-2">
               {product.images && product.images.length > 0 ? (
-                <img src={product.images[ 0 ].url} alt={product.title} className="w-full h-full object-cover" />
+                <img src={product.images[ hoveredImage ?? selectedImage ]?.url} alt={product.title} className="h-full w-full object-cover transition-opacity duration-200" />
               ) : (
                 <div className="flex h-full items-center justify-center text-[#8A837C]"><FiImage className="h-12 w-12" /></div>
               )}
             </div>
             {/* Thumbnails */}
-            {product.images && product.images.length > 1 && (
+            {product.images && product.images.length > 0 && (
               <div className="order-2 flex gap-2 overflow-x-auto sm:order-1 sm:flex-col">
-                {product.images.slice(1).map((img, i) => (
-                  <img key={i} src={img.url} alt={`Thumb ${i}`} className="h-20 w-20 shrink-0 rounded-[5px] object-cover bg-[#E9E4DE]" />
+                {product.images.map((img, index) => (
+                  <button
+                    key={img._id ?? img.url ?? index}
+                    type="button"
+                    onClick={() => setSelectedImage(index)}
+                    onMouseEnter={() => setHoveredImage(index)}
+                    onMouseLeave={() => setHoveredImage(null)}
+                    className={`h-20 w-20 shrink-0 overflow-hidden rounded-[5px] border-2 bg-[#E9E4DE] transition ${selectedImage === index ? 'border-[#211D1A]' : 'border-transparent hover:border-[#8A837C]'}`}
+                  >
+                    <img src={img.url} alt={`${product.title} view ${index + 1}`} className="h-full w-full object-cover" />
+                  </button>
                 ))}
               </div>
             )}

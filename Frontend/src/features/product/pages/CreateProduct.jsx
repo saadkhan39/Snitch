@@ -13,6 +13,8 @@ const CreateProduct = () => {
     description: '',
     priceAmount: '',
     priceCurrency: 'INR',
+    sizes: '',
+    colors: '',
   })
   const [images, setImages] = useState([])
   const [isDragging, setIsDragging] = useState(false)
@@ -73,6 +75,10 @@ const CreateProduct = () => {
     formDataToSend.append('description', form.description.trim())
     formDataToSend.append('priceAmount', form.priceAmount)
     formDataToSend.append('priceCurrency', form.priceCurrency)
+    const attributes = {}
+    if (form.sizes.trim()) attributes.Size = form.sizes.trim()
+    if (form.colors.trim()) attributes.Color = form.colors.trim()
+    formDataToSend.append('attributes', JSON.stringify(attributes))
     images.forEach((img) => {
       formDataToSend.append('images', img.file)
     })
@@ -87,6 +93,8 @@ const CreateProduct = () => {
         description: '',
         priceAmount: '',
         priceCurrency: 'INR',
+        sizes: '',
+        colors: '',
       })
       // Revoke URLs and clear images state
       images.forEach((img) => URL.revokeObjectURL(img.url))
@@ -208,6 +216,34 @@ const CreateProduct = () => {
                   ))}
                 </select>
               </div>
+            </div>
+
+            {/* Parent product options */}
+            <div>
+              <label htmlFor="sizes" className={labelCls}>Available Sizes</label>
+              <input
+                id="sizes"
+                name="sizes"
+                type="text"
+                value={form.sizes}
+                onChange={handleChange}
+                placeholder="e.g. S, M, L, XL"
+                className={inputCls}
+              />
+              <p className="mt-1 text-[8px] text-[#8A837C]">Separate options with commas.</p>
+            </div>
+
+            <div>
+              <label htmlFor="colors" className={labelCls}>Available Colors</label>
+              <input
+                id="colors"
+                name="colors"
+                type="text"
+                value={form.colors}
+                onChange={handleChange}
+                placeholder="e.g. Black, White, Navy"
+                className={inputCls}
+              />
             </div>
 
             {/* Images */}

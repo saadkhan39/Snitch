@@ -3,6 +3,10 @@ import { uploadFiles } from "../services/storage.service.js";
 
 export async function createProduct(req,res){
         const {title,description,priceAmount,priceCurrency} = req.body
+    const rawAttributes = req.body.attributes
+    const attributes = typeof rawAttributes === "string"
+        ? JSON.parse(rawAttributes)
+        : rawAttributes || {}
 
         const seller = req.user
 
@@ -21,6 +25,7 @@ export async function createProduct(req,res){
             currency: priceCurrency || "INR"
         },
         seller:seller._id,
+        attributes,
         images
     })
 

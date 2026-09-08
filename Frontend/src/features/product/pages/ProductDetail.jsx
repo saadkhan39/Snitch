@@ -11,19 +11,32 @@ const ProductDetail = () => {
   const [selectedAttributes, setSelectedAttributes] = useState({})
   const [selectedImage, setSelectedImage] = useState(0)
   const [error, setError] = useState('')
+  const [selectionError, setSelectionError] = useState('')
   const { handleAddToCart } = useCart()
 
   const handleAddProductToCart = async () => {
+    const sizeKey = Object.keys(attributeOptions).find((key) => normalize(key) === 'size')
+    const hasSizeOptions = sizeKey && attributeOptions[sizeKey].length > 0
+    const selectedSize = sizeKey ? selectedAttributes[sizeKey] : null
+
+    if (hasSizeOptions && !selectedSize) {
+      setSelectionError('Please select a size before adding this product to your bag.')
+      return
+    }
+
+    const attributesToMatch = { ...defaultAttributes, ...selectedAttributes }
     const variant = selectedVariant ?? variants.find((candidate) => (
-      Object.entries(defaultAttributes).every(([key, value]) => (
+      Object.entries(attributesToMatch).every(([key, value]) => (
         splitValues(findAttributeValue(toAttributes(candidate.attributes), key)).some((option) => normalize(option) === normalize(value))
       ))
     ))
 
     if (!product?._id || !variant?._id) {
-      console.log('Add to bag requires a product variant')
+      setSelectionError('Please select an available size and color combination.')
       return
     }
+
+    setSelectionError('')
 
     const result = await handleAddToCart({
       productId: product._id,
@@ -89,9 +102,8 @@ const ProductDetail = () => {
 
     return variants.find((variant) => {
       const attributes = toAttributes(variant.attributes)
-      const parentAttributes = toAttributes(product?.attributes)
       return Object.entries(selectedAttributes).every(([key, value]) => (
-        splitValues(findAttributeValue(attributes, key) ?? findAttributeValue(parentAttributes, key)).some((option) => normalize(option) === normalize(value))
+        splitValues(findAttributeValue(attributes, key)).some((option) => normalize(option) === normalize(value))
       ))
     }) ?? null
   }, [product, selectedAttributes, variants])
@@ -117,10 +129,52 @@ const ProductDetail = () => {
 
   const displayedStock = selectedVariant?.stock ?? product?.stock
 
-  useEffect(() => {
+ useEffect(() => {
+  if (!product) return
+
+  const colorKey = Object.keys(attributeOptions).find(
+    (key) => normalize(key) === 'color'
+  )
+
+  if (!colorKey) {
     setSelectedAttributes({})
-    setSelectedImage(0)
-  }, [productId])
+    return
+  }
+
+  const productColor = findColorInTitle(product.title)
+
+  // Product title se color mil gaya
+  if (productColor) {
+    setSelectedAttributes({
+      [colorKey]: productColor,
+    })
+
+    return
+  }
+
+  // Agar title me color nahi hai,
+  // to first variant ka color select karo
+  const firstVariant = variants[0]
+
+  if (firstVariant) {
+    const variantAttributes = toAttributes(firstVariant.attributes)
+    const variantColor = findAttributeValue(
+      variantAttributes,
+      colorKey
+    )
+
+    const color = splitValues(variantColor)[0]
+
+    if (color) {
+      setSelectedAttributes({
+        [colorKey]: color,
+      })
+    }
+  }
+
+  setSelectedImage(0)
+  setSelectionError('')
+}, [product, attributeOptions, variants])
 
   useEffect(() => {
     setSelectedImage(0)
@@ -151,7 +205,8 @@ const ProductDetail = () => {
               <h1 className="font-serif text-4xl leading-none tracking-tighter sm:text-5xl">{displayedProduct.title}</h1>
               <p className="mt-5 text-2xl font-semibold">{formatPrice(displayedProduct.price)}</p>
               <p className="mt-6 border-t border-[#E2DBD1] pt-6 text-sm leading-7 text-[#625B55]">{displayedProduct.description || 'No description provided for this listing.'}</p>
-              {Object.keys(attributeOptions).length > 0 && <div className="mt-8 space-y-5 border-t border-[#E2DBD1] pt-6">{Object.entries(attributeOptions).map(([key, options]) => <div key={key}><p className="mb-2 text-[10px] font-bold uppercase tracking-[0.16em]">{key}</p><div className="flex flex-wrap gap-2">{options.map((option) => { const isSelected = selectedAttributes[key] ? normalize(selectedAttributes[key]) === normalize(option) : normalize(defaultAttributes[key]) === normalize(option); return <button type="button" key={`${key}-${option}`} onClick={() => setSelectedAttributes((current) => ({ ...current, [key]: option }))} className={`rounded-[5px] border px-3 py-2 text-[10px] font-bold uppercase tracking-widest transition ${isSelected ? 'border-[#211D1A] bg-[#211D1A] text-white' : 'border-[#D8D1C8] bg-white hover:border-[#211D1A]'}`}>{option}</button> })}</div>{normalize(key) === 'size' && displayedStock !== undefined && <p className={`mt-3 text-[10px] font-bold uppercase tracking-[0.14em] ${Number(displayedStock) <= 20 ? 'text-[#B42318]' : 'text-[#217346]'}`}>{displayedStock > 0 ? `${displayedStock} in stock` : 'Out of stock'}</p>}</div>)}<button type="button" onClick={() => setSelectedAttributes({})} className="text-[9px] font-bold uppercase tracking-[0.14em] text-[#8A837C] transition hover:text-[#211D1A]">Use default product values</button></div>}
+              {Object.keys(attributeOptions).length > 0 && <div className="mt-8 space-y-5 border-t border-[#E2DBD1] pt-6">{Object.entries(attributeOptions).map(([key, options]) => <div key={key}><p className="mb-2 text-[10px] font-bold uppercase tracking-[0.16em]">{key}{normalize(key) === 'size' && <span className="ml-1 text-[#B42318]">*</span>}</p><div className="flex flex-wrap gap-2">{options.map((option) => { const isSelected = selectedAttributes[key] ? normalize(selectedAttributes[key]) === normalize(option) : normalize(defaultAttributes[key]) === normalize(option); return <button type="button" key={`${key}-${option}`} onClick={() => { setSelectionError(''); setSelectedAttributes((current) => ({ ...current, [key]: option })) }} className={`rounded-[5px] border px-3 py-2 text-[10px] font-bold uppercase tracking-widest transition ${isSelected ? 'border-[#211D1A] bg-[#211D1A] text-white' : 'border-[#D8D1C8] bg-white hover:border-[#211D1A]'}`}>{option}</button> })}</div>{normalize(key) === 'size' && displayedStock !== undefined && <p className={`mt-3 text-[10px] font-bold uppercase tracking-[0.14em] ${Number(displayedStock) <= 20 ? 'text-[#B42318]' : 'text-[#217346]'}`}>{displayedStock > 0 ? `${displayedStock} in stock` : 'Out of stock'}</p>}</div>)}<button type="button" onClick={() => { setSelectionError(''); setSelectedAttributes({}) }} className="text-[9px] font-bold uppercase tracking-[0.14em] text-[#8A837C] transition hover:text-[#211D1A]">Use default product values</button></div>}
+              {selectionError && <p role="alert" className="mt-4 text-[10px] font-bold uppercase tracking-[0.12em] text-[#B42318]">{selectionError}</p>}
               <div className="mt-8 flex flex-wrap gap-3"><button type="button" onClick={handleAddProductToCart} className="flex flex-1 items-center justify-center gap-2 rounded-[5px] bg-[#211D1A] px-5 py-4 text-[10px] font-bold uppercase tracking-[0.13em] text-white transition hover:bg-[#332F2C]"><FiShoppingBag /> Add to bag</button><button type="button" className="flex-1 rounded-[5px] border border-[#D8D1C8] px-5 py-4 text-[10px] font-bold uppercase tracking-[0.13em] text-[#211D1A] transition hover:bg-[#E8E9E5]">Buy now</button><button type="button" aria-label="Save product" className="rounded-[5px] border border-[#D8D1C8] px-5 text-[#211D1A] transition hover:bg-[#E8E9E5]"><FiHeart /></button></div>
             </div>
           </section>

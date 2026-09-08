@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { FiArrowLeft, FiChevronLeft, FiChevronRight, FiHeart, FiPackage, FiShoppingBag } from 'react-icons/fi'
 import { useProduct } from '../hooks/useProduct'
+import { useCart } from '../../cart/hooks/useCart'
 
 const ProductDetail = () => {
   const { productId } = useParams()
@@ -10,6 +11,27 @@ const ProductDetail = () => {
   const [selectedAttributes, setSelectedAttributes] = useState({})
   const [selectedImage, setSelectedImage] = useState(0)
   const [error, setError] = useState('')
+  const { handleAddToCart } = useCart()
+
+  const handleAddProductToCart = async () => {
+    const variant = selectedVariant ?? variants.find((candidate) => (
+      Object.entries(defaultAttributes).every(([key, value]) => (
+        splitValues(findAttributeValue(toAttributes(candidate.attributes), key)).some((option) => normalize(option) === normalize(value))
+      ))
+    ))
+
+    if (!product?._id || !variant?._id) {
+      console.log('Add to bag requires a product variant')
+      return
+    }
+
+    const result = await handleAddToCart({
+      productId: product._id,
+      variantId: variant._id,
+    })
+
+    console.log('Add to bag result:', result)
+  }
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -130,7 +152,7 @@ const ProductDetail = () => {
               <p className="mt-5 text-2xl font-semibold">{formatPrice(displayedProduct.price)}</p>
               <p className="mt-6 border-t border-[#E2DBD1] pt-6 text-sm leading-7 text-[#625B55]">{displayedProduct.description || 'No description provided for this listing.'}</p>
               {Object.keys(attributeOptions).length > 0 && <div className="mt-8 space-y-5 border-t border-[#E2DBD1] pt-6">{Object.entries(attributeOptions).map(([key, options]) => <div key={key}><p className="mb-2 text-[10px] font-bold uppercase tracking-[0.16em]">{key}</p><div className="flex flex-wrap gap-2">{options.map((option) => { const isSelected = selectedAttributes[key] ? normalize(selectedAttributes[key]) === normalize(option) : normalize(defaultAttributes[key]) === normalize(option); return <button type="button" key={`${key}-${option}`} onClick={() => setSelectedAttributes((current) => ({ ...current, [key]: option }))} className={`rounded-[5px] border px-3 py-2 text-[10px] font-bold uppercase tracking-widest transition ${isSelected ? 'border-[#211D1A] bg-[#211D1A] text-white' : 'border-[#D8D1C8] bg-white hover:border-[#211D1A]'}`}>{option}</button> })}</div>{normalize(key) === 'size' && displayedStock !== undefined && <p className={`mt-3 text-[10px] font-bold uppercase tracking-[0.14em] ${Number(displayedStock) <= 20 ? 'text-[#B42318]' : 'text-[#217346]'}`}>{displayedStock > 0 ? `${displayedStock} in stock` : 'Out of stock'}</p>}</div>)}<button type="button" onClick={() => setSelectedAttributes({})} className="text-[9px] font-bold uppercase tracking-[0.14em] text-[#8A837C] transition hover:text-[#211D1A]">Use default product values</button></div>}
-              <div className="mt-8 flex flex-wrap gap-3"><button type="button" className="flex flex-1 items-center justify-center gap-2 rounded-[5px] bg-[#211D1A] px-5 py-4 text-[10px] font-bold uppercase tracking-[0.13em] text-white transition hover:bg-[#332F2C]"><FiShoppingBag /> Add to bag</button><button type="button" className="flex-1 rounded-[5px] border border-[#D8D1C8] px-5 py-4 text-[10px] font-bold uppercase tracking-[0.13em] text-[#211D1A] transition hover:bg-[#E8E9E5]">Buy now</button><button type="button" aria-label="Save product" className="rounded-[5px] border border-[#D8D1C8] px-5 text-[#211D1A] transition hover:bg-[#E8E9E5]"><FiHeart /></button></div>
+              <div className="mt-8 flex flex-wrap gap-3"><button type="button" onClick={handleAddProductToCart} className="flex flex-1 items-center justify-center gap-2 rounded-[5px] bg-[#211D1A] px-5 py-4 text-[10px] font-bold uppercase tracking-[0.13em] text-white transition hover:bg-[#332F2C]"><FiShoppingBag /> Add to bag</button><button type="button" className="flex-1 rounded-[5px] border border-[#D8D1C8] px-5 py-4 text-[10px] font-bold uppercase tracking-[0.13em] text-[#211D1A] transition hover:bg-[#E8E9E5]">Buy now</button><button type="button" aria-label="Save product" className="rounded-[5px] border border-[#D8D1C8] px-5 text-[#211D1A] transition hover:bg-[#E8E9E5]"><FiHeart /></button></div>
             </div>
           </section>
         )}

@@ -1,64 +1,59 @@
-import mongoose from  "mongoose"
-import priceSchema from "./priceSchema.js"
+import mongoose from 'mongoose';
+import priceSchema from "./priceSchema.js";
 
 const productSchema = new mongoose.Schema({
-    title:{
-        type:String,
-        required:true
+    title: {
+        type: String,
+        required: true
     },
-    description:{
-        type:String,
-        required:true
+    description: {
+        type: String,
+        required: true
     },
-    seller:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"user",
-        required:true
+    seller: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'user',
+        required: true
     },
     price: {
-       type: priceSchema,
-       required: true
+        type: priceSchema,
+        required: true
     },
-    attributes:{
-        type:Map,
-        of:String,
-        default:{}
-    },
-    images:[
+    images: [
         {
-            url:{
-                type:String,
-                required:true
+            url: {
+                type: String,
+                required: true
             }
         }
     ],
-    variants:[
+    variants: [
         {
-            images:[
+            images: [
                 {
-                    url:{
-                        type:String,
-                        required:true   
+                    url: {
+                        type: String,
+                        required: true
                     }
                 }
             ],
-            stock:{
-                type:Number,
-                default:0
+            stock: {
+                type: Number,
+                default: 0
             },
-            attributes:{
-                type:Map,
-                of:String
+            attributes: {
+                type: Map,
+                of: String
             },
             price: {
-              type: priceSchema
+                type: priceSchema,
             }
         },
 
     ]
-    
-},{timestamps:true})
+}, { timestamps: true })
 
-const productModel = mongoose.model("product",productSchema)
 
-export default productModel 
+const productModel = mongoose.model('product', productSchema);
+
+export default productModel;

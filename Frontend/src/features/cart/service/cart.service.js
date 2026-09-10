@@ -6,11 +6,16 @@ const api = axios.create({
 })
 
 export const addToCart = async ({ productId, variantId }) => {
-   
-        const response = await api.post(`/add/${productId}/${variantId}`, {
-        quantity: 1
-    })
+    console.log("productId:", productId);
+    console.log("variantId:", variantId);
 
-    return response.data
-}
+    const response = await api.post(
+        `/add/${productId}/${variantId}`,
+        {
+            quantity: 1
+        }
+    );
+
+    return response.data;
+};
 

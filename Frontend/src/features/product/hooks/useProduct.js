@@ -1,6 +1,6 @@
-import {createProduct, getSellerProducts ,getAllProducts ,getProductById, createProductVariant} from "../service/product.service"
-import {setSellerProducts,setAllProducts} from "../state/product.slice"
-import {useDispatch} from "react-redux" 
+import {  createProduct, getAllProducts, getProductById, getSellerProducts ,addProductVariant} from "../service/product.api"
+import { setAllProducts, setSellerProducts } from "../state/product.slice"
+import { useDispatch } from "react-redux"
 
 export const useProduct = () => {
     const dispatch = useDispatch()  
@@ -38,9 +38,9 @@ export const useProduct = () => {
         }       
     }
 
-    async function handleGetProductById(params) {
+    async function handleGetProductById(productId) {
         try {
-            const data = await getProductById(params)
+            const data = await getProductById(productId)
             return { success: true, data }
         } catch (err) {
             const errorMessage = err?.response?.data?.message || err?.message || 'Failed to fetch product details. Please try again.'
@@ -48,17 +48,13 @@ export const useProduct = () => {
         }
     }
 
-    async function handleCreateProductVariant(productId, variant) {
-        try {
-            const data = await createProductVariant(productId, variant)
-            return { success: true, data }
-        } catch (err) {
-            const errorMessage = err?.response?.data?.message || err?.message || 'Failed to create product variant.'
-            return { success: false, error: errorMessage }
-        }
+    async function handleAddProductVariant(productId, newProductVariant) {
+        const data = await addProductVariant(productId, newProductVariant)
+
+        return data
     }
-  
-    return { handleCreateProduct, handleGetSellerProducts ,handleGetAllProducts, handleGetProductById, handleCreateProductVariant}
+
+    return { handleCreateProduct, handleGetSellerProducts, handleGetAllProducts, handleGetProductById ,handleAddProductVariant }
 
 }
 

@@ -1,78 +1,199 @@
-import React, { useEffect, useState } from 'react'
-import { useProduct } from '../hooks/useProduct';
-import { Link, useParams } from 'react-router';
-import { FiArrowLeft, FiImage, FiPackage, FiPlus, FiTrash2 } from 'react-icons/fi';
+import React, { useEffect, useState } from "react";
+import { useProduct } from "../hooks/useProduct";
+import { useParams } from "react-router";
 
-const SellerProductDetail = () => {
-  const [ product, setProduct ] = useState(null);
-  const [ localVariants, setLocalVariants ] = useState([]);
-  const [ isAddingVariant, setIsAddingVariant ] = useState(false);
-  const [ loading, setLoading ] = useState(true);
-  const [ selectedImage, setSelectedImage ] = useState(0);
-  const [ hoveredImage, setHoveredImage ] = useState(null);
+// =========================================================
+// ICONS
+// =========================================================
 
-  // UI state for inputs to maintain focus
-  const [ attributeInputs, setAttributeInputs ] = useState([ { key: '', value: '' } ]);
+const PlusIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="15"
+    height="15"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <line x1="12" y1="5" x2="12" y2="19" />
+    <line x1="5" y1="12" x2="19" y2="12" />
+  </svg>
+);
 
-  // New variant state
-  const [ newVariant, setNewVariant ] = useState({
+const TrashIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polyline points="3 6 5 6 21 6" />
+    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+  </svg>
+);
+
+// =========================================================
+// IMAGE URL HELPER
+// =========================================================
+
+const getImageUrl = (image) =>
+  image?.url ||
+  image?.thumbnailUrl ||
+  image?.filePath ||
+  "";
+
+// =========================================================
+// COMPONENT
+// =========================================================
+
+const SellerProductDetails = () => {
+  const { productId } = useParams();
+
+  const {
+    handleGetProductById,
+    handleAddProductVariant,
+  } = useProduct();
+
+  // =======================================================
+  // PRODUCT STATE
+  // =======================================================
+
+  const [product, setProduct] = useState(null);
+  const [localVariants, setLocalVariants] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // =======================================================
+  // UI STATE
+  // =======================================================
+
+  const [isAddingVariant, setIsAddingVariant] = useState(false);
+
+  // IMPORTANT:
+  // This state controls which product image is displayed.
+  const [selectedImage, setSelectedImage] = useState(0);
+
+  // =======================================================
+  // ATTRIBUTE INPUTS
+  // =======================================================
+
+  const [attributeInputs, setAttributeInputs] = useState([
+    {
+      key: "",
+      value: "",
+    },
+  ]);
+
+  // =======================================================
+  // NEW VARIANT
+  // =======================================================
+
+  const [newVariant, setNewVariant] = useState({
     images: [],
     stock: 0,
-    attributes: {}, // Strictly an object
-    price: { amount: '', currency: 'INR' }
+    attributes: {},
+    price: {
+      amount: "",
+      currency: "INR",
+    },
   });
 
-  const { productId } = useParams();
-  const { handleGetProductById, handleCreateProductVariant } = useProduct();
+  // =======================================================
+  // FETCH PRODUCT
+  // =======================================================
 
-  async function fetchProductDetails() {
+  const fetchProductDetails = async () => {
     setLoading(true);
-    try {
-      const result = await handleGetProductById(productId);
-      if (!result.success) {
-        throw new Error(result.error);
-      }
 
-      const prod = result.data?.product || result.data;
+    try {
+      const data = await handleGetProductById(productId);
+
+      const prod =
+        data?.data?.product ||
+        data?.data ||
+        data?.product ||
+        data;
+
       setProduct(prod);
+
+      // Reset main image whenever product changes
       setSelectedImage(0);
-      setHoveredImage(null);
-      // Initialize variants locally
-      if (prod?.variants) {
+
+      if (Array.isArray(prod?.variants)) {
         setLocalVariants(prod.variants);
+      } else {
+        setLocalVariants([]);
       }
     } catch (error) {
-      console.error("Failed to fetch product details", error);
+      console.error(
+        "Failed to fetch product details",
+        error
+      );
     } finally {
       setLoading(false);
     }
-  }
+  };
+
+  // =======================================================
+  // FETCH WHEN PRODUCT ID CHANGES
+  // =======================================================
 
   useEffect(() => {
-    fetchProductDetails();
-  }, [ productId ]);
+    if (productId) {
+      fetchProductDetails();
+    }
+  }, [productId]);
 
-  // Handlers for modifying existing variant stock natively
+  // =======================================================
+  // STOCK CHANGE
+  // =======================================================
+
   const handleStockChange = (index, newStock) => {
-    const updatedVariants = [ ...localVariants ];
-    updatedVariants[ index ] = { ...updatedVariants[ index ], stock: Number(newStock) };
+    const updatedVariants = [...localVariants];
+
+    updatedVariants[index] = {
+      ...updatedVariants[index],
+      stock: Number(newStock),
+    };
+
     setLocalVariants(updatedVariants);
   };
 
-  // Handlers for New Variant Form
+  // =======================================================
+  // ADD NEW VARIANT
+  // =======================================================
+
   const handleAddNewVariant = async () => {
-    // Validate required at least one attribute to be filled
-    const hasValidAttribute = attributeInputs.some(attr => attr.key.trim() && attr.value.trim());
+    const hasValidAttribute = attributeInputs.some(
+      (attr) =>
+        attr.key.trim() &&
+        attr.value.trim()
+    );
+
     if (!hasValidAttribute) {
-      alert("At least one valid attribute is required.");
+      alert(
+        "At least one valid attribute is required."
+      );
       return;
     }
 
-    // Maps preview URL so the variant list can display the image locally
-    const cleanImages = newVariant.images.map(img => ({ url: img.previewUrl, file: img.file }));
+    const cleanImages = newVariant.images.map(
+      (img) => ({
+        url: img.previewUrl,
+        file: img.file,
+      })
+    );
 
-    // Attributes is already an object in newVariant, just use it safely
-    const cleanAttributes = { ...newVariant.attributes };
+    const cleanAttributes = {
+      ...newVariant.attributes,
+    };
 
     const variantToSave = {
       images: cleanImages,
@@ -80,355 +201,1052 @@ const SellerProductDetail = () => {
       attributes: cleanAttributes,
       price: newVariant.price.amount
         ? Number(newVariant.price.amount)
-        : undefined // price is optional
+        : undefined,
     };
 
-    setLocalVariants([ ...localVariants, variantToSave ]);
+    const previousVariants = [
+      ...localVariants,
+    ];
+
+    // Optimistic UI update
+    setLocalVariants([
+      ...previousVariants,
+      variantToSave,
+    ]);
+
     setIsAddingVariant(false);
 
-    console.log('Variant data being submitted:', variantToSave);
-    const result = await handleCreateProductVariant(productId, variantToSave)
-    console.log('Variant creation response:', result);
-    if (!result.success) {
-      alert(result.error)
-      return
+    try {
+      await handleAddProductVariant(
+        productId,
+        variantToSave
+      );
+
+      // Refresh product so actual database
+      // variant data is displayed
+      await fetchProductDetails();
+    } catch (error) {
+      // Rollback optimistic update
+      setLocalVariants(previousVariants);
+
+      setIsAddingVariant(true);
+
+      alert(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Failed to add variant."
+      );
+
+      return;
     }
 
-    // Reset form
-    // Note: should ideally revoke old object URLs as well to prevent memory leaks if it were a long-lived SPA
-    setAttributeInputs([ { key: '', value: '' } ]);
+    // =====================================================
+    // RESET FORM
+    // =====================================================
+
+    setAttributeInputs([
+      {
+        key: "",
+        value: "",
+      },
+    ]);
+
     setNewVariant({
       images: [],
       stock: 0,
       attributes: {},
-      price: { amount: '', currency: 'INR' }
+      price: {
+        amount: "",
+        currency: "INR",
+      },
     });
   };
 
-  
+  // =======================================================
+  // ADD ATTRIBUTE
+  // =======================================================
 
   const handleAddAttribute = () => {
-    setAttributeInputs(prev => [ ...prev, { key: '', value: '' } ]);
+    setAttributeInputs((prev) => [
+      ...prev,
+      {
+        key: "",
+        value: "",
+      },
+    ]);
   };
 
-  const handleAttributeChange = (index, field, value) => {
-    const updatedInputs = [ ...attributeInputs ];
-    updatedInputs[ index ][ field ] = value;
+  // =======================================================
+  // ATTRIBUTE CHANGE
+  // =======================================================
+
+  const handleAttributeChange = (
+    index,
+    field,
+    value
+  ) => {
+    const updatedInputs = [
+      ...attributeInputs,
+    ];
+
+    updatedInputs[index] = {
+      ...updatedInputs[index],
+      [field]: value,
+    };
+
     setAttributeInputs(updatedInputs);
 
-    // Synchronize to object format
     const newAttrsObj = {};
-    updatedInputs.forEach(attr => {
-      if (attr.key.trim() !== '') {
-        newAttrsObj[ attr.key.trim() ] = attr.value;
+
+    updatedInputs.forEach((attr) => {
+      if (attr.key.trim() !== "") {
+        newAttrsObj[attr.key.trim()] =
+          attr.value;
       }
     });
-    setNewVariant(prev => ({ ...prev, attributes: newAttrsObj }));
+
+    setNewVariant((prev) => ({
+      ...prev,
+      attributes: newAttrsObj,
+    }));
   };
+
+  // =======================================================
+  // REMOVE ATTRIBUTE
+  // =======================================================
 
   const handleRemoveAttribute = (index) => {
-    const updatedInputs = attributeInputs.filter((_, i) => i !== index);
+    const updatedInputs =
+      attributeInputs.filter(
+        (_, i) => i !== index
+      );
+
     setAttributeInputs(updatedInputs);
 
-    // Synchronize to object format
     const newAttrsObj = {};
-    updatedInputs.forEach(attr => {
-      if (attr.key.trim() !== '') {
-        newAttrsObj[ attr.key.trim() ] = attr.value;
+
+    updatedInputs.forEach((attr) => {
+      if (attr.key.trim() !== "") {
+        newAttrsObj[attr.key.trim()] =
+          attr.value;
       }
     });
-    setNewVariant(prev => ({ ...prev, attributes: newAttrsObj }));
+
+    setNewVariant((prev) => ({
+      ...prev,
+      attributes: newAttrsObj,
+    }));
   };
+
+  // =======================================================
+  // IMAGE UPLOAD
+  // =======================================================
 
   const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
-    if (!files.length) return;
+    const files = Array.from(
+      e.target.files || []
+    );
 
-    const availableSlots = 7 - newVariant.images.length;
-    const filesToAdd = files.slice(0, availableSlots);
+    if (!files.length) {
+      return;
+    }
+
+    const availableSlots =
+      7 - newVariant.images.length;
+
+    if (availableSlots <= 0) {
+      alert(
+        "You can only upload up to 7 images."
+      );
+      e.target.value = "";
+      return;
+    }
+
+    const filesToAdd = files.slice(
+      0,
+      availableSlots
+    );
 
     if (files.length > availableSlots) {
-      alert(`You can only upload up to 7 images. ${filesToAdd.length} added.`);
+      alert(
+        `You can only upload up to 7 images. ${filesToAdd.length} added.`
+      );
     }
 
-    const newImageObjects = filesToAdd.map(file => ({
-      file,
-      previewUrl: URL.createObjectURL(file)
-    }));
+    const newImageObjects =
+      filesToAdd.map((file) => ({
+        file,
+        previewUrl:
+          URL.createObjectURL(file),
+      }));
 
-    setNewVariant(prev => ({
+    setNewVariant((prev) => ({
       ...prev,
-      images: [ ...prev.images, ...newImageObjects ]
+      images: [
+        ...prev.images,
+        ...newImageObjects,
+      ],
     }));
 
-    // Clear the input so identical files can be selected again if needed
-    e.target.value = '';
+    e.target.value = "";
   };
+
+  // =======================================================
+  // REMOVE IMAGE
+  // =======================================================
 
   const handleRemoveImage = (index) => {
-    const imageToRemove = newVariant.images[ index ];
+    const imageToRemove =
+      newVariant.images[index];
+
     if (imageToRemove?.previewUrl) {
-      URL.revokeObjectURL(imageToRemove.previewUrl);
+      URL.revokeObjectURL(
+        imageToRemove.previewUrl
+      );
     }
-    const updatedImages = newVariant.images.filter((_, i) => i !== index);
-    setNewVariant(prev => ({ ...prev, images: updatedImages }));
+
+    const updatedImages =
+      newVariant.images.filter(
+        (_, i) => i !== index
+      );
+
+    setNewVariant((prev) => ({
+      ...prev,
+      images: updatedImages,
+    }));
   };
 
+  // =======================================================
+  // CLEAN PREVIEW URLS ON UNMOUNT
+  // =======================================================
+
+  useEffect(() => {
+    return () => {
+      newVariant.images.forEach((image) => {
+        if (image?.previewUrl) {
+          URL.revokeObjectURL(
+            image.previewUrl
+          );
+        }
+      });
+    };
+  }, []);
+
+  // =======================================================
+  // LOADING
+  // =======================================================
+
   if (loading) {
-    return <div className="flex min-h-screen items-center justify-center bg-[#E3E1DE] font-['Plus_Jakarta_Sans',sans-serif] text-[10px] uppercase tracking-[0.16em] text-[#625B55]">Loading product details...</div>;
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#F8F6F2] font-['Plus_Jakarta_Sans',sans-serif] text-[#211D1A]">
+        <p className="animate-pulse text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8A837C]">
+          Retrieving product...
+        </p>
+      </main>
+    );
   }
+
+  // =======================================================
+  // PRODUCT NOT FOUND
+  // =======================================================
 
   if (!product) {
-    return <div className="flex min-h-screen items-center justify-center bg-[#E3E1DE] font-['Plus_Jakarta_Sans',sans-serif] text-[10px] uppercase tracking-[0.16em] text-[#625B55]">Product not found</div>;
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#F8F6F2] font-['Plus_Jakarta_Sans',sans-serif] text-[#211D1A]">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8A837C]">
+          Product not found
+        </p>
+      </main>
+    );
   }
 
-  
+  // =======================================================
+  // PRODUCT IMAGES
+  // =======================================================
+
+  const images = (
+    product.images || []
+  )
+    .map((image) => ({
+      ...image,
+      url: getImageUrl(image),
+    }))
+    .filter((image) => image.url);
+
+  // Make sure selected index is valid
+  const activeImage =
+    images[selectedImage]?.url ||
+    images[0]?.url ||
+    "";
+
+  // =======================================================
+  // UI
+  // =======================================================
 
   return (
-    <main className="min-h-screen bg-[#E3E1DE] px-4 py-6 font-['Plus_Jakarta_Sans',sans-serif] text-[#211D1A] sm:px-6 sm:py-8 lg:px-10">
-      <div className="mx-auto max-w-350">
-        <header className="mb-6 flex items-center justify-between">
-          <Link to="/seller/dashboard" className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#625B55] transition hover:text-[#211D1A]"><FiArrowLeft /> Back to collection</Link>
-          <span className="hidden items-center gap-2 text-[9px] font-bold uppercase tracking-[0.18em] text-[#77716B] sm:flex"><FiPackage /> Product inventory</span>
-        </header>
+    <main className="min-h-screen bg-[#F8F6F2] font-['Plus_Jakarta_Sans',sans-serif] text-[#211D1A]">
 
-        {/* Base Product Info */}
-        <section className="mb-8 grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
-          <div className="grid gap-3 sm:grid-cols-[88px_1fr]">
-            {/* Gallery placeholder */}
-            <div className="order-1 aspect-4/5 overflow-hidden rounded-[10px] bg-[#E9E4DE] sm:order-2">
-              {product.images && product.images.length > 0 ? (
-                <img src={product.images[ hoveredImage ?? selectedImage ]?.url} alt={product.title} className="h-full w-full object-cover transition-opacity duration-200" />
+      {/* =================================================
+          HEADER
+      ================================================= */}
+
+      <header className="sticky top-0 z-20 border-b border-[#E1DBD4] bg-[#F8F6F2]/95 backdrop-blur-sm">
+        <div className="mx-auto flex max-w-[1240px] items-center justify-between px-5 py-5 sm:px-7 lg:px-10">
+
+          <div>
+            <p className="text-[7px] font-bold uppercase tracking-[0.25em] text-[#8A837C]">
+              Seller dashboard
+            </p>
+
+            <h1 className="mt-1 font-serif text-[20px] leading-none tracking-[-0.02em]">
+              Product details
+            </h1>
+          </div>
+
+          <div className="text-right">
+            <span className="text-[17px] font-bold tracking-[0.12em]">
+              SNITCH
+            </span>
+
+            <p className="mt-1 text-[7px] uppercase tracking-[0.16em] text-[#8A837C]">
+              Manage listing
+            </p>
+          </div>
+
+        </div>
+      </header>
+
+      {/* =================================================
+          MAIN
+      ================================================= */}
+
+      <div className="mx-auto max-w-[1240px] px-5 pb-24 sm:px-7 lg:px-10">
+
+        {/* =================================================
+            PRODUCT OVERVIEW
+        ================================================= */}
+
+        <section className="grid gap-8 border-b border-[#E1DBD4] py-8 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:gap-12 md:py-10">
+
+          {/* =================================================
+              PRODUCT IMAGE
+          ================================================= */}
+
+          <div className="w-full max-w-[300px]">
+
+            {/* MAIN IMAGE */}
+
+            <div className="aspect-[4/5] max-h-[340px] overflow-hidden rounded-[4px] bg-[#EAE5E0]">
+
+              {activeImage ? (
+                <img
+                  src={activeImage}
+                  alt={product.title}
+                  className="h-full w-full object-cover"
+                />
               ) : (
-                <div className="flex h-full items-center justify-center text-[#8A837C]"><FiImage className="h-12 w-12" /></div>
+                <div className="flex h-full items-center justify-center text-[8px] font-semibold uppercase tracking-[0.14em] text-[#8A837C]">
+                  No image
+                </div>
               )}
+
             </div>
-            {/* Thumbnails */}
-            {product.images && product.images.length > 0 && (
-              <div className="order-2 flex gap-2 overflow-x-auto sm:order-1 sm:flex-col">
-                {product.images.map((img, index) => (
-                  <button
-                    key={img._id ?? img.url ?? index}
-                    type="button"
-                    onClick={() => setSelectedImage(index)}
-                    onMouseEnter={() => setHoveredImage(index)}
-                    onMouseLeave={() => setHoveredImage(null)}
-                    className={`h-20 w-20 shrink-0 overflow-hidden rounded-[5px] border-2 bg-[#E9E4DE] transition ${selectedImage === index ? 'border-[#211D1A]' : 'border-transparent hover:border-[#8A837C]'}`}
-                  >
-                    <img src={img.url} alt={`${product.title} view ${index + 1}`} className="h-full w-full object-cover" />
-                  </button>
-                ))}
+
+            {/* =================================================
+                THUMBNAILS
+            ================================================= */}
+
+            {images.length > 1 && (
+              <div className="mt-2 flex gap-1.5 overflow-x-auto pb-1">
+
+                {images.map(
+                  (img, index) => (
+                    <button
+                      key={`${img.url}-${index}`}
+                      type="button"
+                      onClick={() =>
+                        setSelectedImage(
+                          index
+                        )
+                      }
+                      className={`h-14 w-12 shrink-0 overflow-hidden rounded-[3px] border bg-white transition ${
+                        selectedImage ===
+                        index
+                          ? "border-[#211D1A]"
+                          : "border-[#E1DBD4] hover:border-[#8A837C]"
+                      }`}
+                    >
+                      <img
+                        src={img.url}
+                        alt={`Product ${index + 1}`}
+                        className="h-full w-full object-cover"
+                      />
+                    </button>
+                  )
+                )}
+
               </div>
             )}
+
           </div>
 
-          <div className="rounded-[18px] border border-[#CEC8C1] bg-[#F8F6F2] p-6 sm:p-8 lg:mt-8">
-            <p className="mb-3 text-[9px] font-bold uppercase tracking-[0.22em] text-[#8A837C]">Snitch / seller listing</p>
-            <h1 className="font-serif text-4xl leading-none tracking-tighter sm:text-5xl">{product.title}</h1>
-            <p className="mt-5 text-2xl font-semibold">{product.price?.amount} {product.price?.currency}</p>
-            <p className="mt-6 border-t border-[#E2DBD1] pt-6 text-sm leading-7 text-[#625B55]">{product.description || 'No description provided for this listing.'}</p>
-            <div className="mt-7 flex items-center gap-3 border-t border-[#E2DBD1] pt-5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#77716B]"><span className="h-1.5 w-1.5 rounded-full bg-[#6C9274]" /> Listing active</div>
+          {/* =================================================
+              PRODUCT INFO
+          ================================================= */}
+
+          <div className="flex flex-col justify-center">
+
+            <p className="text-[8px] font-semibold uppercase tracking-[0.2em] text-[#8A837C]">
+              Product listing
+            </p>
+
+            <h2 className="mt-3 max-w-xl font-serif text-4xl leading-[0.95] tracking-[-0.035em] sm:text-5xl">
+              {product.title}
+            </h2>
+
+            <div className="mt-6 h-[2px] w-8 bg-[#211D1A]" />
+
+            <p className="mt-6 max-w-lg text-sm leading-7 text-[#625B55]">
+              {product.description}
+            </p>
+
+            {/* PRICE */}
+
+            <div className="mt-8 flex items-end justify-between border-t border-[#E1DBD4] pt-5">
+
+              <div>
+                <p className="text-[8px] font-semibold uppercase tracking-[0.15em] text-[#8A837C]">
+                  Base price
+                </p>
+
+                <p className="mt-2 text-xl font-semibold">
+                  {product.price?.amount}{" "}
+                  <span className="text-sm font-normal text-[#625B55]">
+                    {product.price?.currency}
+                  </span>
+                </p>
+              </div>
+
+              <div className="text-right">
+                <p className="text-[8px] font-semibold uppercase tracking-[0.15em] text-[#8A837C]">
+                  Variants
+                </p>
+
+                <p className="mt-2 text-xl font-semibold">
+                  {localVariants.length}
+                </p>
+              </div>
+
+            </div>
+
           </div>
+
         </section>
 
-        {/* Variants & Inventory */}
-        <section className="rounded-3xl border border-[#CEC8C1] bg-[#F8F6F2] p-5 sm:p-8 lg:p-10">
-          <div className="mb-8 flex flex-col items-start justify-between gap-4 border-b border-[#E2DBD1] pb-6 md:flex-row md:items-center">
-            <div><p className="mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-[#77716B]">Manage availability</p><h2 className="font-serif text-3xl tracking-[-0.04em]">Variants & inventory</h2></div>
+        {/* =================================================
+            VARIANTS SECTION
+        ================================================= */}
+
+        <section className="py-10">
+
+          {/* SECTION HEADER */}
+
+          <div className="flex flex-col justify-between gap-5 border-b border-[#E1DBD4] pb-6 sm:flex-row sm:items-end">
+
+            <div>
+              <p className="text-[8px] font-semibold uppercase tracking-[0.2em] text-[#8A837C]">
+                Inventory management
+              </p>
+
+              <h3 className="mt-2 font-serif text-3xl leading-none tracking-[-0.025em]">
+                Variants
+              </h3>
+
+              <p className="mt-3 text-[9px] uppercase tracking-[0.1em] text-[#8A837C]">
+                Manage color, size, images and stock
+              </p>
+            </div>
+
             {!isAddingVariant && (
               <button
-                onClick={() => setIsAddingVariant(true)}
-                className="inline-flex h-11 items-center gap-2 rounded-xl bg-[#211D1A] px-5 text-[10px] font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#332F2C]"
+                type="button"
+                onClick={() =>
+                  setIsAddingVariant(true)
+                }
+                className="flex h-10 items-center justify-center gap-2 rounded-[4px] bg-[#211D1A] px-5 text-[9px] font-semibold uppercase tracking-[0.14em] text-white transition hover:bg-[#4A4039]"
               >
-                <FiPlus /> Add New Variant
+                <PlusIcon />
+                Add new variant
               </button>
             )}
+
           </div>
 
-          {/* Add New Variant Form */}
+          {/* =================================================
+              ADD VARIANT FORM
+          ================================================= */}
+
           {isAddingVariant && (
-            <div className="mb-10 rounded-[14px] border border-[#D8D1C8] bg-[#F5F2ED] p-5 sm:p-8">
-              <div className="flex justify-between items-center mb-6">
-                <h4 className="font-serif text-2xl tracking-[-0.03em]">Create variant</h4>
+            <div className="mt-7 border border-[#E1DBD4] bg-white p-5 sm:p-7 lg:p-8">
+
+              {/* FORM HEADER */}
+
+              <div className="flex items-start justify-between border-b border-[#E1DBD4] pb-5">
+
+                <div>
+                  <p className="text-[7px] font-bold uppercase tracking-[0.22em] text-[#8A837C]">
+                    New listing option
+                  </p>
+
+                  <h4 className="mt-2 font-serif text-2xl leading-none">
+                    Create variant
+                  </h4>
+                </div>
+
                 <button
-                  onClick={() => setIsAddingVariant(false)}
-                  className="text-[#7f7668] hover:text-[#1b1c1a] text-sm uppercase tracking-wider cursor-pointer"
+                  type="button"
+                  onClick={() =>
+                    setIsAddingVariant(false)
+                  }
+                  className="text-[8px] font-semibold uppercase tracking-[0.14em] text-[#8A837C] transition hover:text-[#211D1A]"
                 >
                   Cancel
                 </button>
+
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Form Left Col: Attributes & Basics */}
-                <div className="space-y-6">
+              <div className="grid gap-8 pt-7 lg:grid-cols-2">
 
-                  {/* Dynamic Attributes */}
+                {/* =================================================
+                    LEFT
+                ================================================= */}
+
+                <div className="space-y-7">
+
+                  {/* ATTRIBUTES */}
+
                   <div>
-                    <label className="mb-3 block text-[10px] font-bold uppercase tracking-[0.16em] text-[#77716B]">Attributes (e.g. Size, Color) *</label>
-                    <div className="space-y-3">
-                      {attributeInputs.map((attr, index) => (
-                        <div key={index} className="flex gap-2 items-center">
-                          <input
-                            type="text"
-                            placeholder="Key (e.g., Size)"
-                            value={attr.key}
-                            onChange={(e) => handleAttributeChange(index, 'key', e.target.value)}
-                            className="w-1/2 border-b border-[#CEC8C1] bg-transparent py-2 text-sm outline-none placeholder:text-[#A8A19A] focus:border-[#211D1A]"
-                          />
-                          <input
-                            type="text"
-                            placeholder="Value (e.g., M)"
-                            value={attr.value}
-                            onChange={(e) => handleAttributeChange(index, 'value', e.target.value)}
-                            className="w-1/2 border-b border-[#CEC8C1] bg-transparent py-2 text-sm outline-none placeholder:text-[#A8A19A] focus:border-[#211D1A]"
-                          />
-                          {attributeInputs.length > 1 && (
-                            <button aria-label="Remove attribute" onClick={() => handleRemoveAttribute(index)} className="rounded-lg p-2 text-[#8C5750] transition hover:bg-[#EAD8D3]">
-                              <FiTrash2 />
-                            </button>
-                          )}
-                        </div>
-                      ))}
+
+                    <div className="mb-3 flex items-center justify-between">
+
+                      <label className="text-[8px] font-bold uppercase tracking-[0.16em] text-[#625B55]">
+                        Attributes
+                      </label>
+
+                      <span className="text-[8px] uppercase tracking-[0.1em] text-[#AAA39B]">
+                        e.g. Color / Size
+                      </span>
+
                     </div>
+
+                    <div className="space-y-2">
+
+                      {attributeInputs.map(
+                        (attr, index) => (
+                          <div
+                            key={index}
+                            className="flex gap-2"
+                          >
+
+                            <input
+                              type="text"
+                              placeholder="Key"
+                              value={
+                                attr.key
+                              }
+                              onChange={(e) =>
+                                handleAttributeChange(
+                                  index,
+                                  "key",
+                                  e.target.value
+                                )
+                              }
+                              className="h-10 w-1/2 border border-[#D8D1C8] bg-[#F8F6F2] px-3 text-[10px] text-[#211D1A] outline-none placeholder:text-[#AAA39B] focus:border-[#211D1A]"
+                            />
+
+                            <input
+                              type="text"
+                              placeholder="Value"
+                              value={
+                                attr.value
+                              }
+                              onChange={(e) =>
+                                handleAttributeChange(
+                                  index,
+                                  "value",
+                                  e.target.value
+                                )
+                              }
+                              className="h-10 w-1/2 border border-[#D8D1C8] bg-[#F8F6F2] px-3 text-[10px] text-[#211D1A] outline-none placeholder:text-[#AAA39B] focus:border-[#211D1A]"
+                            />
+
+                            {attributeInputs.length >
+                              1 && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleRemoveAttribute(
+                                    index
+                                  )
+                                }
+                                className="flex h-10 w-10 shrink-0 items-center justify-center border border-[#E1DBD4] text-[#8A837C] transition hover:border-red-300 hover:bg-red-50 hover:text-red-500"
+                              >
+                                <TrashIcon />
+                              </button>
+                            )}
+
+                          </div>
+                        )
+                      )}
+
+                    </div>
+
                     <button
-                      onClick={handleAddAttribute}
-                      className="mt-3 flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#625B55] hover:text-[#211D1A]"
+                      type="button"
+                      onClick={
+                        handleAddAttribute
+                      }
+                      className="mt-3 flex items-center gap-1.5 text-[8px] font-bold uppercase tracking-[0.14em] text-[#211D1A] transition hover:text-[#625B55]"
                     >
-                      <FiPlus /> Add Attribute
+                      <PlusIcon />
+                      Add attribute
                     </button>
+
                   </div>
 
-                  {/* Stock & Price */}
-                  <div className="flex gap-4">
-                    <div className="w-1/2">
-                      <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.16em] text-[#77716B]">Initial Stock</label>
+                  {/* STOCK + PRICE */}
+
+                  <div className="grid grid-cols-2 gap-3">
+
+                    <div>
+
+                      <label className="mb-2 block text-[8px] font-bold uppercase tracking-[0.14em] text-[#625B55]">
+                        Initial stock
+                      </label>
+
                       <input
                         type="number"
-                        value={newVariant.stock}
-                        onChange={(e) => setNewVariant({ ...newVariant, stock: e.target.value })}
-                        className="w-full border-b border-[#CEC8C1] bg-transparent py-2 text-sm outline-none focus:border-[#211D1A]"
+                        min="0"
+                        value={
+                          newVariant.stock
+                        }
+                        onChange={(e) =>
+                          setNewVariant(
+                            (prev) => ({
+                              ...prev,
+                              stock:
+                                e.target.value,
+                            })
+                          )
+                        }
+                        className="h-10 w-full border border-[#D8D1C8] bg-[#F8F6F2] px-3 text-[10px] text-[#211D1A] outline-none focus:border-[#211D1A]"
                       />
+
                     </div>
-                    <div className="w-1/2">
-                      <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.16em] text-[#77716B]">Price Amount (Optional)</label>
+
+                    <div>
+
+                      <label className="mb-2 block text-[8px] font-bold uppercase tracking-[0.14em] text-[#625B55]">
+                        Variant price
+                      </label>
+
                       <input
                         type="number"
-                        value={newVariant.price.amount}
-                        onChange={(e) => setNewVariant({ ...newVariant, price: { ...newVariant.price, amount: e.target.value } })}
-                        placeholder="Default if empty"
-                        className="w-full border-b border-[#CEC8C1] bg-transparent py-2 text-sm outline-none placeholder:text-[#A8A19A] focus:border-[#211D1A]"
+                        min="0"
+                        value={
+                          newVariant.price
+                            .amount
+                        }
+                        onChange={(e) =>
+                          setNewVariant(
+                            (prev) => ({
+                              ...prev,
+                              price: {
+                                ...prev.price,
+                                amount:
+                                  e.target
+                                    .value,
+                              },
+                            })
+                          )
+                        }
+                        placeholder="Optional"
+                        className="h-10 w-full border border-[#D8D1C8] bg-[#F8F6F2] px-3 text-[10px] text-[#211D1A] outline-none placeholder:text-[#AAA39B] focus:border-[#211D1A]"
                       />
+
                     </div>
+
                   </div>
+
                 </div>
 
-                {/* Form Right Col: Images */}
+                {/* =================================================
+                    RIGHT - IMAGES
+                ================================================= */}
+
                 <div>
-                  <div className="flex justify-between items-end mb-3">
-                    <label className="block text-[10px] font-bold uppercase tracking-[0.16em] text-[#77716B]">Image Upload (Max 7, Optional)</label>
-                    <span className="text-[10px] text-[#8A837C]">{newVariant.images.length}/7</span>
+
+                  <div className="mb-3 flex items-center justify-between">
+
+                    <label className="text-[8px] font-bold uppercase tracking-[0.16em] text-[#625B55]">
+                      Variant images
+                    </label>
+
+                    <span className="text-[8px] uppercase tracking-[0.1em] text-[#AAA39B]">
+                      {
+                        newVariant.images
+                          .length
+                      }
+                      /7
+                    </span>
+
                   </div>
 
-                  {newVariant.images.length > 0 && (
-                    <div className="grid grid-cols-3 gap-2 mb-4">
-                      {newVariant.images.map((img, index) => (
-                        <div key={index} className="relative aspect-4/5 overflow-hidden rounded-[5px] bg-[#E9E4DE]">
-                          <img src={img.previewUrl} alt="Preview" className="w-full h-full object-cover" />
-                          <button
-                            onClick={() => handleRemoveImage(index)}
-                            aria-label="Remove image"
-                            className="absolute right-1 top-1 rounded bg-white/85 p-1 text-[#8C5750] transition hover:bg-white"
+                  {/* IMAGE PREVIEWS */}
+
+                  {newVariant.images
+                    .length > 0 && (
+                    <div className="grid grid-cols-4 gap-2">
+
+                      {newVariant.images.map(
+                        (
+                          img,
+                          index
+                        ) => (
+                          <div
+                            key={
+                              index
+                            }
+                            className="group relative aspect-square overflow-hidden rounded-[3px] border border-[#D8D1C8] bg-[#F8F6F2]"
                           >
-                            <FiTrash2 />
-                          </button>
-                        </div>
-                      ))}
+
+                            <img
+                              src={
+                                img.previewUrl
+                              }
+                              alt="Preview"
+                              className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                            />
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleRemoveImage(
+                                  index
+                                )
+                              }
+                              className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-[3px] bg-[#211D1A]/85 text-white opacity-0 transition group-hover:opacity-100"
+                            >
+                              <TrashIcon />
+                            </button>
+
+                            {index ===
+                              0 && (
+                              <span className="absolute bottom-1 left-1 bg-[#211D1A]/90 px-1.5 py-1 text-[6px] font-bold uppercase tracking-[0.1em] text-white">
+                                Cover
+                              </span>
+                            )}
+
+                          </div>
+                        )
+                      )}
+
                     </div>
                   )}
 
-                  {newVariant.images.length < 7 && (
-                    <div>
+                  {/* UPLOAD */}
+
+                  {newVariant.images
+                    .length < 7 && (
+                    <label className="mt-3 flex h-28 cursor-pointer flex-col items-center justify-center gap-2 border border-dashed border-[#D0C8BF] bg-[#F8F6F2] text-[#8A837C] transition hover:border-[#211D1A] hover:text-[#211D1A]">
+
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                      >
+                        <path d="M12 3v12" />
+                        <path d="m7 8 5-5 5 5" />
+                        <path d="M5 15v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" />
+                      </svg>
+
+                      <span className="text-[8px] font-bold uppercase tracking-[0.12em]">
+                        Upload images
+                      </span>
+
+                      <span className="text-[7px] uppercase tracking-[0.1em] text-[#AAA39B]">
+                        Up to 7 images
+                      </span>
+
                       <input
                         type="file"
                         accept="image/*"
                         multiple
-                        onChange={handleImageUpload}
-                        className="block w-full text-sm text-[#625B55]
-                          file:rounded-lg file:border-0 file:bg-[#E8E4DE] file:px-4 file:py-2 file:text-[#211D1A]
-                          hover:file:bg-[#DCD7D0] file:cursor-pointer file:uppercase file:text-[10px] file:tracking-[0.12em] file:font-bold
-                          cursor-pointer"
+                        onChange={
+                          handleImageUpload
+                        }
+                        className="hidden"
                       />
-                    </div>
+
+                    </label>
                   )}
+
                 </div>
+
               </div>
 
-              <div className="mt-10 flex justify-end">
+              {/* SAVE BUTTON */}
+
+              <div className="mt-8 flex justify-end border-t border-[#E1DBD4] pt-6">
+
                 <button
-                  onClick={handleAddNewVariant}
-                  className="rounded-xl bg-[#211D1A] px-6 py-3 text-[10px] font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#332F2C]"
+                  type="button"
+                  onClick={
+                    handleAddNewVariant
+                  }
+                  className="flex h-10 items-center justify-center bg-[#211D1A] px-7 text-[9px] font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#4A4039]"
                 >
-                  Save Variant
+                  Save variant
                 </button>
+
               </div>
+
             </div>
           )}
 
-          {/* Variants List */}
-          {localVariants.length === 0 ? (
-            <div className="py-12 text-center text-[#6e6258]">
-              <FiPackage className="mx-auto mb-3 h-7 w-7 text-[#8A837C]" /><p className="text-[10px] uppercase tracking-[0.14em]">No variants have been created yet.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-              {localVariants.map((variant, idx) => (
-                <div key={idx} className="flex flex-col rounded-[14px] border border-[#D8D1C8] bg-white pt-4 shadow-[0_8px_24px_rgba(33,29,26,0.04)]">
-                  <div className="px-6 flex gap-4 h-24 mb-4">
-                    {/* Variant Thumb */}
-                    <div className="h-20 w-16 shrink-0 overflow-hidden rounded-[5px] bg-[#E9E4DE]">
-                      {variant.images && variant.images.length > 0 ? (
-                        <img src={variant.images[ 0 ].url} alt="Variant" className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center text-[10px] text-[#8A837C]">N/A</div>
-                      )}
-                    </div>
-                    {/* Attributes */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-wrap gap-2 mb-2">
-                        {Object.entries(variant.attributes || {}).map(([ key, val ]) => (
-                          <span key={key} className="rounded bg-[#EAE6E0] px-2 py-1 text-[10px] uppercase tracking-[0.08em] text-[#4E4945]">
-                            <span className="text-[#8A837C]">{key}:</span> {val}
-                          </span>
-                        ))}
-                      </div>
-                      <div className="text-sm font-light">
-                        {variant.price?.amount ? `${variant.price.amount} ${variant.price.currency}` : 'Base Price'}
-                      </div>
-                    </div>
-                  </div>
+          {/* =================================================
+              VARIANT LIST
+          ================================================= */}
 
-                  {/* Stock Management Row */}
-                  <div className="mt-auto flex items-center justify-between border-t border-[#E8E4DE] bg-[#F5F2ED] px-6 py-3">
-                    <label className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#77716B]">Current Stock</label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="number"
-                        value={variant.stock || 0}
-                        onChange={(e) => handleStockChange(idx, e.target.value)}
-                        className="w-20 border-b border-[#CEC8C1] bg-transparent py-1 text-right font-serif text-lg outline-none focus:border-[#211D1A]"
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          <div className="mt-7">
+
+            {localVariants.length === 0 ? (
+              <div className="border border-dashed border-[#D8D1C8] py-16 text-center">
+
+                <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-[#8A837C]">
+                  No variants created yet
+                </p>
+
+                <p className="mt-2 text-[8px] uppercase tracking-[0.1em] text-[#AAA39B]">
+                  Add your first color or size variant
+                </p>
+
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+
+                {localVariants.map(
+                  (variant, idx) => {
+
+                    const variantImage =
+                      variant.images?.[0]
+                        ?.url ||
+                      variant.images?.[0]
+                        ?.thumbnailUrl ||
+                      variant.images?.[0]
+                        ?.filePath;
+
+                    const variantStock =
+                      Number(
+                        variant.stock || 0
+                      );
+
+                    const isInStock =
+                      variantStock > 0;
+
+                    return (
+                      <article
+                        key={
+                          variant._id ||
+                          idx
+                        }
+                        className="overflow-hidden rounded-[4px] border border-[#E1DBD4] bg-white"
+                      >
+
+                        {/* CARD TOP */}
+
+                        <div className="p-4">
+
+                          <div className="flex gap-4">
+
+                            {/* THUMB */}
+
+                            <div className="h-24 w-20 shrink-0 overflow-hidden rounded-[3px] bg-[#F1EEE9]">
+
+                              {variantImage ? (
+                                <img
+                                  src={
+                                    variantImage
+                                  }
+                                  alt="Variant"
+                                  className="h-full w-full object-cover"
+                                />
+                              ) : (
+                                <div className="flex h-full items-center justify-center text-[7px] font-semibold uppercase tracking-[0.1em] text-[#AAA39B]">
+                                  No image
+                                </div>
+                              )}
+
+                            </div>
+
+                            {/* INFO */}
+
+                            <div className="min-w-0 flex-1">
+
+                              <div className="mb-3 flex items-center justify-between">
+
+                                <span className="text-[7px] font-bold uppercase tracking-[0.16em] text-[#8A837C]">
+                                  Variant{" "}
+                                  {idx +
+                                    1}
+                                </span>
+
+                                <span
+                                  className={`h-1.5 w-1.5 rounded-full ${
+                                    isInStock
+                                      ? "bg-[#211D1A]"
+                                      : "bg-[#B54A42]"
+                                  }`}
+                                />
+
+                              </div>
+
+                              {/* ATTRIBUTES */}
+
+                              <div className="flex flex-wrap gap-1.5">
+
+                                {Object.entries(
+                                  variant.attributes ||
+                                    {}
+                                ).map(
+                                  ([
+                                    key,
+                                    val,
+                                  ]) => (
+                                    <div
+                                      key={
+                                        key
+                                      }
+                                      className="border border-[#E1DBD4] bg-[#F8F6F2] px-2 py-1.5"
+                                    >
+                                      <span className="mr-1 text-[7px] font-bold uppercase tracking-[0.08em] text-[#AAA39B]">
+                                        {
+                                          key
+                                        }
+                                      </span>
+
+                                      <span className="text-[8px] font-semibold uppercase tracking-[0.08em] text-[#211D1A]">
+                                        {
+                                          val
+                                        }
+                                      </span>
+                                    </div>
+                                  )
+                                )}
+
+                              </div>
+
+                              {/* PRICE */}
+
+                              <p className="mt-3 text-[10px] font-semibold text-[#211D1A]">
+
+                                {variant
+                                  .price
+                                  ?.amount ? (
+                                  <>
+                                    {
+                                      variant
+                                        .price
+                                        .amount
+                                    }{" "}
+                                    <span className="text-[8px] font-normal text-[#8A837C]">
+                                      {variant
+                                        .price
+                                        .currency ||
+                                        product
+                                          .price
+                                          ?.currency ||
+                                        "INR"}
+                                    </span>
+                                  </>
+                                ) : (
+                                  <span className="text-[8px] font-medium uppercase tracking-[0.1em] text-[#8A837C]">
+                                    Base price
+                                  </span>
+                                )}
+
+                              </p>
+
+                            </div>
+
+                          </div>
+
+                        </div>
+
+                        {/* STOCK */}
+
+                        <div className="flex items-center justify-between border-t border-[#E1DBD4] bg-[#F8F6F2] px-4 py-3">
+
+                          <div>
+
+                            <p className="text-[7px] font-bold uppercase tracking-[0.14em] text-[#8A837C]">
+                              Current stock
+                            </p>
+
+                            <p
+                              className={`mt-1 text-[7px] font-semibold uppercase tracking-[0.1em] ${
+                                isInStock
+                                  ? "text-[#625B55]"
+                                  : "text-red-500"
+                              }`}
+                            >
+                              {isInStock
+                                ? "Available"
+                                : "Out of stock"}
+                            </p>
+
+                          </div>
+
+                          <input
+                            type="number"
+                            min="0"
+                            value={
+                              variant.stock ??
+                              0
+                            }
+                            onChange={(e) =>
+                              handleStockChange(
+                                idx,
+                                e.target
+                                  .value
+                              )
+                            }
+                            className="h-9 w-20 border border-[#D8D1C8] bg-white px-2 text-right font-serif text-base text-[#211D1A] outline-none focus:border-[#211D1A]"
+                          />
+
+                        </div>
+
+                      </article>
+                    );
+                  }
+                )}
+
+              </div>
+            )}
+
+          </div>
 
         </section>
 
       </div>
-    </main>
-  )
-}
 
-export default SellerProductDetail
+    </main>
+  );
+};
+
+export default SellerProductDetails;
+

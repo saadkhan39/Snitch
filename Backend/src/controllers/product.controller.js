@@ -77,55 +77,56 @@ export async function getProductDetails(req,res){
     })
 }
 
-export async function createProductVariant(req,res){
-    const { productId } = req.params
+export async function addProductVariant(req, res) {
 
-    const product = await productModel.findOne({_id:productId,seller:req.user._id})
+    const productId = req.params.productId;
 
-    if(!product){
+    const product = await productModel.findOne({
+        _id: productId,
+        seller: req.user._id
+    });
+
+    if (!product) {
         return res.status(404).json({
-            message: "Product not found or you are not authorized to add variant",
+            message: "Product not found",
             success: false
         })
     }
 
-    const files = req.files 
-    const images =[]
-
-    if(files && files.length > 0){
-        for(const file of files){
-            const uploadedFile = await uploadFiles({
+    const files = req.files || [];
+    const images = [];
+    if (files.length > 0) {
+        (await Promise.all(files.map(async (file) => {
+            const image = await uploadFiles({
                 buffer: file.buffer,
                 fileName: file.originalname
             })
-            images.push(uploadedFile)
-        }
+            return image
+        }))).map(image => images.push(image))
     }
-    const price = req.body.priceAmount
-    const stock = Number(req.body.stock) || 0
-    const rawAttributes = req.body.attributes
-    const attributes = typeof rawAttributes === "string"
-        ? JSON.parse(rawAttributes)
-        : rawAttributes || {}
 
-    console.log(price,stock,attributes,images);
+    const price = req.body.priceAmount
+    const stock = req.body.stock
+    const attributes = JSON.parse(req.body.attributes || "{}")
+
+    console.log(price)
 
     product.variants.push({
         images,
-        price:{
-            amount :Number(price) || product.price.amount,
+        price: {
+            amount: Number(price) || product.price.amount,
             currency: req.body.priceCurrency || product.price.currency
         },
         stock,
         attributes
     })
 
-    await product.save()
+    await product.save();
 
-      return res.status(201).json({
+    return res.status(200).json({
         message: "Product variant added successfully",
         success: true,
-          variant: product.variants[product.variants.length - 1]
+        product
     })
-    
+
 }

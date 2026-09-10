@@ -13,8 +13,6 @@ const CreateProduct = () => {
     description: '',
     priceAmount: '',
     priceCurrency: 'INR',
-    sizes: '',
-    colors: '',
   })
   const [images, setImages] = useState([])
   const [isDragging, setIsDragging] = useState(false)
@@ -75,10 +73,7 @@ const CreateProduct = () => {
     formDataToSend.append('description', form.description.trim())
     formDataToSend.append('priceAmount', form.priceAmount)
     formDataToSend.append('priceCurrency', form.priceCurrency)
-    const attributes = {}
-    if (form.sizes.trim()) attributes.Size = form.sizes.trim()
-    if (form.colors.trim()) attributes.Color = form.colors.trim()
-    formDataToSend.append('attributes', JSON.stringify(attributes))
+   
     images.forEach((img) => {
       formDataToSend.append('images', img.file)
     })
@@ -93,8 +88,7 @@ const CreateProduct = () => {
         description: '',
         priceAmount: '',
         priceCurrency: 'INR',
-        sizes: '',
-        colors: '',
+        
       })
       // Revoke URLs and clear images state
       images.forEach((img) => URL.revokeObjectURL(img.url))
@@ -120,8 +114,8 @@ const CreateProduct = () => {
           <span className="text-[18px] font-bold tracking-[0.1em] text-[#211D1A]">
             SNITCH
           </span>
-          <Link to="/products" className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#211D1A] hover:underline">
-            Products
+          <Link to="/seller/dashboard" className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#211D1A] hover:underline">
+            Seller Dashboard
           </Link>
         </div>
 
@@ -218,33 +212,6 @@ const CreateProduct = () => {
               </div>
             </div>
 
-            {/* Parent product options */}
-            <div>
-              <label htmlFor="sizes" className={labelCls}>Available Sizes</label>
-              <input
-                id="sizes"
-                name="sizes"
-                type="text"
-                value={form.sizes}
-                onChange={handleChange}
-                placeholder="e.g. S, M, L, XL"
-                className={inputCls}
-              />
-              <p className="mt-1 text-[8px] text-[#8A837C]">Separate options with commas.</p>
-            </div>
-
-            <div>
-              <label htmlFor="colors" className={labelCls}>Available Colors</label>
-              <input
-                id="colors"
-                name="colors"
-                type="text"
-                value={form.colors}
-                onChange={handleChange}
-                placeholder="e.g. Black, White, Navy"
-                className={inputCls}
-              />
-            </div>
 
             {/* Images */}
             <div>
@@ -331,23 +298,6 @@ const CreateProduct = () => {
                   'Publish Product'
                 )}
               </button>
-            </div>
-
-            {/* Divider */}
-            <div className="flex items-center gap-3 py-0.5">
-              <div className="h-px flex-1 bg-[#D8D1C8]" />
-              <span className="text-[7px] uppercase tracking-[0.15em] text-[#AAA29A]">or</span>
-              <div className="h-px flex-1 bg-[#D8D1C8]" />
-            </div>
-
-            {/* Cancel */}
-            <div className="text-center">
-              <Link
-                to="/products"
-                className="text-[10px] font-bold text-[#211D1A] transition-colors hover:text-[#211D1A]"
-              >
-                Cancel & go back to Products
-              </Link>
             </div>
 
           </form>

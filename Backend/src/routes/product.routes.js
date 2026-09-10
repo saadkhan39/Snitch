@@ -2,8 +2,7 @@ import express from "express"
 import multer  from 'multer'
 import { authenticateSeller } from "../middleware/auth.middleware.js"
 import { createProductValidator } from "../validator/product.validator.js"
-import { createProduct, getAllProduct, getSellerProducts ,getProductDetails ,createProductVariant} from "../controllers/product.controller.js"
-
+import { createProduct, getAllProduct, getSellerProducts, getProductDetails,addProductVariant } from '../controllers/product.controller.js';
 
 const upload = multer({
     storage: multer.memoryStorage(),
@@ -44,13 +43,13 @@ router.get("/", getAllProduct)
 router.get("/detail/:id", getProductDetails)
 
 
+
 /**
- * @routes POST /api/products/:productId/variants
- * @desc Create a new variant for a product (Private - Seller only)
+ * @route post /api/products/:productId/variants
+ * @description Add a new variant to a product
  * @access Private (Seller only)
  */
-router.post("/:productId/variants", authenticateSeller, upload.array("variantImages", 7), createProductVariant)
-
+router.post("/:productId/variants", authenticateSeller, upload.array('images', 7), addProductVariant)
 
 
 export default router

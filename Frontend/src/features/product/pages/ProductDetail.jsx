@@ -140,11 +140,9 @@ const ProductDetail = () => {
   const [addingToCart, setAddingToCart] =
     useState(false);
 
-  // Turns the button into "Go to cart" after a successful add
   const [addedToCart, setAddedToCart] =
     useState(false);
 
-  // Drives the brief bag-icon animation in the header
   const [bagPulse, setBagPulse] =
     useState(false);
 
@@ -189,6 +187,7 @@ const ProductDetail = () => {
         setSelectedImage(0);
         setSelectedAttributes({});
         setAddedToCart(false);
+
       } catch (err) {
         console.error(
           "Failed to fetch product:",
@@ -203,6 +202,7 @@ const ProductDetail = () => {
               "Unable to load product."
           );
         }
+
       } finally {
         if (mounted) {
           setLoading(false);
@@ -215,6 +215,7 @@ const ProductDetail = () => {
     return () => {
       mounted = false;
     };
+
   }, [productId]);
 
 
@@ -233,6 +234,7 @@ const ProductDetail = () => {
     const names = new Map();
 
     product.variants.forEach((variant) => {
+
       const attributes =
         normalizeAttributes(
           variant?.attributes
@@ -240,14 +242,17 @@ const ProductDetail = () => {
 
       Object.keys(attributes).forEach(
         (key) => {
+
           const normalized =
             key.trim().toLowerCase();
 
           if (!names.has(normalized)) {
+
             names.set(
               normalized,
               key.trim()
             );
+
           }
         }
       );
@@ -256,6 +261,7 @@ const ProductDetail = () => {
     return Array.from(
       names.values()
     );
+
   }, [product]);
 
 
@@ -266,6 +272,7 @@ const ProductDetail = () => {
   const getAttributeValues = (
     attributeName
   ) => {
+
     if (
       !product ||
       !Array.isArray(product.variants)
@@ -277,6 +284,7 @@ const ProductDetail = () => {
 
     product.variants.forEach(
       (variant) => {
+
         const attributes =
           normalizeAttributes(
             variant?.attributes
@@ -285,8 +293,10 @@ const ProductDetail = () => {
         const actualKey =
           Object.keys(attributes).find(
             (key) =>
-              key.toLowerCase() ===
-              attributeName.toLowerCase()
+              key.toLowerCase().trim() ===
+              attributeName
+                .toLowerCase()
+                .trim()
           );
 
         if (!actualKey) {
@@ -300,6 +310,7 @@ const ProductDetail = () => {
 
         attributeValues.forEach(
           (value) => {
+
             const cleanValue =
               value.trim();
 
@@ -307,10 +318,12 @@ const ProductDetail = () => {
               cleanValue.toLowerCase();
 
             if (!values.has(normalized)) {
+
               values.set(
                 normalized,
                 cleanValue
               );
+
             }
           }
         );
@@ -331,6 +344,7 @@ const ProductDetail = () => {
     variant,
     attributeName
   ) => {
+
     const attributes =
       normalizeAttributes(
         variant?.attributes
@@ -339,8 +353,10 @@ const ProductDetail = () => {
     const actualKey =
       Object.keys(attributes).find(
         (key) =>
-          key.toLowerCase() ===
-          attributeName.toLowerCase()
+          key.toLowerCase().trim() ===
+          attributeName
+            .toLowerCase()
+            .trim()
       );
 
     if (!actualKey) {
@@ -358,6 +374,7 @@ const ProductDetail = () => {
   // =======================================================
 
   const selectedVariant = useMemo(() => {
+
     if (
       !product ||
       !Array.isArray(product.variants) ||
@@ -387,8 +404,10 @@ const ProductDetail = () => {
     return (
       product.variants.find(
         (variant) => {
+
           return attributeNames.every(
             (attributeName) => {
+
               const selectedValue =
                 selectedAttributes[
                   attributeName
@@ -413,9 +432,11 @@ const ProductDetail = () => {
               );
             }
           );
+
         }
       ) || null
     );
+
   }, [
     product,
     attributeNames,
@@ -431,6 +452,7 @@ const ProductDetail = () => {
     attributeName,
     value
   ) => {
+
     if (
       !product ||
       !Array.isArray(product.variants)
@@ -440,6 +462,7 @@ const ProductDetail = () => {
 
     return product.variants.some(
       (variant) => {
+
         if (!variant) {
           return false;
         }
@@ -449,12 +472,10 @@ const ProductDetail = () => {
             variant.stock || 0
           );
 
-        // Don't allow out-of-stock variants
         if (variantStock <= 0) {
           return false;
         }
 
-        // Current attribute must match
         const currentValues =
           getVariantAttributeValues(
             variant,
@@ -476,7 +497,6 @@ const ProductDetail = () => {
           return false;
         }
 
-        // Other selected attributes must match
         return Object.entries(
           selectedAttributes
         ).every(
@@ -484,6 +504,7 @@ const ProductDetail = () => {
             selectedAttribute,
             selectedValue,
           ]) => {
+
             if (
               selectedAttribute ===
               attributeName
@@ -523,6 +544,7 @@ const ProductDetail = () => {
     attributeName,
     value
   ) => {
+
     setSelectedAttributes(
       (previous) => ({
         ...previous,
@@ -531,8 +553,6 @@ const ProductDetail = () => {
     );
 
     setSelectedImage(0);
-
-    // Changing the variant means "Add to cart" should reappear
     setAddedToCart(false);
   };
 
@@ -596,6 +616,7 @@ const ProductDetail = () => {
   // =======================================================
 
   const stockStatus = (() => {
+
     if (
       hasVariants &&
       !allAttributesSelected
@@ -612,6 +633,7 @@ const ProductDetail = () => {
     }
 
     return "known";
+
   })();
 
 
@@ -659,8 +681,10 @@ const ProductDetail = () => {
   // =======================================================
 
   useEffect(() => {
+
     setSelectedImage(0);
     setAddedToCart(false);
+
   }, [
     selectedVariant?._id,
   ]);
@@ -686,6 +710,7 @@ const ProductDetail = () => {
 
   const handleAddProductToCart =
     async () => {
+
       if (
         !canAddToCart ||
         addingToCart
@@ -694,9 +719,17 @@ const ProductDetail = () => {
       }
 
       try {
+
         setAddingToCart(true);
 
+
+        // ================================================
+        // IMPORTANT:
+        // SEND EXACT SELECTED COLOR + SIZE
+        // ================================================
+
         const payload = {
+
           productId:
             product?._id,
 
@@ -705,34 +738,55 @@ const ProductDetail = () => {
             null,
 
           quantity: 1,
+
+          selectedAttributes: {
+            ...selectedAttributes,
+          },
+
         };
 
+
         console.log(
-          "Adding to cart:",
+          "ADDING TO CART:",
           payload
         );
+
+        console.log(
+          "SELECTED ATTRIBUTES:",
+          selectedAttributes
+        );
+
 
         await handleAddToCart(
           payload
         );
 
-        // Swap the button into "Go to cart" instead of showing a message
+
+        // ================================================
+        // SUCCESS
+        // ================================================
+
         setAddedToCart(true);
 
-        // Briefly pulse the bag icon in the header
         setBagPulse(true);
+
 
         setTimeout(() => {
           setBagPulse(false);
         }, 900);
 
+
       } catch (err) {
+
         console.error(
-          "Failed to add product to cart:",
+          "FAILED TO ADD PRODUCT TO CART:",
           err
         );
+
       } finally {
+
         setAddingToCart(false);
+
       }
     };
 
@@ -742,6 +796,7 @@ const ProductDetail = () => {
   // =======================================================
 
   if (loading) {
+
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#F8F6F2] font-['Plus_Jakarta_Sans',sans-serif] text-[#211D1A]">
 
@@ -759,6 +814,7 @@ const ProductDetail = () => {
   // =======================================================
 
   if (!product) {
+
     return (
       <main className="flex min-h-screen flex-col items-center justify-center bg-[#F8F6F2] font-['Plus_Jakarta_Sans',sans-serif] text-[#211D1A]">
 
@@ -789,7 +845,6 @@ const ProductDetail = () => {
     <main className="min-h-screen bg-[#F8F6F2] font-['Plus_Jakarta_Sans',sans-serif] text-[#211D1A]">
 
       <div className="mx-auto max-w-[1180px] px-4 py-5 sm:px-6 lg:px-8">
-
 
         {/* =================================================
             HEADER
@@ -838,7 +893,6 @@ const ProductDetail = () => {
               Sign in
             </Link>
 
-            {/* BAG ICON — pulses + shows a ping badge briefly after an add-to-cart */}
             <button
               type="button"
               aria-label="Shopping bag"
@@ -851,18 +905,25 @@ const ProductDetail = () => {
                   : "scale-100 border-[#D8D1C8] bg-white text-[#211D1A] hover:border-[#211D1A] hover:bg-[#211D1A] hover:text-white"
               }`}
             >
+
               <FiShoppingBag
                 className={`h-3.5 w-3.5 transition-transform duration-300 ${
-                  bagPulse ? "animate-bounce" : ""
+                  bagPulse
+                    ? "animate-bounce"
+                    : ""
                 }`}
               />
 
               {bagPulse && (
                 <span className="absolute -right-1 -top-1 flex h-2.5 w-2.5">
+
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#B54A42] opacity-75" />
+
                   <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#B54A42]" />
+
                 </span>
               )}
+
             </button>
 
           </div>
@@ -892,13 +953,11 @@ const ProductDetail = () => {
 
         <div className="grid gap-8 py-6 md:grid-cols-[minmax(0,0.95fr)_minmax(320px,0.8fr)] md:gap-12 lg:gap-16 lg:py-8">
 
-
           {/* =================================================
               IMAGE GALLERY
           ================================================= */}
 
           <section className="flex min-w-0 gap-2.5">
-
 
             {/* THUMBNAILS */}
 
@@ -906,6 +965,7 @@ const ProductDetail = () => {
 
               {images.map(
                 (image, index) => (
+
                   <button
                     key={`${image.url}-${index}`}
                     type="button"
@@ -921,12 +981,15 @@ const ProductDetail = () => {
                         : "border-[#E1DBD4] hover:border-[#8A837C]"
                     }`}
                   >
+
                     <img
                       src={image.url}
                       alt={`Product ${index + 1}`}
                       className="h-full w-full object-cover"
                     />
+
                   </button>
+
                 )
               )}
 
@@ -954,10 +1017,9 @@ const ProductDetail = () => {
                 />
 
 
-                {/* IMAGE ARROWS */}
-
                 {images.length > 1 && (
                   <>
+
                     <button
                       type="button"
                       onClick={() =>
@@ -992,11 +1054,10 @@ const ProductDetail = () => {
                     >
                       <FiChevronRight className="h-3.5 w-3.5" />
                     </button>
+
                   </>
                 )}
 
-
-                {/* IMAGE COUNT */}
 
                 {images.length > 1 && (
                   <div className="absolute bottom-3 right-3 bg-[#211D1A]/85 px-2.5 py-1.5 text-[7px] font-semibold uppercase tracking-[0.12em] text-white">
@@ -1014,6 +1075,7 @@ const ProductDetail = () => {
 
                 {images.map(
                   (image, index) => (
+
                     <button
                       key={`${image.url}-mobile-${index}`}
                       type="button"
@@ -1029,12 +1091,15 @@ const ProductDetail = () => {
                           : "border-[#E1DBD4]"
                       }`}
                     >
+
                       <img
                         src={image.url}
                         alt=""
                         className="h-full w-full object-cover"
                       />
+
                     </button>
+
                   )
                 )}
 
@@ -1050,7 +1115,6 @@ const ProductDetail = () => {
           ================================================= */}
 
           <section className="flex flex-col md:pt-2">
-
 
             {/* TITLE */}
 
@@ -1236,14 +1300,13 @@ const ProductDetail = () => {
                 </div>
 
 
-                {/* SELECTION MESSAGE */}
-
                 {hasVariants &&
                   !allAttributesSelected && (
                     <p className="mt-5 border-l-2 border-[#B54A42] pl-3 text-[8px] font-semibold uppercase tracking-[0.1em] text-[#B54A42]">
                       Please select all options
                     </p>
                   )}
+
 
                 {selectedVariant &&
                   Number(
@@ -1266,9 +1329,7 @@ const ProductDetail = () => {
             )}
 
 
-            {/* =================================================
-                DESCRIPTION
-            ================================================= */}
+            {/* DESCRIPTION */}
 
             <div className="border-b border-[#E1DBD4] py-5">
 
@@ -1284,9 +1345,7 @@ const ProductDetail = () => {
             </div>
 
 
-            {/* =================================================
-                SHIPPING
-            ================================================= */}
+            {/* SHIPPING */}
 
             <div className="py-5">
 
@@ -1335,43 +1394,45 @@ const ProductDetail = () => {
             </div>
 
 
-            {/* =================================================
-                ACTION BUTTONS
-            ================================================= */}
+            {/* ACTION BUTTONS */}
 
             <div className="grid gap-2 sm:grid-cols-2">
 
-              {/* ADD TO CART / GO TO CART — swaps state + style once the item is added */}
-             <button
-  type="button"
-  disabled={
-    !addedToCart &&
-    (!canAddToCart ||
-      addingToCart)
-  }
-  onClick={
-    addedToCart
-      ? () => navigate("/cart")
-      : handleAddProductToCart
-  }
-  className={`flex h-11 items-center justify-center gap-2 rounded-[3px] text-[9px] font-semibold uppercase tracking-[0.14em] text-white transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-40 ${
-    addedToCart
-      ? "bg-[#211D1A] hover:bg-[#554D47]"
-      : "bg-[#211D1A] hover:bg-[#554D47]"
-  }`}
->
-  {addedToCart ? (
-    <FiCheck className="h-3.5 w-3.5 animate-[bounce_0.6s_ease-in-out_1]" />
-  ) : (
-    <FiShoppingBag className="h-3.5 w-3.5" />
-  )}
+              <button
+                type="button"
+                disabled={
+                  !addedToCart &&
+                  (!canAddToCart ||
+                    addingToCart)
+                }
+                onClick={
+                  addedToCart
+                    ? () =>
+                        navigate(
+                          "/cart"
+                        )
+                    : handleAddProductToCart
+                }
+                className={`flex h-11 items-center justify-center gap-2 rounded-[3px] text-[9px] font-semibold uppercase tracking-[0.14em] text-white transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-40 ${
+                  addedToCart
+                    ? "bg-[#211D1A] hover:bg-[#554D47]"
+                    : "bg-[#211D1A] hover:bg-[#554D47]"
+                }`}
+              >
 
-  {addingToCart
-    ? "Adding..."
-    : addedToCart
-    ? "Go to cart"
-    : "Add to cart"}
-</button>
+                {addedToCart ? (
+                  <FiCheck className="h-3.5 w-3.5 animate-[bounce_0.6s_ease-in-out_1]" />
+                ) : (
+                  <FiShoppingBag className="h-3.5 w-3.5" />
+                )}
+
+                {addingToCart
+                  ? "Adding..."
+                  : addedToCart
+                  ? "Go to cart"
+                  : "Add to cart"}
+
+              </button>
 
 
               <button
@@ -1386,8 +1447,6 @@ const ProductDetail = () => {
 
             </div>
 
-
-            {/* SELECTION HELPER */}
 
             {hasVariants &&
               !selectedVariant &&
@@ -1408,3 +1467,4 @@ const ProductDetail = () => {
 };
 
 export default ProductDetail;
+

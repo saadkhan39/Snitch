@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import { useSelector } from 'react-redux'
-import { Link, useNavigate } from 'react-router'
+import React, { useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router";
 import {
   FiArrowUpRight,
   FiChevronDown,
@@ -12,24 +12,26 @@ import {
   FiShoppingBag,
   FiUser,
   FiX,
-} from 'react-icons/fi'
-import { useProduct } from '../hooks/useProduct'
+} from "react-icons/fi";
+
+import { useProduct } from "../hooks/useProduct";
+import { useWishlist } from "../../wishlist/hooks/useWishlist";
 
 const formatPrice = (price) => {
-  if (!price) return 'Price not available'
+  if (!price) return "Price not available";
 
-  const amount = Number(price.amount ?? 0)
-  const currency = price.currency || 'INR'
+  const amount = Number(price.amount ?? 0);
+  const currency = price.currency || "INR";
 
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
     currency,
     maximumFractionDigits: 2,
-  }).format(amount)
-}
+  }).format(amount);
+};
 
 const getImageUrl = (image) => {
-  if (!image) return null
+  if (!image) return null;
 
   return (
     image.url ||
@@ -37,42 +39,46 @@ const getImageUrl = (image) => {
     image.filePath ||
     image.secure_url ||
     null
-  )
-}
+  );
+};
 
 const getProductImage = (product, index = 0) => {
-  if (!Array.isArray(product?.images)) return null
+  if (!Array.isArray(product?.images)) return null;
 
-  return getImageUrl(product.images[index])
-}
+  return getImageUrl(product.images[index]);
+};
 
 const getProductStock = (product) => {
-  if (!product) return 0
+  if (!product) return 0;
 
-  if (Array.isArray(product.variants) && product.variants.length > 0) {
+  if (
+    Array.isArray(product.variants) &&
+    product.variants.length > 0
+  ) {
     return product.variants.reduce(
-      (total, variant) => total + Number(variant?.stock ?? 0),
+      (total, variant) =>
+        total + Number(variant?.stock ?? 0),
       0
-    )
+    );
   }
 
-  return Number(product.stock ?? 0)
-}
+  return Number(product.stock ?? 0);
+};
 
 const normalizeText = (value) => {
-  return String(value ?? '')
+  return String(value ?? "")
     .trim()
-    .toLowerCase()
-}
+    .toLowerCase();
+};
 
 const CATEGORIES = [
-  'All',
-  'Outerwear',
-  'Basics',
-  'Tops',
-  'Loungewear',
-  'Accessories',
-]
+  "All",
+  "Outerwear",
+  "Basics",
+  "Tops",
+  "Loungewear",
+  "Accessories",
+];
 
 const ProductCardSkeleton = () => (
   <div className="overflow-hidden rounded-[7px] border border-[#E5DFD8] bg-white">
@@ -92,7 +98,7 @@ const ProductCardSkeleton = () => (
       </div>
     </div>
   </div>
-)
+);
 
 const ProductImageFallback = () => (
   <div className="flex h-full w-full items-center justify-center bg-[#EAE5E0] text-[#8A837C]">
@@ -104,87 +110,126 @@ const ProductImageFallback = () => (
       </span>
     </div>
   </div>
-)
+);
 
 const Home = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+
+  /*
+    =====================================================
+    WISHLIST
+    =====================================================
+  */
+
+  const {
+    wishlistItems,
+    handleGetWishlist,
+    handleAddToWishlist,
+    handleRemoveFromWishlist,
+    isWishlisted,
+  } = useWishlist();
+
+  /*
+    Load wishlist when Home page mounts.
+  */
+  useEffect(() => {
+    handleGetWishlist();
+  }, []);
+
+  /*
+    =====================================================
+    PRODUCTS
+    =====================================================
+  */
 
   const products = useSelector(
     (state) => state.product?.allProducts ?? []
-  )
+  );
 
-  const { handleGetAllProducts } = useProduct()
+  const { handleGetAllProducts } = useProduct();
 
-  const [isLoading, setIsLoading] = useState(true)
-  const [loadError, setLoadError] = useState(false)
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
-  const [activeCategory, setActiveCategory] = useState('All')
+  const [activeCategory, setActiveCategory] = useState("All");
 
-  const [searchOpen, setSearchOpen] = useState(false)
-  const [searchTerm, setSearchTerm] = useState('')
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const [wishlist, setWishlist] = useState(() => new Set())
-
-  /* ================= LOAD PRODUCTS ================= */
+  /*
+    =====================================================
+    LOAD PRODUCTS
+    =====================================================
+  */
 
   useEffect(() => {
-    let isMounted = true
+    let isMounted = true;
 
     const loadProducts = async () => {
       try {
-        setIsLoading(true)
-        setLoadError(false)
+        setIsLoading(true);
+        setLoadError(false);
 
-        await handleGetAllProducts()
+        await handleGetAllProducts();
       } catch (error) {
-        console.error('Failed to load products:', error)
+        console.error("Failed to load products:", error);
 
         if (isMounted) {
-          setLoadError(true)
+          setLoadError(true);
         }
       } finally {
         if (isMounted) {
-          setIsLoading(false)
+          setIsLoading(false);
         }
       }
-    }
+    };
 
-    loadProducts()
+    loadProducts();
 
     return () => {
-      isMounted = false
-    }
-  }, [])
+      isMounted = false;
+    };
+  }, []);
 
-  /* ================= HERO IMAGES ================= */
+  /*
+    =====================================================
+    HERO IMAGES
+    =====================================================
+  */
 
   const heroImage =
     getProductImage(products[0]) ||
     getProductImage(products[1]) ||
-    null
+    null;
 
   const featureImage =
     getProductImage(products[1]) ||
     getProductImage(products[0]) ||
-    null
+    null;
 
   const secondaryImage =
     getProductImage(products[2]) ||
     getProductImage(products[1]) ||
     getProductImage(products[0]) ||
-    null
+    null;
 
-  /* ================= FILTER PRODUCTS ================= */
+  /*
+    =====================================================
+    FILTER PRODUCTS
+    =====================================================
+  */
 
   const visibleProducts = useMemo(() => {
-    const query = normalizeText(searchTerm)
+    const query = normalizeText(searchTerm);
 
     return products.filter((product) => {
-      const productCategory = normalizeText(product?.category)
+      const productCategory = normalizeText(
+        product?.category
+      );
 
       const matchesCategory =
-        activeCategory === 'All' ||
-        productCategory === normalizeText(activeCategory)
+        activeCategory === "All" ||
+        productCategory === normalizeText(activeCategory);
 
       const searchableText = [
         product?.title,
@@ -192,95 +237,269 @@ const Home = () => {
         product?.category,
       ]
         .filter(Boolean)
-        .join(' ')
+        .join(" ");
 
       const matchesSearch =
         !query ||
-        normalizeText(searchableText).includes(query)
+        normalizeText(searchableText).includes(query);
 
-      return matchesCategory && matchesSearch
-    })
-  }, [products, activeCategory, searchTerm])
+      return matchesCategory && matchesSearch;
+    });
+  }, [products, activeCategory, searchTerm]);
 
-  /* ================= FILTER HELPERS ================= */
+  /*
+    =====================================================
+    FILTER HELPERS
+    =====================================================
+  */
 
   const clearFilters = () => {
-    setActiveCategory('All')
-    setSearchTerm('')
-  }
+    setActiveCategory("All");
+    setSearchTerm("");
+  };
 
   const handleCategoryShortcut = (category) => {
-    setActiveCategory(category)
+    setActiveCategory(category);
 
     requestAnimationFrame(() => {
       document
-        .getElementById('browse')
+        .getElementById("browse")
         ?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start',
-        })
-    })
-  }
+          behavior: "smooth",
+          block: "start",
+        });
+    });
+  };
 
-  /* ================= WISHLIST ================= */
+  /*
+    =====================================================
+    CHECK WISHLIST
+    =====================================================
+  */
 
-  const toggleWishlist = (event, productId) => {
-    event.preventDefault()
-    event.stopPropagation()
+  const isProductSaved = (productId) => {
+    if (!productId || !wishlistItems) {
+      return false;
+    }
 
-    setWishlist((previous) => {
-      const next = new Set(previous)
+    /*
+      If useWishlist exposes isWishlisted(productId),
+      use that first.
+    */
+    if (typeof isWishlisted === "function") {
+      try {
+        return Boolean(isWishlisted(productId));
+      } catch (error) {
+        console.warn(
+          "isWishlisted check failed:",
+          error
+        );
+      }
+    }
 
-      if (next.has(productId)) {
-        next.delete(productId)
-      } else {
-        next.add(productId)
+    /*
+      If wishlistItems is a Set
+    */
+    if (wishlistItems instanceof Set) {
+      return wishlistItems.has(productId);
+    }
+
+    /*
+      If wishlistItems is an Array
+    */
+    if (Array.isArray(wishlistItems)) {
+      return wishlistItems.some((item) => {
+        const itemProductId =
+          item?.product?._id ||
+          item?.product?.id ||
+          item?.product ||
+          item?._id ||
+          item?.id;
+
+        return (
+          String(itemProductId) === String(productId)
+        );
+      });
+    }
+
+    /*
+      If wishlistItems is an object
+    */
+    if (typeof wishlistItems === "object") {
+      if (wishlistItems[productId]) {
+        return true;
       }
 
-      return next
-    })
-  }
+      if (Array.isArray(wishlistItems.items)) {
+        return wishlistItems.items.some((item) => {
+          const itemProductId =
+            item?.product?._id ||
+            item?.product?.id ||
+            item?.product ||
+            item?._id ||
+            item?.id;
 
-  /* ================= PRODUCT CLICK ================= */
+          return (
+            String(itemProductId) === String(productId)
+          );
+        });
+      }
+
+      if (Array.isArray(wishlistItems.products)) {
+        return wishlistItems.products.some((item) => {
+          const itemProductId =
+            item?.product?._id ||
+            item?.product?.id ||
+            item?._id ||
+            item?.id ||
+            item;
+
+          return (
+            String(itemProductId) === String(productId)
+          );
+        });
+      }
+    }
+
+    return false;
+  };
+
+  /*
+    =====================================================
+    WISHLIST HANDLER
+    =====================================================
+  */
+
+  const handleWishlistClick = async (
+    event,
+    product
+  ) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const productId = product?._id;
+
+    if (!productId) {
+      console.error(
+        "Wishlist error: product ID is missing"
+      );
+      return;
+    }
+
+    const isSaved = isProductSaved(productId);
+
+    try {
+      if (isSaved) {
+        await handleRemoveFromWishlist(productId);
+      } else {
+        await handleAddToWishlist(productId);
+      }
+
+      /*
+        Refresh wishlist so UI immediately reflects
+        the latest wishlist state.
+      */
+      await handleGetWishlist();
+    } catch (error) {
+      console.error(
+        "Wishlist action failed:",
+        error
+      );
+    }
+  };
+
+  /*
+    =====================================================
+    PRODUCT CLICK
+    =====================================================
+  */
 
   const openProduct = (productId) => {
-    navigate(`/product/${productId}`)
-  }
+    navigate(`/product/${productId}`);
+  };
 
-  const handleProductKeyDown = (event, productId) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault()
-      openProduct(productId)
+  const handleProductKeyDown = (
+    event,
+    productId
+  ) => {
+    if (
+      event.key === "Enter" ||
+      event.key === " "
+    ) {
+      event.preventDefault();
+      openProduct(productId);
     }
-  }
+  };
+
+  /*
+    =====================================================
+    MOBILE SEARCH
+    =====================================================
+  */
+
+  const handleMobileSearchToggle = () => {
+    setSearchOpen((previous) => !previous);
+  };
+
+  const handleMobileSearchClear = () => {
+    setSearchTerm("");
+  };
 
   return (
     <main className="min-h-screen bg-[#F8F6F2] font-['Plus_Jakarta_Sans',sans-serif] text-[#211D1A]">
-
       <div className="mx-auto max-w-[1240px] px-4 py-5 sm:px-7 sm:py-7">
 
         {/* =====================================================
             HEADER
         ===================================================== */}
 
-        <header className="sticky top-0 z-30 -mx-4 border-b border-[#E1DBD4]/90 bg-[#F8F6F2]/95 px-4 pb-4 backdrop-blur-md sm:-mx-7 sm:px-7">
+        <header
+          className="
+            fixed
+            left-0
+            right-0
+            top-0
+            z-30
+            border-b
+            border-[#E1DBD4]/90
+            bg-[#F8F6F2]/95
+            px-4
+            pb-4
+            pt-4
+            backdrop-blur-md
+            sm:px-7
+          "
+        >
+          <div
+            className="
+              mx-auto
+              grid
+              w-full
+              max-w-[1600px]
+              grid-cols-3
+              items-center
+            "
+          >
+            {/* =====================================================
+                LEFT
+            ===================================================== */}
 
-          <div className="flex items-center justify-between">
-
-            {/* LEFT */}
-
-            <div className="flex items-center gap-3">
-
+            <div className="flex items-center gap-3 justify-self-start">
               <button
                 type="button"
                 aria-label="Open menu"
                 className="
-                  flex h-9 w-9
-                  items-center justify-center
+                  flex
+                  h-9
+                  w-9
+                  items-center
+                  justify-center
                   rounded-[5px]
-                  border border-[#D8D1C8]
+                  border
+                  border-[#D8D1C8]
                   bg-white
-                  transition-all duration-200
+                  transition-all
+                  duration-200
                   hover:border-[#211D1A]
                   hover:bg-[#EEEAE5]
                 "
@@ -288,73 +507,241 @@ const Home = () => {
                 <FiMenu className="h-4 w-4" />
               </button>
 
-              <span className="hidden text-[8px] font-medium uppercase tracking-[0.18em] text-[#8A837C] sm:block">
+              <span
+                className="
+                  hidden
+                  text-[8px]
+                  font-medium
+                  uppercase
+                  tracking-[0.18em]
+                  text-[#8A837C]
+                  sm:block
+                "
+              >
                 Modern essentials
               </span>
-
             </div>
 
-            {/* LOGO */}
+            {/* =====================================================
+                CENTER LOGO
+            ===================================================== */}
 
-            <Link
-              to="/"
+            <div className="flex items-center justify-center">
+              <Link
+                to="/"
+                aria-label="SNITCH home"
+                className="
+                  text-[19px]
+                  font-bold
+                  tracking-[0.12em]
+                  text-[#211D1A]
+                  transition-opacity
+                  hover:opacity-70
+                "
+              >
+                SNITCH
+              </Link>
+            </div>
+
+            {/* =====================================================
+                DESKTOP NAV
+            ===================================================== */}
+
+            <nav
               className="
-                absolute left-1/2
-                -translate-x-1/2
-                text-[19px]
-                font-bold
+                hidden
+                items-center
+                justify-self-end
+                gap-6
+                text-[9px]
+                font-semibold
+                uppercase
                 tracking-[0.12em]
-                text-[#211D1A]
-                transition-opacity
-                hover:opacity-70
+                text-[#625B55]
+                sm:flex
               "
             >
-              SNITCH
-            </Link>
-
-            {/* DESKTOP NAV */}
-
-            <nav className="hidden items-center gap-6 text-[9px] font-semibold uppercase tracking-[0.12em] text-[#625B55] sm:flex">
-
-              <a
-                href="#browse"
-                className="transition-colors hover:text-[#211D1A]"
-              >
-                Shop
-              </a>
-
-              <a
-                href="#about"
-                className="transition-colors hover:text-[#211D1A]"
-              >
-                About
-              </a>
+              {/* SHOP */}
 
               <button
                 type="button"
-                onClick={() => handleCategoryShortcut('All')}
-                className="transition-colors hover:text-[#211D1A]"
+                onClick={() => {
+                  document
+                    .getElementById("browse")
+                    ?.scrollIntoView({
+                      behavior: "smooth",
+                      block: "start",
+                    });
+                }}
+                className="
+                  transition-colors
+                  hover:text-[#211D1A]
+                "
               >
-                New
+                SHOP
               </button>
+
+              {/* SIGN IN */}
 
               <Link
                 to="/login"
-                className="transition-colors hover:text-[#211D1A]"
+                className="
+                  transition-colors
+                  hover:text-[#211D1A]
+                "
               >
                 Sign in
               </Link>
 
+              {/* =================================================
+                  SEARCH
+              ================================================= */}
+
+              {searchOpen ? (
+                <div
+                  className="
+                    flex
+                    shrink-0
+                    items-center
+                    gap-2
+                    rounded-[5px]
+                    border
+                    border-[#211D1A]
+                    bg-white
+                    px-3
+                    py-2
+                  "
+                >
+                  <FiSearch
+                    className="
+                      h-3.5
+                      w-3.5
+                      shrink-0
+                      text-[#625B55]
+                    "
+                  />
+
+                  <input
+                    autoFocus
+                    type="text"
+                    value={searchTerm}
+                    onChange={(event) =>
+                      setSearchTerm(event.target.value)
+                    }
+                    placeholder="Search products"
+                    className="
+                      w-28
+                      bg-transparent
+                      text-[9px]
+                      font-semibold
+                      text-[#211D1A]
+                      outline-none
+                      placeholder:text-[#A39C93]
+                      sm:w-44
+                    "
+                  />
+
+                  <button
+                    type="button"
+                    aria-label="Close search"
+                    onClick={() => {
+                      setSearchOpen(false);
+                      setSearchTerm("");
+                    }}
+                    className="
+                      flex
+                      shrink-0
+                      items-center
+                      justify-center
+                    "
+                  >
+                    <FiX
+                      className="
+                        h-3.5
+                        w-3.5
+                        text-[#625B55]
+                        transition-colors
+                        hover:text-[#211D1A]
+                      "
+                    />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  aria-label="Search"
+                  onClick={() => setSearchOpen(true)}
+                  className="
+                    flex
+                    h-8
+                    w-8
+                    shrink-0
+                    items-center
+                    justify-center
+                    rounded-[5px]
+                    border
+                    border-[#D8D1C8]
+                    bg-white
+                    text-[#211D1A]
+                    transition-all
+                    hover:border-[#211D1A]
+                    hover:bg-[#211D1A]
+                    hover:text-white
+                  "
+                >
+                  <FiSearch className="h-3.5 w-3.5" />
+                </button>
+              )}
+
+              {/* =================================================
+                  WISHLIST
+              ================================================= */}
+
+              <button
+                type="button"
+                aria-label="Wishlist"
+                onClick={() => navigate("/wishlist")}
+                className="
+                  flex
+                  h-8
+                  w-8
+                  shrink-0
+                  items-center
+                  justify-center
+                  rounded-[5px]
+                  border
+                  border-[#D8D1C8]
+                  bg-white
+                  text-[#211D1A]
+                  transition-all
+                  hover:border-[#211D1A]
+                  hover:bg-[#211D1A]
+                  hover:text-white
+                "
+              >
+                <FiHeart className="h-3.5 w-3.5" />
+              </button>
+
+              {/* =================================================
+                  CART
+              ================================================= */}
+
               <button
                 type="button"
                 aria-label="Shopping bag"
-                onClick={() => navigate('/cart')}
+                onClick={() => navigate("/cart")}
                 className="
-                  flex h-8 w-8
-                  items-center justify-center
+                  flex
+                  h-8
+                  w-8
+                  shrink-0
+                  items-center
+                  justify-center
                   rounded-[5px]
-                  border border-[#D8D1C8]
+                  border
+                  border-[#D8D1C8]
                   bg-white
+                  text-[#211D1A]
                   transition-all
                   hover:border-[#211D1A]
                   hover:bg-[#211D1A]
@@ -363,22 +750,71 @@ const Home = () => {
               >
                 <FiShoppingBag className="h-3.5 w-3.5" />
               </button>
-
             </nav>
 
-            {/* MOBILE ACTIONS */}
+            {/* =====================================================
+                MOBILE ACTIONS
+            ===================================================== */}
 
-            <div className="ml-auto flex items-center gap-2 sm:hidden">
+            <div
+              className="
+                flex
+                items-center
+                gap-2
+                justify-self-end
+                sm:hidden
+              "
+            >
+              {/* SEARCH */}
+
+              <button
+                type="button"
+                aria-label={
+                  searchOpen
+                    ? "Close search"
+                    : "Search"
+                }
+                aria-expanded={searchOpen}
+                onClick={handleMobileSearchToggle}
+                className="
+                  flex
+                  h-9
+                  w-9
+                  items-center
+                  justify-center
+                  rounded-[5px]
+                  border
+                  border-[#D8D1C8]
+                  bg-white
+                  text-[#211D1A]
+                  transition-all
+                  hover:border-[#211D1A]
+                  hover:bg-[#EEEAE5]
+                "
+              >
+                {searchOpen ? (
+                  <FiX className="h-4 w-4" />
+                ) : (
+                  <FiSearch className="h-4 w-4" />
+                )}
+              </button>
+
+              {/* SIGN IN */}
 
               <Link
                 to="/login"
                 aria-label="Sign in"
                 className="
-                  flex h-9 w-9
-                  items-center justify-center
+                  flex
+                  h-9
+                  w-9
+                  items-center
+                  justify-center
                   rounded-[5px]
-                  border border-[#D8D1C8]
+                  border
+                  border-[#D8D1C8]
                   bg-white
+                  text-[#211D1A]
                   transition-all
                   hover:border-[#211D1A]
                   hover:bg-[#EEEAE5]
@@ -387,16 +823,48 @@ const Home = () => {
                 <FiUser className="h-4 w-4" />
               </Link>
 
+              {/* WISHLIST */}
+
+              <button
+                type="button"
+                aria-label="Wishlist"
+                onClick={() => navigate("/wishlist")}
+                className="
+                  flex
+                  h-9
+                  w-9
+                  items-center
+                  justify-center
+                  rounded-[5px]
+                  border
+                  border-[#D8D1C8]
+                  bg-white
+                  text-[#211D1A]
+                  transition-all
+                  hover:border-[#211D1A]
+                  hover:bg-[#EEEAE5]
+                "
+              >
+                <FiHeart className="h-4 w-4" />
+              </button>
+
+              {/* CART */}
+
               <button
                 type="button"
                 aria-label="Shopping bag"
-                onClick={() => navigate('/cart')}
+                onClick={() => navigate("/cart")}
                 className="
-                  flex h-9 w-9
-                  items-center justify-center
+                  flex
+                  h-9
+                  w-9
+                  items-center
+                  justify-center
                   rounded-[5px]
-                  border border-[#D8D1C8]
+                  border
+                  border-[#D8D1C8]
                   bg-white
+                  text-[#211D1A]
                   transition-all
                   hover:border-[#211D1A]
                   hover:bg-[#EEEAE5]
@@ -404,32 +872,159 @@ const Home = () => {
               >
                 <FiShoppingBag className="h-4 w-4" />
               </button>
-
             </div>
-
           </div>
-
         </header>
 
+        {/* =====================================================
+            MOBILE SEARCH BAR
+        ===================================================== */}
+
+        {searchOpen && (
+          <div
+            className="
+              fixed
+              left-0
+              right-0
+              top-[73px]
+              z-20
+              border-b
+              border-[#E1DBD4]
+              bg-[#F8F6F2]/95
+              px-4
+              py-3
+              backdrop-blur-md
+              sm:hidden
+            "
+          >
+            <div
+              className="
+                flex
+                items-center
+                gap-2
+                rounded-[5px]
+                border
+                border-[#D8D1C8]
+                bg-white
+                px-3
+                py-2
+              "
+            >
+              <FiSearch
+                className="
+                  h-3.5
+                  w-3.5
+                  shrink-0
+                  text-[#625B55]
+                "
+              />
+
+              <input
+                autoFocus
+                type="text"
+                value={searchTerm}
+                onChange={(event) =>
+                  setSearchTerm(event.target.value)
+                }
+                placeholder="Search products"
+                className="
+                  min-w-0
+                  flex-1
+                  bg-transparent
+                  text-[9px]
+                  font-semibold
+                  text-[#211D1A]
+                  outline-none
+                  placeholder:text-[#A39C93]
+                "
+              />
+
+              {searchTerm && (
+                <button
+                  type="button"
+                  aria-label="Clear search"
+                  onClick={handleMobileSearchClear}
+                  className="
+                    flex
+                    shrink-0
+                    items-center
+                    justify-center
+                  "
+                >
+                  <FiX
+                    className="
+                      h-3.5
+                      w-3.5
+                      text-[#625B55]
+                      transition-colors
+                      hover:text-[#211D1A]
+                    "
+                  />
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* =====================================================
+            HEADER SPACER
+        ===================================================== */}
+
+        <div
+          className={`
+            ${
+              searchOpen
+                ? "h-[125px]"
+                : "h-[73px]"
+            }
+            sm:h-[77px]
+          `}
+        />
 
         {/* =====================================================
             SHOP BAR
         ===================================================== */}
 
-        <div className="flex items-center gap-2 border-b border-[#E7E2DC] py-3">
-
-          <div className="flex flex-1 gap-2 overflow-x-auto [scrollbar-width:none]">
+        <div
+          className="
+            flex
+            items-center
+            gap-2
+            border-b
+            border-[#E7E2DC]
+            py-3
+          "
+        >
+          <div
+            className="
+              flex
+              flex-1
+              gap-2
+              overflow-x-auto
+              [scrollbar-width:none]
+              [&::-webkit-scrollbar]:hidden
+            "
+          >
+            {/* =================================================
+                CLOTHING
+            ================================================= */}
 
             <button
               type="button"
-              onClick={() => handleCategoryShortcut('All')}
+              onClick={() =>
+                handleCategoryShortcut("All")
+              }
               className="
-                flex shrink-0
-                items-center gap-2
+                flex
+                shrink-0
+                items-center
+                gap-2
                 rounded-[5px]
-                border border-[#D8D1C8]
+                border
+                border-[#D8D1C8]
                 bg-white
-                px-3.5 py-2
+                px-3.5
+                py-2
                 text-[9px]
                 font-semibold
                 text-[#625B55]
@@ -443,15 +1038,23 @@ const Home = () => {
               <FiChevronDown className="h-3 w-3" />
             </button>
 
+            {/* =================================================
+                NEW ARRIVALS
+            ================================================= */}
+
             <button
               type="button"
-              onClick={() => handleCategoryShortcut('All')}
+              onClick={() =>
+                handleCategoryShortcut("All")
+              }
               className="
                 shrink-0
                 rounded-[5px]
-                border border-[#D8D1C8]
+                border
+                border-[#D8D1C8]
                 bg-white
-                px-3.5 py-2
+                px-3.5
+                py-2
                 text-[9px]
                 font-semibold
                 text-[#625B55]
@@ -463,15 +1066,23 @@ const Home = () => {
               New arrivals
             </button>
 
+            {/* =================================================
+                SALE
+            ================================================= */}
+
             <button
               type="button"
-              onClick={() => handleCategoryShortcut('All')}
+              onClick={() =>
+                handleCategoryShortcut("All")
+              }
               className="
                 shrink-0
                 rounded-[5px]
-                border border-[#D8D1C8]
+                border
+                border-[#D8D1C8]
                 bg-white
-                px-3.5 py-2
+                px-3.5
+                py-2
                 text-[9px]
                 font-semibold
                 text-[#625B55]
@@ -482,87 +1093,8 @@ const Home = () => {
             >
               Sale
             </button>
-
           </div>
-
-
-          {/* SEARCH */}
-
-          {searchOpen ? (
-
-            <div
-              className="
-                flex shrink-0
-                items-center gap-2
-                rounded-[5px]
-                border border-[#211D1A]
-                bg-white
-                px-3
-                py-2
-              "
-            >
-
-              <FiSearch className="h-3.5 w-3.5 text-[#625B55]" />
-
-              <input
-                autoFocus
-                type="text"
-                value={searchTerm}
-                onChange={(event) =>
-                  setSearchTerm(event.target.value)
-                }
-                placeholder="Search products"
-                className="
-                  w-28
-                  bg-transparent
-                  text-[9px]
-                  font-semibold
-                  text-[#211D1A]
-                  outline-none
-                  placeholder:text-[#A39C93]
-                  sm:w-44
-                "
-              />
-
-              <button
-                type="button"
-                aria-label="Close search"
-                onClick={() => {
-                  setSearchOpen(false)
-                  setSearchTerm('')
-                }}
-              >
-                <FiX className="h-3.5 w-3.5 text-[#625B55]" />
-              </button>
-
-            </div>
-
-          ) : (
-
-            <button
-              type="button"
-              aria-label="Search"
-              onClick={() => setSearchOpen(true)}
-              className="
-                flex h-8 w-8
-                shrink-0
-                items-center justify-center
-                rounded-[5px]
-                border border-[#D8D1C8]
-                bg-white
-                transition-all
-                hover:border-[#211D1A]
-                hover:bg-[#211D1A]
-                hover:text-white
-              "
-            >
-              <FiSearch className="h-3.5 w-3.5" />
-            </button>
-
-          )}
-
         </div>
-
 
         {/* =====================================================
             HERO
@@ -579,7 +1111,6 @@ const Home = () => {
             sm:min-h-[470px]
           "
         >
-
           {heroImage && (
             <img
               src={heroImage}
@@ -601,17 +1132,13 @@ const Home = () => {
           <div className="absolute inset-0 -z-10 bg-gradient-to-r from-black/60 via-black/20 to-transparent" />
 
           <div className="flex min-h-[370px] flex-col justify-between p-6 text-white sm:min-h-[470px] sm:p-10">
-
             <div>
-
               <div className="mb-5 flex items-center gap-2">
-
                 <span className="h-px w-7 bg-white/60" />
 
                 <p className="text-[8px] font-semibold uppercase tracking-[0.25em] text-white/70">
                   Snitch studio / 01
                 </p>
-
               </div>
 
               <h1
@@ -634,12 +1161,9 @@ const Home = () => {
                 modern silhouettes, effortless comfort and personal
                 style.
               </p>
-
             </div>
 
-
             <div className="flex items-end justify-between">
-
               <a
                 href="#browse"
                 className="
@@ -676,19 +1200,14 @@ const Home = () => {
                 >
                   <FiArrowUpRight className="h-3.5 w-3.5" />
                 </span>
-
               </a>
 
               <span className="hidden text-[8px] font-semibold uppercase tracking-[0.18em] text-white/60 sm:block">
                 Top collection
               </span>
-
             </div>
-
           </div>
-
         </section>
-
 
         {/* =====================================================
             INTRO
@@ -698,7 +1217,6 @@ const Home = () => {
           id="about"
           className="scroll-mt-20 py-14 text-center sm:py-16"
         >
-
           <p className="mb-3 text-[8px] font-bold uppercase tracking-[0.25em] text-[#8A837C]">
             The latest edit
           </p>
@@ -712,8 +1230,7 @@ const Home = () => {
             "
           >
             Fresh Fashion at
-            <br className="sm:hidden" />
-            {' '}Modern Vibes
+            <br className="sm:hidden" /> Modern Vibes
           </h2>
 
           <p className="mx-auto mt-4 max-w-lg text-[10px] leading-5 text-[#625B55] sm:text-[11px]">
@@ -721,16 +1238,13 @@ const Home = () => {
             styles, ensuring you are always on point. Discover pieces
             that fit naturally into your wardrobe.
           </p>
-
         </section>
-
 
         {/* =====================================================
             EDITORIAL
         ===================================================== */}
 
         <section className="grid gap-3 sm:grid-cols-[1.15fr_0.85fr]">
-
           <article
             className="
               overflow-hidden
@@ -740,7 +1254,6 @@ const Home = () => {
               p-2
             "
           >
-
             <div
               className="
                 h-64
@@ -750,7 +1263,6 @@ const Home = () => {
                 sm:h-[330px]
               "
             >
-
               {featureImage ? (
                 <img
                   src={featureImage}
@@ -768,11 +1280,9 @@ const Home = () => {
                   <FiPackage className="h-10 w-10 text-[#8A837C]" />
                 </div>
               )}
-
             </div>
 
             <div className="px-2 pb-3 pt-5">
-
               <p className="mb-2 text-[8px] font-bold uppercase tracking-[0.2em] text-[#8A837C]">
                 Editorial / 01
               </p>
@@ -784,11 +1294,8 @@ const Home = () => {
               <p className="mt-1.5 text-[9px] text-[#625B55]">
                 — Imagining new fashion trends
               </p>
-
             </div>
-
           </article>
-
 
           <article
             className="
@@ -797,15 +1304,14 @@ const Home = () => {
               flex-col
               overflow-hidden
               rounded-[7px]
-              border border-[#E1DBD4]
+              border
+              border-[#E1DBD4]
               bg-[#E8E9E5]
               p-6
               sm:min-h-0
             "
           >
-
             <div>
-
               <p className="mb-3 text-[8px] font-bold uppercase tracking-[0.2em] text-[#8A837C]">
                 Coming soon
               </p>
@@ -826,7 +1332,6 @@ const Home = () => {
               <p className="mt-4 max-w-[240px] text-[9px] leading-4 text-[#625B55]">
                 — Bringing you a new era of simple clothes.
               </p>
-
             </div>
 
             <div
@@ -842,7 +1347,6 @@ const Home = () => {
                 bg-[#D7D8D4]
               "
             >
-
               {secondaryImage ? (
                 <img
                   src={secondaryImage}
@@ -854,13 +1358,9 @@ const Home = () => {
                   <FiPackage className="h-7 w-7 text-[#8A837C]" />
                 </div>
               )}
-
             </div>
-
           </article>
-
         </section>
-
 
         {/* =====================================================
             PRODUCT BROWSE
@@ -870,11 +1370,8 @@ const Home = () => {
           id="browse"
           className="scroll-mt-20 pt-16"
         >
-
           <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
-
             <div>
-
               <p className="mb-2 text-[8px] font-bold uppercase tracking-[0.24em] text-[#8A837C]">
                 Curated for you
               </p>
@@ -889,7 +1386,6 @@ const Home = () => {
               >
                 Browse All You Need.
               </h2>
-
             </div>
 
             <button
@@ -917,24 +1413,23 @@ const Home = () => {
 
               <FiChevronRight className="h-3 w-3" />
             </button>
-
           </div>
-
 
           {/* CATEGORY FILTER */}
 
           <div className="mt-6 flex gap-2 overflow-x-auto pb-2 [scrollbar-width:none]">
-
             {CATEGORIES.map((category) => {
-
-              const isActive = category === activeCategory
+              const isActive =
+                category === activeCategory;
 
               return (
                 <button
                   type="button"
                   key={category}
                   aria-pressed={isActive}
-                  onClick={() => setActiveCategory(category)}
+                  onClick={() =>
+                    setActiveCategory(category)
+                  }
                   className={`
                     shrink-0
                     rounded-[5px]
@@ -947,33 +1442,31 @@ const Home = () => {
                     transition-all
                     ${
                       isActive
-                        ? 'border-[#211D1A] bg-[#211D1A] text-white'
-                        : 'border-[#D8D1C8] bg-white text-[#625B55] hover:border-[#211D1A] hover:text-[#211D1A]'
+                        ? "border-[#211D1A] bg-[#211D1A] text-white"
+                        : "border-[#D8D1C8] bg-white text-[#625B55] hover:border-[#211D1A] hover:text-[#211D1A]"
                     }
                   `}
                 >
                   {category}
                 </button>
-              )
+              );
             })}
-
           </div>
-
 
           {/* RESULTS INFO */}
 
           {!isLoading && !loadError && (
             <div className="mt-4 flex items-center justify-between">
-
               <p className="text-[8px] font-semibold uppercase tracking-[0.12em] text-[#8A837C]">
-                {visibleProducts.length}{' '}
+                {visibleProducts.length}{" "}
                 {visibleProducts.length === 1
-                  ? 'piece'
-                  : 'pieces'}{' '}
+                  ? "piece"
+                  : "pieces"}{" "}
                 found
               </p>
 
-              {(activeCategory !== 'All' || searchTerm) && (
+              {(activeCategory !== "All" ||
+                searchTerm) && (
                 <button
                   type="button"
                   onClick={clearFilters}
@@ -989,12 +1482,9 @@ const Home = () => {
                   Clear
                 </button>
               )}
-
             </div>
           )}
-
         </section>
-
 
         {/* =====================================================
             LOADING
@@ -1002,14 +1492,13 @@ const Home = () => {
 
         {isLoading && (
           <section className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-
-            {Array.from({ length: 6 }).map((_, index) => (
-              <ProductCardSkeleton key={index} />
-            ))}
-
+            {Array.from({ length: 6 }).map(
+              (_, index) => (
+                <ProductCardSkeleton key={index} />
+              )
+            )}
           </section>
         )}
-
 
         {/* =====================================================
             ERROR
@@ -1032,7 +1521,6 @@ const Home = () => {
               text-center
             "
           >
-
             <div
               className="
                 mb-5
@@ -1051,13 +1539,15 @@ const Home = () => {
             </h2>
 
             <p className="mt-2 max-w-sm text-[10px] leading-5 text-[#625B55]">
-              We couldn't load the collection right now. Please try
-              again.
+              We couldn't load the collection right now.
+              Please try again.
             </p>
 
             <button
               type="button"
-              onClick={() => window.location.reload()}
+              onClick={() =>
+                window.location.reload()
+              }
               className="
                 mt-6
                 rounded-[5px]
@@ -1075,10 +1565,8 @@ const Home = () => {
             >
               Try again
             </button>
-
           </section>
         )}
-
 
         {/* =====================================================
             EMPTY STATE
@@ -1087,7 +1575,6 @@ const Home = () => {
         {!isLoading &&
           !loadError &&
           visibleProducts.length === 0 && (
-
             <section
               className="
                 mt-6
@@ -1104,12 +1591,12 @@ const Home = () => {
                 text-center
               "
             >
-
               <div
                 className="
                   mb-5
                   flex h-12 w-12
-                  items-center justify-center
+                  items-center
+                  justify-center
                   rounded-[5px]
                   border border-[#D8D1C8]
                   bg-white
@@ -1128,14 +1615,14 @@ const Home = () => {
                 "
               >
                 {products.length === 0
-                  ? 'No products available yet'
-                  : 'Nothing matches those filters'}
+                  ? "No products available yet"
+                  : "Nothing matches those filters"}
               </h2>
 
               <p className="max-w-md text-[10px] leading-5 text-[#625B55]">
                 {products.length === 0
-                  ? 'Fresh drops will appear here once sellers publish their items.'
-                  : 'Try another search or category to explore the collection.'}
+                  ? "Fresh drops will appear here once sellers publish their items."
+                  : "Try another search or category to explore the collection."}
               </p>
 
               {products.length > 0 && (
@@ -1160,10 +1647,8 @@ const Home = () => {
                   Clear filters
                 </button>
               )}
-
             </section>
           )}
-
 
         {/* =====================================================
             PRODUCT GRID
@@ -1172,29 +1657,36 @@ const Home = () => {
         {!isLoading &&
           !loadError &&
           visibleProducts.length > 0 && (
-
             <section className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 
               {visibleProducts.map((product) => {
+                const firstImage =
+                  getProductImage(product);
 
-                const firstImage = getProductImage(product)
+                const stock =
+                  getProductStock(product);
 
-                const stock = getProductStock(product)
+                const isSaved =
+                  isProductSaved(product._id);
 
-                const isSaved = wishlist.has(product._id)
-
-                const isOutOfStock = stock <= 0
+                const isOutOfStock =
+                  stock <= 0;
 
                 const hasVariants =
                   Array.isArray(product.variants) &&
-                  product.variants.length > 0
+                  product.variants.length > 0;
 
                 return (
                   <article
                     key={product._id}
-                    onClick={() => openProduct(product._id)}
+                    onClick={() =>
+                      openProduct(product._id)
+                    }
                     onKeyDown={(event) =>
-                      handleProductKeyDown(event, product._id)
+                      handleProductKeyDown(
+                        event,
+                        product._id
+                      )
                     }
                     role="button"
                     tabIndex={0}
@@ -1216,7 +1708,6 @@ const Home = () => {
                       focus:ring-[#211D1A]
                     "
                   >
-
                     {/* PRODUCT IMAGE */}
 
                     <div
@@ -1227,11 +1718,13 @@ const Home = () => {
                         bg-[#E9E4DE]
                       "
                     >
-
                       {firstImage ? (
                         <img
                           src={firstImage}
-                          alt={product.title || 'Product'}
+                          alt={
+                            product.title ||
+                            "Product"
+                          }
                           loading="lazy"
                           className="
                             h-full
@@ -1245,7 +1738,6 @@ const Home = () => {
                       ) : (
                         <ProductImageFallback />
                       )}
-
 
                       {/* IMAGE GRADIENT */}
 
@@ -1263,7 +1755,6 @@ const Home = () => {
                           group-hover:opacity-100
                         "
                       />
-
 
                       {/* NEW LABEL */}
 
@@ -1286,11 +1777,9 @@ const Home = () => {
                         New
                       </span>
 
-
                       {/* STOCK LABEL */}
 
                       {isOutOfStock ? (
-
                         <span
                           className="
                             absolute
@@ -1307,9 +1796,7 @@ const Home = () => {
                         >
                           Sold out
                         </span>
-
                       ) : stock <= 5 ? (
-
                         <span
                           className="
                             absolute
@@ -1328,45 +1815,59 @@ const Home = () => {
                         >
                           Only {stock} left
                         </span>
-
                       ) : null}
 
-
-                      {/* WISHLIST */}
+                      {/* =================================================
+                          WISHLIST BUTTON
+                      ================================================= */}
 
                       <button
                         type="button"
                         aria-label={
                           isSaved
                             ? `Remove ${product.title} from wishlist`
-                            : `Save ${product.title}`
+                            : `Add ${product.title} to wishlist`
                         }
+                        aria-pressed={isSaved}
                         onClick={(event) =>
-                          toggleWishlist(event, product._id)
+                          handleWishlistClick(
+                            event,
+                            product
+                          )
                         }
-                        className={`
+                        className="
                           absolute
-                          right-3 top-3
-                          flex h-8 w-8
-                          items-center justify-center
+                          right-3
+                          top-3
+                          flex
+                          h-8
+                          w-8
+                          shrink-0
+                          items-center
+                          justify-center
                           rounded-[5px]
                           border
+                          border-[#D8D1C8]
+                          bg-white
+                          text-[#211D1A]
                           transition-all
-                          ${
-                            isSaved
-                              ? 'border-[#211D1A] bg-[#211D1A] text-white opacity-100'
-                              : 'border-[#D8D1C8] bg-white/90 text-[#211D1A] opacity-100 sm:opacity-0 sm:group-hover:opacity-100'
-                          }
-                        `}
+                          duration-200
+                        "
                       >
                         <FiHeart
                           className={`
-                            h-3.5 w-3.5
-                            ${isSaved ? 'fill-current' : ''}
+                            h-3.5
+                            w-3.5
+                            transition-all
+                            duration-200
+                            ${
+                              isSaved
+                                ? "fill-current"
+                                : ""
+                            }
                           `}
                         />
                       </button>
-
 
                       {/* IMAGE COUNT */}
 
@@ -1374,7 +1875,8 @@ const Home = () => {
                         <span
                           className="
                             absolute
-                            bottom-3 right-3
+                            bottom-3
+                            right-3
                             rounded-[4px]
                             bg-black/55
                             px-2 py-1
@@ -1387,18 +1889,13 @@ const Home = () => {
                           {product.images.length} photos
                         </span>
                       )}
-
                     </div>
-
 
                     {/* PRODUCT INFO */}
 
                     <div className="space-y-3 p-4">
-
                       <div>
-
                         <div className="mb-1.5 flex items-start justify-between gap-3">
-
                           <h3
                             className="
                               line-clamp-1
@@ -1409,11 +1906,10 @@ const Home = () => {
                               text-[#211D1A]
                             "
                           >
-                            {product.title || 'Untitled product'}
+                            {product.title ||
+                              "Untitled product"}
                           </h3>
-
                         </div>
-
 
                         <p
                           className="
@@ -1425,16 +1921,13 @@ const Home = () => {
                           "
                         >
                           {product.description ||
-                            'No description provided for this listing.'}
+                            "No description provided for this listing."}
                         </p>
-
                       </div>
-
 
                       {/* PRODUCT META */}
 
                       <div className="flex items-center gap-2">
-
                         {product.category && (
                           <span
                             className="
@@ -1468,9 +1961,7 @@ const Home = () => {
                             {product.variants.length} variants
                           </span>
                         )}
-
                       </div>
-
 
                       {/* BOTTOM */}
 
@@ -1484,11 +1975,11 @@ const Home = () => {
                           pt-3
                         "
                       >
-
                         <div>
-
                           <p className="text-[13px] font-bold text-[#211D1A]">
-                            {formatPrice(product.price)}
+                            {formatPrice(
+                              product.price
+                            )}
                           </p>
 
                           {!isOutOfStock && (
@@ -1496,49 +1987,48 @@ const Home = () => {
                               In stock
                             </p>
                           )}
-
                         </div>
-
 
                         <button
                           type="button"
                           disabled={isOutOfStock}
-                          aria-label={`Add ${product.title} to bag`}
+                          aria-label={`Shop ${product.title}`}
                           onClick={(event) => {
-                            event.preventDefault()
-                            event.stopPropagation()
+                            event.preventDefault();
+                            event.stopPropagation();
 
                             if (!isOutOfStock) {
-                              openProduct(product._id)
+                              openProduct(product._id);
                             }
                           }}
                           className={`
-                            flex h-9 w-9
-                            items-center justify-center
+                            flex h-9 items-center justify-center
                             rounded-[5px]
                             border
+                            px-4
+                            text-[8px]
+                            font-bold
+                            uppercase
+                            tracking-[0.12em]
                             transition-all
                             ${
                               isOutOfStock
-                                ? 'cursor-not-allowed border-[#E2DBD1] bg-[#F2EFEA] text-[#A39C93]'
-                                : 'border-[#D8D1C8] text-[#211D1A] hover:border-[#211D1A] hover:bg-[#211D1A] hover:text-white'
+                                ? "cursor-not-allowed border-[#E2DBD1] bg-[#F2EFEA] text-[#A39C93]"
+                                : "border-[#211D1A] bg-[#211D1A] text-white hover:bg-[#3A342F]"
                             }
                           `}
                         >
-                          <FiShoppingBag className="h-3.5 w-3.5" />
+                          {isOutOfStock
+                            ? "SOLD OUT"
+                            : "SHOP NOW"}
                         </button>
-
                       </div>
-
                     </div>
-
                   </article>
-                )
+                );
               })}
-
             </section>
           )}
-
 
         {/* =====================================================
             FOOTER
@@ -1558,7 +2048,6 @@ const Home = () => {
             sm:flex-row
           "
         >
-
           <p className="text-[8px] font-semibold uppercase tracking-[0.15em] text-[#8A837C]">
             SNITCH
           </p>
@@ -1570,12 +2059,10 @@ const Home = () => {
           <p className="text-[8px] text-[#8A837C]">
             © {new Date().getFullYear()}
           </p>
-
         </footer>
-
       </div>
     </main>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;

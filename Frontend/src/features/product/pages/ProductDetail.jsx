@@ -22,7 +22,7 @@ import {
 
 import { useProduct } from "../hooks/useProduct";
 import { useCart } from "../../cart/hooks/useCart";
-
+import { useWishlist } from "../../wishlist/hooks/useWishlist";
 
 // =========================================================
 // FORMAT PRICE
@@ -118,6 +118,42 @@ const ProductDetail = () => {
     handleAddToCart,
   } = useCart();
 
+  const {
+  wishlistItems,
+  handleGetWishlist,
+  handleAddToWishlist,
+  handleRemoveFromWishlist,
+  isWishlisted,
+} = useWishlist();
+
+const wishlisted = isWishlisted(productId);
+
+// =======================================================
+// WISHLIST
+// =======================================================
+
+const handleWishlist = async () => {
+  if (!productId) {
+    return;
+  }
+
+  try {
+    if (wishlisted) {
+      await handleRemoveFromWishlist(productId);
+    } else {
+      await handleAddToWishlist(productId);
+    }
+  } catch (error) {
+    console.error(
+      "WISHLIST ERROR:",
+      error
+    );
+  }
+};
+
+useEffect(() => {
+  handleGetWishlist();
+}, [productId]);
 
   // =======================================================
   // STATE
@@ -1134,13 +1170,22 @@ const ProductDetail = () => {
               </div>
 
 
-              <button
-                type="button"
-                aria-label="Add to wishlist"
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[4px] border border-[#D8D1C8] bg-white transition hover:border-[#211D1A] hover:bg-[#EEEAE5]"
-              >
-                <FiHeart className="h-3.5 w-3.5" />
-              </button>
+             <button
+  type="button"
+  onClick={handleWishlist}
+  aria-label={
+    wishlisted
+      ? "Remove from wishlist"
+      : "Add to wishlist"
+  }
+  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[4px] border border-[#D8D1C8] bg-white transition hover:border-[#211D1A] hover:bg-[#EEEAE5]"
+>
+  <FiHeart
+    className={`h-3.5 w-3.5 transition ${
+      wishlisted ? "fill-current" : ""
+    }`}
+  />
+</button>
 
             </div>
 

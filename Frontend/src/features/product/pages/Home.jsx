@@ -129,9 +129,6 @@ const Home = () => {
     isWishlisted,
   } = useWishlist();
 
-  /*
-    Load wishlist when Home page mounts.
-  */
   useEffect(() => {
     handleGetWishlist();
   }, []);
@@ -151,9 +148,9 @@ const Home = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
 
-  const [activeCategory, setActiveCategory] = useState("All");
+  const [activeCategory, setActiveCategory] =
+    useState("All");
 
-  const [searchOpen, setSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
   /*
@@ -172,7 +169,10 @@ const Home = () => {
 
         await handleGetAllProducts();
       } catch (error) {
-        console.error("Failed to load products:", error);
+        console.error(
+          "Failed to load products:",
+          error
+        );
 
         if (isMounted) {
           setLoadError(true);
@@ -229,7 +229,8 @@ const Home = () => {
 
       const matchesCategory =
         activeCategory === "All" ||
-        productCategory === normalizeText(activeCategory);
+        productCategory ===
+          normalizeText(activeCategory);
 
       const searchableText = [
         product?.title,
@@ -282,13 +283,11 @@ const Home = () => {
       return false;
     }
 
-    /*
-      If useWishlist exposes isWishlisted(productId),
-      use that first.
-    */
     if (typeof isWishlisted === "function") {
       try {
-        return Boolean(isWishlisted(productId));
+        return Boolean(
+          isWishlisted(productId)
+        );
       } catch (error) {
         console.warn(
           "isWishlisted check failed:",
@@ -297,16 +296,10 @@ const Home = () => {
       }
     }
 
-    /*
-      If wishlistItems is a Set
-    */
     if (wishlistItems instanceof Set) {
       return wishlistItems.has(productId);
     }
 
-    /*
-      If wishlistItems is an Array
-    */
     if (Array.isArray(wishlistItems)) {
       return wishlistItems.some((item) => {
         const itemProductId =
@@ -317,47 +310,59 @@ const Home = () => {
           item?.id;
 
         return (
-          String(itemProductId) === String(productId)
+          String(itemProductId) ===
+          String(productId)
         );
       });
     }
 
-    /*
-      If wishlistItems is an object
-    */
     if (typeof wishlistItems === "object") {
       if (wishlistItems[productId]) {
         return true;
       }
 
-      if (Array.isArray(wishlistItems.items)) {
-        return wishlistItems.items.some((item) => {
-          const itemProductId =
-            item?.product?._id ||
-            item?.product?.id ||
-            item?.product ||
-            item?._id ||
-            item?.id;
+      if (
+        Array.isArray(
+          wishlistItems.items
+        )
+      ) {
+        return wishlistItems.items.some(
+          (item) => {
+            const itemProductId =
+              item?.product?._id ||
+              item?.product?.id ||
+              item?.product ||
+              item?._id ||
+              item?.id;
 
-          return (
-            String(itemProductId) === String(productId)
-          );
-        });
+            return (
+              String(itemProductId) ===
+              String(productId)
+            );
+          }
+        );
       }
 
-      if (Array.isArray(wishlistItems.products)) {
-        return wishlistItems.products.some((item) => {
-          const itemProductId =
-            item?.product?._id ||
-            item?.product?.id ||
-            item?._id ||
-            item?.id ||
-            item;
+      if (
+        Array.isArray(
+          wishlistItems.products
+        )
+      ) {
+        return wishlistItems.products.some(
+          (item) => {
+            const itemProductId =
+              item?.product?._id ||
+              item?.product?.id ||
+              item?._id ||
+              item?.id ||
+              item;
 
-          return (
-            String(itemProductId) === String(productId)
-          );
-        });
+            return (
+              String(itemProductId) ===
+              String(productId)
+            );
+          }
+        );
       }
     }
 
@@ -386,19 +391,20 @@ const Home = () => {
       return;
     }
 
-    const isSaved = isProductSaved(productId);
+    const isSaved =
+      isProductSaved(productId);
 
     try {
       if (isSaved) {
-        await handleRemoveFromWishlist(productId);
+        await handleRemoveFromWishlist(
+          productId
+        );
       } else {
-        await handleAddToWishlist(productId);
+        await handleAddToWishlist(
+          productId
+        );
       }
 
-      /*
-        Refresh wishlist so UI immediately reflects
-        the latest wishlist state.
-      */
       await handleGetWishlist();
     } catch (error) {
       console.error(
@@ -429,20 +435,6 @@ const Home = () => {
       event.preventDefault();
       openProduct(productId);
     }
-  };
-
-  /*
-    =====================================================
-    MOBILE SEARCH
-    =====================================================
-  */
-
-  const handleMobileSearchToggle = () => {
-    setSearchOpen((previous) => !previous);
-  };
-
-  const handleMobileSearchClear = () => {
-    setSearchTerm("");
   };
 
   return (
@@ -480,9 +472,7 @@ const Home = () => {
               items-center
             "
           >
-            {/* =====================================================
-                LEFT
-            ===================================================== */}
+            {/* LEFT */}
 
             <div className="flex items-center gap-3 justify-self-start">
               <button
@@ -522,9 +512,7 @@ const Home = () => {
               </span>
             </div>
 
-            {/* =====================================================
-                CENTER LOGO
-            ===================================================== */}
+            {/* CENTER LOGO */}
 
             <div className="flex items-center justify-center">
               <Link
@@ -543,9 +531,7 @@ const Home = () => {
               </Link>
             </div>
 
-            {/* =====================================================
-                DESKTOP NAV
-            ===================================================== */}
+            {/* DESKTOP NAV */}
 
             <nav
               className="
@@ -593,114 +579,14 @@ const Home = () => {
                 Sign in
               </Link>
 
-              {/* =================================================
-                  SEARCH
-              ================================================= */}
-
-              {searchOpen ? (
-                <div
-                  className="
-                    flex
-                    shrink-0
-                    items-center
-                    gap-2
-                    rounded-[5px]
-                    border
-                    border-[#211D1A]
-                    bg-white
-                    px-3
-                    py-2
-                  "
-                >
-                  <FiSearch
-                    className="
-                      h-3.5
-                      w-3.5
-                      shrink-0
-                      text-[#625B55]
-                    "
-                  />
-
-                  <input
-                    autoFocus
-                    type="text"
-                    value={searchTerm}
-                    onChange={(event) =>
-                      setSearchTerm(event.target.value)
-                    }
-                    placeholder="Search products"
-                    className="
-                      w-28
-                      bg-transparent
-                      text-[9px]
-                      font-semibold
-                      text-[#211D1A]
-                      outline-none
-                      placeholder:text-[#A39C93]
-                      sm:w-44
-                    "
-                  />
-
-                  <button
-                    type="button"
-                    aria-label="Close search"
-                    onClick={() => {
-                      setSearchOpen(false);
-                      setSearchTerm("");
-                    }}
-                    className="
-                      flex
-                      shrink-0
-                      items-center
-                      justify-center
-                    "
-                  >
-                    <FiX
-                      className="
-                        h-3.5
-                        w-3.5
-                        text-[#625B55]
-                        transition-colors
-                        hover:text-[#211D1A]
-                      "
-                    />
-                  </button>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  aria-label="Search"
-                  onClick={() => setSearchOpen(true)}
-                  className="
-                    flex
-                    h-8
-                    w-8
-                    shrink-0
-                    items-center
-                    justify-center
-                    rounded-[5px]
-                    border
-                    border-[#D8D1C8]
-                    bg-white
-                    text-[#211D1A]
-                    transition-all
-                    hover:border-[#211D1A]
-                    hover:bg-[#211D1A]
-                    hover:text-white
-                  "
-                >
-                  <FiSearch className="h-3.5 w-3.5" />
-                </button>
-              )}
-
-              {/* =================================================
-                  WISHLIST
-              ================================================= */}
+              {/* WISHLIST */}
 
               <button
                 type="button"
                 aria-label="Wishlist"
-                onClick={() => navigate("/wishlist")}
+                onClick={() =>
+                  navigate("/wishlist")
+                }
                 className="
                   flex
                   h-8
@@ -722,14 +608,14 @@ const Home = () => {
                 <FiHeart className="h-3.5 w-3.5" />
               </button>
 
-              {/* =================================================
-                  CART
-              ================================================= */}
+              {/* CART */}
 
               <button
                 type="button"
                 aria-label="Shopping bag"
-                onClick={() => navigate("/cart")}
+                onClick={() =>
+                  navigate("/cart")
+                }
                 className="
                   flex
                   h-8
@@ -752,9 +638,7 @@ const Home = () => {
               </button>
             </nav>
 
-            {/* =====================================================
-                MOBILE ACTIONS
-            ===================================================== */}
+            {/* MOBILE ACTIONS */}
 
             <div
               className="
@@ -765,40 +649,6 @@ const Home = () => {
                 sm:hidden
               "
             >
-              {/* SEARCH */}
-
-              <button
-                type="button"
-                aria-label={
-                  searchOpen
-                    ? "Close search"
-                    : "Search"
-                }
-                aria-expanded={searchOpen}
-                onClick={handleMobileSearchToggle}
-                className="
-                  flex
-                  h-9
-                  w-9
-                  items-center
-                  justify-center
-                  rounded-[5px]
-                  border
-                  border-[#D8D1C8]
-                  bg-white
-                  text-[#211D1A]
-                  transition-all
-                  hover:border-[#211D1A]
-                  hover:bg-[#EEEAE5]
-                "
-              >
-                {searchOpen ? (
-                  <FiX className="h-4 w-4" />
-                ) : (
-                  <FiSearch className="h-4 w-4" />
-                )}
-              </button>
-
               {/* SIGN IN */}
 
               <Link
@@ -828,7 +678,9 @@ const Home = () => {
               <button
                 type="button"
                 aria-label="Wishlist"
-                onClick={() => navigate("/wishlist")}
+                onClick={() =>
+                  navigate("/wishlist")
+                }
                 className="
                   flex
                   h-9
@@ -853,7 +705,9 @@ const Home = () => {
               <button
                 type="button"
                 aria-label="Shopping bag"
-                onClick={() => navigate("/cart")}
+                onClick={() =>
+                  navigate("/cart")
+                }
                 className="
                   flex
                   h-9
@@ -877,109 +731,10 @@ const Home = () => {
         </header>
 
         {/* =====================================================
-            MOBILE SEARCH BAR
-        ===================================================== */}
-
-        {searchOpen && (
-          <div
-            className="
-              fixed
-              left-0
-              right-0
-              top-[73px]
-              z-20
-              border-b
-              border-[#E1DBD4]
-              bg-[#F8F6F2]/95
-              px-4
-              py-3
-              backdrop-blur-md
-              sm:hidden
-            "
-          >
-            <div
-              className="
-                flex
-                items-center
-                gap-2
-                rounded-[5px]
-                border
-                border-[#D8D1C8]
-                bg-white
-                px-3
-                py-2
-              "
-            >
-              <FiSearch
-                className="
-                  h-3.5
-                  w-3.5
-                  shrink-0
-                  text-[#625B55]
-                "
-              />
-
-              <input
-                autoFocus
-                type="text"
-                value={searchTerm}
-                onChange={(event) =>
-                  setSearchTerm(event.target.value)
-                }
-                placeholder="Search products"
-                className="
-                  min-w-0
-                  flex-1
-                  bg-transparent
-                  text-[9px]
-                  font-semibold
-                  text-[#211D1A]
-                  outline-none
-                  placeholder:text-[#A39C93]
-                "
-              />
-
-              {searchTerm && (
-                <button
-                  type="button"
-                  aria-label="Clear search"
-                  onClick={handleMobileSearchClear}
-                  className="
-                    flex
-                    shrink-0
-                    items-center
-                    justify-center
-                  "
-                >
-                  <FiX
-                    className="
-                      h-3.5
-                      w-3.5
-                      text-[#625B55]
-                      transition-colors
-                      hover:text-[#211D1A]
-                    "
-                  />
-                </button>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* =====================================================
             HEADER SPACER
         ===================================================== */}
 
-        <div
-          className={`
-            ${
-              searchOpen
-                ? "h-[125px]"
-                : "h-[73px]"
-            }
-            sm:h-[77px]
-          `}
-        />
+        <div className="h-[73px] sm:h-[77px]" />
 
         {/* =====================================================
             SHOP BAR
@@ -995,19 +750,21 @@ const Home = () => {
             py-3
           "
         >
+          {/* CATEGORY BUTTONS */}
+
           <div
             className="
               flex
+              min-w-0
               flex-1
+              items-center
               gap-2
               overflow-x-auto
               [scrollbar-width:none]
               [&::-webkit-scrollbar]:hidden
             "
           >
-            {/* =================================================
-                CLOTHING
-            ================================================= */}
+            {/* CLOTHING */}
 
             <button
               type="button"
@@ -1038,9 +795,7 @@ const Home = () => {
               <FiChevronDown className="h-3 w-3" />
             </button>
 
-            {/* =================================================
-                NEW ARRIVALS
-            ================================================= */}
+            {/* NEW ARRIVALS */}
 
             <button
               type="button"
@@ -1066,9 +821,7 @@ const Home = () => {
               New arrivals
             </button>
 
-            {/* =================================================
-                SALE
-            ================================================= */}
+            {/* SALE */}
 
             <button
               type="button"
@@ -1093,6 +846,79 @@ const Home = () => {
             >
               Sale
             </button>
+          </div>
+
+          {/* =================================================
+              SEARCH - RIGHT CORNER
+          ================================================= */}
+
+          <div
+            className="
+              flex
+              w-[145px]
+              shrink-0
+              items-center
+              gap-2
+              rounded-[5px]
+              border
+              border-[#D8D1C8]
+              bg-white
+              px-3
+              py-2
+              sm:w-[220px]
+              lg:w-[250px]
+            "
+          >
+            <FiSearch
+              className="
+                h-3.5
+                w-3.5
+                shrink-0
+                text-[#625B55]
+              "
+            />
+
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(event) =>
+                setSearchTerm(
+                  event.target.value
+                )
+              }
+              placeholder="Search products"
+              className="
+                min-w-0
+                flex-1
+                bg-transparent
+                text-[9px]
+                font-semibold
+                text-[#211D1A]
+                outline-none
+                placeholder:text-[#A39C93]
+              "
+            />
+
+            {searchTerm && (
+              <button
+                type="button"
+                aria-label="Clear search"
+                onClick={() =>
+                  setSearchTerm("")
+                }
+                className="
+                  flex
+                  shrink-0
+                  items-center
+                  justify-center
+                  text-[#625B55]
+                  transition-colors
+                  hover:text-[#211D1A]
+                "
+              >
+                <FiX className="h-3.5 w-3.5" />
+              </button>
+            )}
           </div>
         </div>
 
@@ -1157,9 +983,9 @@ const Home = () => {
               </h1>
 
               <p className="mt-5 max-w-sm text-[10px] leading-5 text-white/75 sm:text-[11px]">
-                Discover timeless everyday pieces designed around
-                modern silhouettes, effortless comfort and personal
-                style.
+                Discover timeless everyday pieces
+                designed around modern silhouettes,
+                effortless comfort and personal style.
               </p>
             </div>
 
@@ -1174,7 +1000,8 @@ const Home = () => {
                   rounded-[5px]
                   border border-white
                   bg-white
-                  px-4 py-2
+                  px-4
+                  py-2
                   text-[9px]
                   font-bold
                   uppercase
@@ -1234,9 +1061,10 @@ const Home = () => {
           </h2>
 
           <p className="mx-auto mt-4 max-w-lg text-[10px] leading-5 text-[#625B55] sm:text-[11px]">
-            Our collection is constantly updated with the latest
-            styles, ensuring you are always on point. Discover pieces
-            that fit naturally into your wardrobe.
+            Our collection is constantly updated with the
+            latest styles, ensuring you are always on point.
+            Discover pieces that fit naturally into your
+            wardrobe.
           </p>
         </section>
 
@@ -1268,7 +1096,8 @@ const Home = () => {
                   src={featureImage}
                   alt="Discover new fashion trends"
                   className="
-                    h-full w-full
+                    h-full
+                    w-full
                     object-cover
                     transition-transform
                     duration-700
@@ -1434,7 +1263,8 @@ const Home = () => {
                     shrink-0
                     rounded-[5px]
                     border
-                    px-4 py-2.5
+                    px-4
+                    py-2.5
                     text-[8px]
                     font-semibold
                     uppercase
@@ -1455,35 +1285,36 @@ const Home = () => {
 
           {/* RESULTS INFO */}
 
-          {!isLoading && !loadError && (
-            <div className="mt-4 flex items-center justify-between">
-              <p className="text-[8px] font-semibold uppercase tracking-[0.12em] text-[#8A837C]">
-                {visibleProducts.length}{" "}
-                {visibleProducts.length === 1
-                  ? "piece"
-                  : "pieces"}{" "}
-                found
-              </p>
+          {!isLoading &&
+            !loadError && (
+              <div className="mt-4 flex items-center justify-between">
+                <p className="text-[8px] font-semibold uppercase tracking-[0.12em] text-[#8A837C]">
+                  {visibleProducts.length}{" "}
+                  {visibleProducts.length === 1
+                    ? "piece"
+                    : "pieces"}{" "}
+                  found
+                </p>
 
-              {(activeCategory !== "All" ||
-                searchTerm) && (
-                <button
-                  type="button"
-                  onClick={clearFilters}
-                  className="
-                    text-[8px]
-                    font-bold
-                    uppercase
-                    tracking-[0.12em]
-                    text-[#625B55]
-                    hover:text-[#211D1A]
-                  "
-                >
-                  Clear
-                </button>
-              )}
-            </div>
-          )}
+                {(activeCategory !== "All" ||
+                  searchTerm) && (
+                  <button
+                    type="button"
+                    onClick={clearFilters}
+                    className="
+                      text-[8px]
+                      font-bold
+                      uppercase
+                      tracking-[0.12em]
+                      text-[#625B55]
+                      hover:text-[#211D1A]
+                    "
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+            )}
         </section>
 
         {/* =====================================================
@@ -1494,7 +1325,9 @@ const Home = () => {
           <section className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map(
               (_, index) => (
-                <ProductCardSkeleton key={index} />
+                <ProductCardSkeleton
+                  key={index}
+                />
               )
             )}
           </section>
@@ -1508,7 +1341,8 @@ const Home = () => {
           <section
             className="
               mt-6
-              flex min-h-[320px]
+              flex
+              min-h-[320px]
               flex-col
               items-center
               justify-center
@@ -1524,10 +1358,14 @@ const Home = () => {
             <div
               className="
                 mb-5
-                flex h-12 w-12
-                items-center justify-center
+                flex
+                h-12
+                w-12
+                items-center
+                justify-center
                 rounded-[5px]
-                border border-[#D8D1C8]
+                border
+                border-[#D8D1C8]
                 bg-white
               "
             >
@@ -1551,9 +1389,11 @@ const Home = () => {
               className="
                 mt-6
                 rounded-[5px]
-                border border-[#211D1A]
+                border
+                border-[#211D1A]
                 bg-[#211D1A]
-                px-5 py-2.5
+                px-5
+                py-2.5
                 text-[8px]
                 font-bold
                 uppercase
@@ -1578,7 +1418,8 @@ const Home = () => {
             <section
               className="
                 mt-6
-                flex min-h-[320px]
+                flex
+                min-h-[320px]
                 flex-col
                 items-center
                 justify-center
@@ -1587,18 +1428,22 @@ const Home = () => {
                 border-dashed
                 border-[#B7B1AA]
                 bg-[#F2EFEA]
-                px-6 py-12
+                px-6
+                py-12
                 text-center
               "
             >
               <div
                 className="
                   mb-5
-                  flex h-12 w-12
+                  flex
+                  h-12
+                  w-12
                   items-center
                   justify-center
                   rounded-[5px]
-                  border border-[#D8D1C8]
+                  border
+                  border-[#D8D1C8]
                   bg-white
                   text-[#211D1A]
                 "
@@ -1632,9 +1477,11 @@ const Home = () => {
                   className="
                     mt-6
                     rounded-[5px]
-                    border border-[#211D1A]
+                    border
+                    border-[#211D1A]
                     bg-[#211D1A]
-                    px-5 py-2.5
+                    px-5
+                    py-2.5
                     text-[8px]
                     font-bold
                     uppercase
@@ -1658,375 +1505,410 @@ const Home = () => {
           !loadError &&
           visibleProducts.length > 0 && (
             <section className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {visibleProducts.map(
+                (product) => {
+                  const firstImage =
+                    getProductImage(product);
 
-              {visibleProducts.map((product) => {
-                const firstImage =
-                  getProductImage(product);
+                  const stock =
+                    getProductStock(product);
 
-                const stock =
-                  getProductStock(product);
+                  const isSaved =
+                    isProductSaved(
+                      product._id
+                    );
 
-                const isSaved =
-                  isProductSaved(product._id);
+                  const isOutOfStock =
+                    stock <= 0;
 
-                const isOutOfStock =
-                  stock <= 0;
+                  const hasVariants =
+                    Array.isArray(
+                      product.variants
+                    ) &&
+                    product.variants.length > 0;
 
-                const hasVariants =
-                  Array.isArray(product.variants) &&
-                  product.variants.length > 0;
-
-                return (
-                  <article
-                    key={product._id}
-                    onClick={() =>
-                      openProduct(product._id)
-                    }
-                    onKeyDown={(event) =>
-                      handleProductKeyDown(
-                        event,
-                        product._id
-                      )
-                    }
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`View ${product.title}`}
-                    className="
-                      group
-                      cursor-pointer
-                      overflow-hidden
-                      rounded-[7px]
-                      border border-[#E1DBD4]
-                      bg-white
-                      transition-all
-                      duration-300
-                      hover:-translate-y-1
-                      hover:border-[#CFC7BE]
-                      hover:shadow-[0_14px_35px_rgba(33,29,26,0.07)]
-                      focus:outline-none
-                      focus:ring-1
-                      focus:ring-[#211D1A]
-                    "
-                  >
-                    {/* PRODUCT IMAGE */}
-
-                    <div
+                  return (
+                    <article
+                      key={product._id}
+                      onClick={() =>
+                        openProduct(
+                          product._id
+                        )
+                      }
+                      onKeyDown={(event) =>
+                        handleProductKeyDown(
+                          event,
+                          product._id
+                        )
+                      }
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`View ${product.title}`}
                       className="
-                        relative
-                        aspect-[4/5]
+                        group
+                        cursor-pointer
                         overflow-hidden
-                        bg-[#E9E4DE]
+                        rounded-[7px]
+                        border
+                        border-[#E1DBD4]
+                        bg-white
+                        transition-all
+                        duration-300
+                        hover:-translate-y-1
+                        hover:border-[#CFC7BE]
+                        hover:shadow-[0_14px_35px_rgba(33,29,26,0.07)]
+                        focus:outline-none
+                        focus:ring-1
+                        focus:ring-[#211D1A]
                       "
                     >
-                      {firstImage ? (
-                        <img
-                          src={firstImage}
-                          alt={
-                            product.title ||
-                            "Product"
-                          }
-                          loading="lazy"
-                          className="
-                            h-full
-                            w-full
-                            object-cover
-                            transition-transform
-                            duration-700
-                            group-hover:scale-[1.035]
-                          "
-                        />
-                      ) : (
-                        <ProductImageFallback />
-                      )}
-
-                      {/* IMAGE GRADIENT */}
+                      {/* PRODUCT IMAGE */}
 
                       <div
                         className="
-                          pointer-events-none
-                          absolute inset-x-0 bottom-0
-                          h-24
-                          bg-gradient-to-t
-                          from-black/20
-                          to-transparent
-                          opacity-0
-                          transition-opacity
-                          duration-300
-                          group-hover:opacity-100
-                        "
-                      />
-
-                      {/* NEW LABEL */}
-
-                      <span
-                        className="
-                          absolute
-                          left-3 top-3
-                          rounded-[4px]
-                          border border-white/60
-                          bg-[#F8F5F1]/90
-                          px-2.5 py-1.5
-                          text-[7px]
-                          font-bold
-                          uppercase
-                          tracking-[0.14em]
-                          text-[#211D1A]
-                          backdrop-blur-sm
+                          relative
+                          aspect-[4/5]
+                          overflow-hidden
+                          bg-[#E9E4DE]
                         "
                       >
-                        New
-                      </span>
+                        {firstImage ? (
+                          <img
+                            src={firstImage}
+                            alt={
+                              product.title ||
+                              "Product"
+                            }
+                            loading="lazy"
+                            className="
+                              h-full
+                              w-full
+                              object-cover
+                              transition-transform
+                              duration-700
+                              group-hover:scale-[1.035]
+                            "
+                          />
+                        ) : (
+                          <ProductImageFallback />
+                        )}
 
-                      {/* STOCK LABEL */}
+                        {/* IMAGE GRADIENT */}
 
-                      {isOutOfStock ? (
-                        <span
+                        <div
                           className="
+                            pointer-events-none
                             absolute
-                            bottom-3 left-3
-                            rounded-[4px]
-                            bg-[#211D1A]/90
-                            px-2.5 py-1.5
-                            text-[7px]
-                            font-bold
-                            uppercase
-                            tracking-[0.12em]
-                            text-white
+                            inset-x-0
+                            bottom-0
+                            h-24
+                            bg-gradient-to-t
+                            from-black/20
+                            to-transparent
+                            opacity-0
+                            transition-opacity
+                            duration-300
+                            group-hover:opacity-100
                           "
-                        >
-                          Sold out
-                        </span>
-                      ) : stock <= 5 ? (
+                        />
+
+                        {/* NEW LABEL */}
+
                         <span
                           className="
                             absolute
-                            bottom-3 left-3
+                            left-3
+                            top-3
                             rounded-[4px]
-                            border border-white/60
-                            bg-white/90
-                            px-2.5 py-1.5
+                            border
+                            border-white/60
+                            bg-[#F8F5F1]/90
+                            px-2.5
+                            py-1.5
                             text-[7px]
                             font-bold
                             uppercase
-                            tracking-[0.12em]
+                            tracking-[0.14em]
                             text-[#211D1A]
                             backdrop-blur-sm
                           "
                         >
-                          Only {stock} left
+                          New
                         </span>
-                      ) : null}
 
-                      {/* =================================================
-                          WISHLIST BUTTON
-                      ================================================= */}
+                        {/* STOCK LABEL */}
 
-                      <button
-                        type="button"
-                        aria-label={
-                          isSaved
-                            ? `Remove ${product.title} from wishlist`
-                            : `Add ${product.title} to wishlist`
-                        }
-                        aria-pressed={isSaved}
-                        onClick={(event) =>
-                          handleWishlistClick(
-                            event,
-                            product
-                          )
-                        }
-                        className="
-                          absolute
-                          right-3
-                          top-3
-                          flex
-                          h-8
-                          w-8
-                          shrink-0
-                          items-center
-                          justify-center
-                          rounded-[5px]
-                          border
-                          border-[#D8D1C8]
-                          bg-white
-                          text-[#211D1A]
-                          transition-all
-                          duration-200
-                        "
-                      >
-                        <FiHeart
-                          className={`
-                            h-3.5
-                            w-3.5
-                            transition-all
-                            duration-200
-                            ${
-                              isSaved
-                                ? "fill-current"
-                                : ""
-                            }
-                          `}
-                        />
-                      </button>
-
-                      {/* IMAGE COUNT */}
-
-                      {product.images?.length > 1 && (
-                        <span
-                          className="
-                            absolute
-                            bottom-3
-                            right-3
-                            rounded-[4px]
-                            bg-black/55
-                            px-2 py-1
-                            text-[7px]
-                            font-semibold
-                            text-white
-                            backdrop-blur-sm
-                          "
-                        >
-                          {product.images.length} photos
-                        </span>
-                      )}
-                    </div>
-
-                    {/* PRODUCT INFO */}
-
-                    <div className="space-y-3 p-4">
-                      <div>
-                        <div className="mb-1.5 flex items-start justify-between gap-3">
-                          <h3
+                        {isOutOfStock ? (
+                          <span
                             className="
-                              line-clamp-1
-                              font-serif
-                              text-[17px]
-                              leading-tight
-                              tracking-[-0.04em]
+                              absolute
+                              bottom-3
+                              left-3
+                              rounded-[4px]
+                              bg-[#211D1A]/90
+                              px-2.5
+                              py-1.5
+                              text-[7px]
+                              font-bold
+                              uppercase
+                              tracking-[0.12em]
+                              text-white
+                            "
+                          >
+                            Sold out
+                          </span>
+                        ) : stock <= 5 ? (
+                          <span
+                            className="
+                              absolute
+                              bottom-3
+                              left-3
+                              rounded-[4px]
+                              border
+                              border-white/60
+                              bg-white/90
+                              px-2.5
+                              py-1.5
+                              text-[7px]
+                              font-bold
+                              uppercase
+                              tracking-[0.12em]
                               text-[#211D1A]
+                              backdrop-blur-sm
                             "
                           >
-                            {product.title ||
-                              "Untitled product"}
-                          </h3>
-                        </div>
-
-                        <p
-                          className="
-                            line-clamp-2
-                            min-h-8
-                            text-[9px]
-                            leading-4
-                            text-[#625B55]
-                          "
-                        >
-                          {product.description ||
-                            "No description provided for this listing."}
-                        </p>
-                      </div>
-
-                      {/* PRODUCT META */}
-
-                      <div className="flex items-center gap-2">
-                        {product.category && (
-                          <span
-                            className="
-                              rounded-[3px]
-                              bg-[#F2EEE9]
-                              px-2 py-1
-                              text-[7px]
-                              font-bold
-                              uppercase
-                              tracking-[0.1em]
-                              text-[#625B55]
-                            "
-                          >
-                            {product.category}
+                            Only {stock} left
                           </span>
-                        )}
+                        ) : null}
 
-                        {hasVariants && (
-                          <span
-                            className="
-                              rounded-[3px]
-                              bg-[#F2EEE9]
-                              px-2 py-1
-                              text-[7px]
-                              font-bold
-                              uppercase
-                              tracking-[0.1em]
-                              text-[#625B55]
-                            "
-                          >
-                            {product.variants.length} variants
-                          </span>
-                        )}
-                      </div>
-
-                      {/* BOTTOM */}
-
-                      <div
-                        className="
-                          flex
-                          items-center
-                          justify-between
-                          border-t
-                          border-[#E2DBD1]
-                          pt-3
-                        "
-                      >
-                        <div>
-                          <p className="text-[13px] font-bold text-[#211D1A]">
-                            {formatPrice(
-                              product.price
-                            )}
-                          </p>
-
-                          {!isOutOfStock && (
-                            <p className="mt-0.5 text-[7px] font-semibold uppercase tracking-[0.08em] text-[#8A837C]">
-                              In stock
-                            </p>
-                          )}
-                        </div>
+                        {/* WISHLIST BUTTON */}
 
                         <button
                           type="button"
-                          disabled={isOutOfStock}
-                          aria-label={`Shop ${product.title}`}
-                          onClick={(event) => {
-                            event.preventDefault();
-                            event.stopPropagation();
-
-                            if (!isOutOfStock) {
-                              openProduct(product._id);
-                            }
-                          }}
-                          className={`
-                            flex h-9 items-center justify-center
+                          aria-label={
+                            isSaved
+                              ? `Remove ${product.title} from wishlist`
+                              : `Add ${product.title} to wishlist`
+                          }
+                          aria-pressed={isSaved}
+                          onClick={(event) =>
+                            handleWishlistClick(
+                              event,
+                              product
+                            )
+                          }
+                          className="
+                            absolute
+                            right-3
+                            top-3
+                            flex
+                            h-8
+                            w-8
+                            shrink-0
+                            items-center
+                            justify-center
                             rounded-[5px]
                             border
-                            px-4
-                            text-[8px]
-                            font-bold
-                            uppercase
-                            tracking-[0.12em]
+                            border-[#D8D1C8]
+                            bg-white
+                            text-[#211D1A]
                             transition-all
-                            ${
-                              isOutOfStock
-                                ? "cursor-not-allowed border-[#E2DBD1] bg-[#F2EFEA] text-[#A39C93]"
-                                : "border-[#211D1A] bg-[#211D1A] text-white hover:bg-[#3A342F]"
-                            }
-                          `}
+                            duration-200
+                          "
                         >
-                          {isOutOfStock
-                            ? "SOLD OUT"
-                            : "SHOP NOW"}
+                          <FiHeart
+                            className={`
+                              h-3.5
+                              w-3.5
+                              transition-all
+                              duration-200
+                              ${
+                                isSaved
+                                  ? "fill-current"
+                                  : ""
+                              }
+                            `}
+                          />
                         </button>
+
+                        {/* IMAGE COUNT */}
+
+                        {product.images?.length >
+                          1 && (
+                          <span
+                            className="
+                              absolute
+                              bottom-3
+                              right-3
+                              rounded-[4px]
+                              bg-black/55
+                              px-2
+                              py-1
+                              text-[7px]
+                              font-semibold
+                              text-white
+                              backdrop-blur-sm
+                            "
+                          >
+                            {product.images.length}{" "}
+                            photos
+                          </span>
+                        )}
                       </div>
-                    </div>
-                  </article>
-                );
-              })}
+
+                      {/* PRODUCT INFO */}
+
+                      <div className="space-y-3 p-4">
+                        <div>
+                          <div className="mb-1.5 flex items-start justify-between gap-3">
+                            <h3
+                              className="
+                                line-clamp-1
+                                font-serif
+                                text-[17px]
+                                leading-tight
+                                tracking-[-0.04em]
+                                text-[#211D1A]
+                              "
+                            >
+                              {product.title ||
+                                "Untitled product"}
+                            </h3>
+                          </div>
+
+                          <p
+                            className="
+                              line-clamp-2
+                              min-h-8
+                              text-[9px]
+                              leading-4
+                              text-[#625B55]
+                            "
+                          >
+                            {product.description ||
+                              "No description provided for this listing."}
+                          </p>
+                        </div>
+
+                        {/* PRODUCT META */}
+
+                        <div className="flex items-center gap-2">
+                          {product.category && (
+                            <span
+                              className="
+                                rounded-[3px]
+                                bg-[#F2EEE9]
+                                px-2
+                                py-1
+                                text-[7px]
+                                font-bold
+                                uppercase
+                                tracking-[0.1em]
+                                text-[#625B55]
+                              "
+                            >
+                              {product.category}
+                            </span>
+                          )}
+
+                          {hasVariants && (
+                            <span
+                              className="
+                                rounded-[3px]
+                                bg-[#F2EEE9]
+                                px-2
+                                py-1
+                                text-[7px]
+                                font-bold
+                                uppercase
+                                tracking-[0.1em]
+                                text-[#625B55]
+                              "
+                            >
+                              {
+                                product
+                                  .variants
+                                  .length
+                              }{" "}
+                              variants
+                            </span>
+                          )}
+                        </div>
+
+                        {/* BOTTOM */}
+
+                        <div
+                          className="
+                            flex
+                            items-center
+                            justify-between
+                            border-t
+                            border-[#E2DBD1]
+                            pt-3
+                          "
+                        >
+                          <div>
+                            <p className="text-[13px] font-bold text-[#211D1A]">
+                              {formatPrice(
+                                product.price
+                              )}
+                            </p>
+
+                            {!isOutOfStock && (
+                              <p className="mt-0.5 text-[7px] font-semibold uppercase tracking-[0.08em] text-[#8A837C]">
+                                In stock
+                              </p>
+                            )}
+                          </div>
+
+                          <button
+                            type="button"
+                            disabled={
+                              isOutOfStock
+                            }
+                            aria-label={`Shop ${product.title}`}
+                            onClick={(event) => {
+                              event.preventDefault();
+                              event.stopPropagation();
+
+                              if (
+                                !isOutOfStock
+                              ) {
+                                openProduct(
+                                  product._id
+                                );
+                              }
+                            }}
+                            className={`
+                              flex
+                              h-9
+                              items-center
+                              justify-center
+                              rounded-[5px]
+                              border
+                              px-4
+                              text-[8px]
+                              font-bold
+                              uppercase
+                              tracking-[0.12em]
+                              transition-all
+                              ${
+                                isOutOfStock
+                                  ? "cursor-not-allowed border-[#E2DBD1] bg-[#F2EFEA] text-[#A39C93]"
+                                  : "border-[#211D1A] bg-[#211D1A] text-white hover:bg-[#3A342F]"
+                              }
+                            `}
+                          >
+                            {isOutOfStock
+                              ? "SOLD OUT"
+                              : "SHOP NOW"}
+                          </button>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                }
+              )}
             </section>
           )}
 
@@ -2066,3 +1948,4 @@ const Home = () => {
 };
 
 export default Home;
+

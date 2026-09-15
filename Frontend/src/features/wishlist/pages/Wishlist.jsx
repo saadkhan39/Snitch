@@ -349,7 +349,7 @@ const Wishlist = () => {
                         aria-label="Remove from wishlist"
                         className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center border border-[#D8D1C8] bg-[#F8F6F2]/95 text-[#211D1A] opacity-0 transition duration-300 hover:border-[#211D1A] group-hover:opacity-100 disabled:opacity-50 sm:right-4 sm:top-4"
                       >
-                        <FiTrash2 className="h-[13px] w-[13px] stroke-[1.4]" />
+<FiX className="h-[13px] w-[13px] stroke-[1.4]" />
                       </button>
 
                       <div className="absolute bottom-3 left-3 flex h-7 w-7 items-center justify-center bg-[#F8F6F2]/95 sm:bottom-4 sm:left-4">
@@ -383,17 +383,7 @@ const Wishlist = () => {
                       Move to Cart
                     </button>
 
-                    <div className="mt-4 flex items-center justify-between border-t border-[#E1DBD4] pt-3">
-                      <span className="text-[9px] uppercase tracking-[0.17em] text-[#8A8179]">
-                        Saved
-                      </span>
-                      <Link
-                        to={`/product/${productId}`}
-                        className="text-[9px] uppercase tracking-[0.17em] text-[#211D1A] transition hover:underline"
-                      >
-                        View Product
-                      </Link>
-                    </div>
+                    
                   </article>
                 );
               })}

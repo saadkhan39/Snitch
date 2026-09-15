@@ -856,293 +856,294 @@ const Home = () => {
           </div>
         </div>
 
-        {/* HERO */}
+       
 
-        <section
+{/* PREMIUM HERO */}
+<section
+  className="
+    relative
+    mt-[1.25rem]
+    h-[68vh]
+    min-h-[520px]
+    overflow-hidden
+    rounded-[0.25rem]
+    bg-[#171512]
+    sm:h-[78vh]
+    sm:min-h-[620px]
+    lg:h-[82vh]
+  "
+>
+  {/* HERO IMAGES */}
+  {isHeroLoading ? (
+    <div className="absolute inset-0 animate-pulse bg-[#24211B]" />
+  ) : heroImages.length > 0 ? (
+    <div className="absolute inset-0">
+      {heroImages.map((image, index) => (
+        <img
+          key={`${image}-${index}`}
+          src={image}
+          alt={`Snitch collection ${index + 1}`}
+          className={`
+            absolute
+            inset-0
+            h-full
+            w-full
+            object-cover
+            object-center
+            transition-opacity
+            duration-[1600ms]
+            ease-in-out
+            ${
+              index === heroIndex
+                ? "opacity-100"
+                : "opacity-0"
+            }
+          `}
+        />
+      ))}
+
+      {/* VERY LIGHT IMAGE OVERLAY */}
+      <div
+        className="
+          pointer-events-none
+          absolute
+          inset-0
+          bg-black/10
+        "
+      />
+
+      {/* BOTTOM READABILITY */}
+      <div
+        className="
+          pointer-events-none
+          absolute
+          inset-x-0
+          bottom-0
+          h-[45%]
+          bg-gradient-to-t
+          from-black/65
+          via-black/20
+          to-transparent
+        "
+      />
+
+      {/* SUBTLE SIDE VIGNETTE */}
+      <div
+        className="
+          pointer-events-none
+          absolute
+          inset-0
+          bg-gradient-to-r
+          from-black/20
+          via-transparent
+          to-transparent
+        "
+      />
+    </div>
+  ) : (
+    <div className="absolute inset-0 flex items-center justify-center bg-[#24211B]">
+      <div className="text-center">
+        <FiPackage className="mx-auto h-8 w-8 text-[#8C8574]" />
+
+        <p className="mt-3 text-[10px] uppercase tracking-[0.18em] text-[#8C8574]">
+          {heroError ? "Hero unavailable" : "No hero banner yet"}
+        </p>
+      </div>
+    </div>
+  )}
+
+  {/* HERO CONTENT */}
+  <div
+    className="
+      relative
+      z-10
+      flex
+      h-full
+      flex-col
+      justify-between
+      px-5
+      py-6
+      sm:px-8
+      sm:py-8
+      lg:px-12
+      lg:py-10
+    "
+  >
+    {/* TOP LABEL */}
+    <div className="flex items-start justify-between">
+      <div>
+        <p
           className="
-            relative
-            mt-[1.25rem]
-            min-h-[53vh]
-            overflow-hidden
-            rounded-[0.4375rem]
-            border
-            border-[#E1DBD4]
-            bg-[#EAE5DF]
-            sm:min-h-[70vh]
+            text-[9px]
+            font-medium
+            uppercase
+            tracking-[0.22em]
+            text-white/75
+            sm:text-[10px]
           "
         >
-          {/* HERO IMAGE SLIDER */}
+          The New Collection
+        </p>
 
-          {isHeroLoading ? (
-            <div className="absolute inset-0 animate-pulse bg-[#EAE5DF]" />
-          ) : heroImages.length > 0 ? (
-            <div className="absolute inset-0">
-              {heroImages.map((image, index) => (
-                <img
-                  key={`${image}-${index}`}
-                  src={image}
-                  alt={`Featured collection ${index + 1}`}
-                  className={`
-                    absolute
-                    inset-0
-                    h-full
-                    w-full
-                    object-cover
-                    object-center
-                    transition-opacity
-                    duration-[1200ms]
-                    ease-in-out
-                    ${index === heroIndex ? "opacity-100" : "opacity-0"}
-                  `}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center bg-[#EAE5DF]">
-              <div className="text-center">
-                <FiPackage className="mx-auto h-[2rem] w-[2rem] text-[#8A837C]" />
+        <div className="mt-2 h-px w-8 bg-[#555555]" />
+      </div>
 
-                <p className="mt-[0.75rem] text-[0.5rem] font-bold uppercase tracking-[0.16em] text-[#8A837C]">
-                  {heroError ? "Hero unavailable" : "No hero banner"}
-                </p>
-              </div>
-            </div>
-          )}
+      {/* SLIDE NUMBER */}
+      {heroImages.length > 1 && (
+        <div
+          className="
+            flex
+            items-center
+            gap-2
+            text-[9px]
+            uppercase
+            tracking-[0.15em]
+            text-white/70
+          "
+        >
+          <span className="text-white">
+            {String(heroIndex + 1).padStart(2, "0")}
+          </span>
 
-          {/* CONTENT */}
+          <span className="text-white/35">/</span>
 
-          <div
-            className="
-              relative
-              z-10
-              flex
-              min-h-[53vh]
-              flex-col
-              justify-between
-              p-[1.25rem]
-              sm:min-h-[70vh]
-              sm:p-[2rem]
-              lg:p-[2.5rem]
-            "
-          >
-            {/* TOP LABEL */}
+          <span>
+            {String(heroImages.length).padStart(2, "0")}
+          </span>
+        </div>
+      )}
+    </div>
 
-            <div className="flex items-start justify-between">
-              <div
-                className="
-                  inline-flex
-                  items-center
-                  gap-[0.5rem]
-                  rounded-[0.25rem]
-                  border
-                  border-[#D8D1C8]
-                  bg-[#F8F6F2]/90
-                  px-[0.75rem]
-                  py-[0.5rem]
-                  backdrop-blur-sm
-                "
-              >
-                <span className="h-[0.375rem] w-[0.375rem] rounded-full bg-[#211D1A]" />
+    {/* BOTTOM CONTENT */}
+    <div
+      className="
+        flex
+        flex-col
+        gap-8
+        sm:flex-row
+        sm:items-end
+        sm:justify-between
+      "
+    >
+      {/* TEXT */}
+      <div className="max-w-[650px]">
+        <p
+          className="
+            mb-3
+            text-[9px]
+            uppercase
+            tracking-[0.22em]
+            text-[#585757]
+            sm:text-[10px]
+          "
+        >
+          Modern essentials
+        </p>
 
-                <p
-                  className="
-                    text-[0.4375rem]
-                    font-bold
-                    uppercase
-                    tracking-[0.2em]
-                    text-[#211D1A]
-                    sm:text-[0.5rem]
-                  "
-                >
-                  SNITCH STUDIO / 01
-                </p>
-              </div>
+       <h1
+  className="
+    font-sans
+    text-[2.75rem]
+    font-semibold
+    leading-[0.8]
+    tracking-[-0.055em]
+    text-[#F8F4EA]
+    sm:text-[5rem]
+    lg:text-[6.25rem]
+  "
+>
+  Made for
+  <br />
+  <span className="font-light">
+    every moment.
+  </span>
+</h1>
 
-              {heroImages.length > 1 && (
-                <div
-                  className="
-                    rounded-[0.25rem]
-                    border
-                    border-[#D8D1C8]
-                    bg-[#F8F6F2]/90
-                    px-[0.75rem]
-                    py-[0.5rem]
-                    text-[0.4375rem]
-                    font-bold
-                    tracking-[0.15em]
-                    text-[#211D1A]
-                    backdrop-blur-sm
-                    sm:text-[0.5rem]
-                  "
-                >
-                  {String(heroIndex + 1).padStart(2, "0")}
-                  {" / "}
-                  {String(heroImages.length).padStart(2, "0")}
-                </div>
-              )}
-            </div>
+        <p
+          className="
+            mt-5
+            max-w-[380px]
+            text-[11px]
+            leading-[1.6]
+            text-white/65
+            sm:text-[12px]
+          "
+        >
+          Refined silhouettes, considered details and
+          effortless pieces made for every day.
+        </p>
 
-            {/* MAIN CONTENT */}
+        {/* CTA */}
+       <a
+  href="#browse"
+  className="
+    group
+    mt-7
+    inline-flex
+    items-center
+    gap-3
+    border
+    border-white/60
+    px-5
+    py-3
+    text-[0.60rem]
+    font-bold
+    uppercase
+    tracking-[0.18em]
+    text-white
+    transition-all
+    duration-300
+    hover:border-white
+    hover:bg-white
+    hover:text-[#171512]
+  "
+>
+  Shop collection
 
-            <div className="flex items-end justify-between gap-[1rem]">
-              <div
-                className="
-                  max-w-[31.25rem]
-                  rounded-[0.3125rem]
-                  border
-                  border-[#D8D1C8]
-                  bg-[#F8F6F2]/90
-                  p-[1.25rem]
-                  backdrop-blur-sm
-                  sm:p-[1.75rem]
-                "
-              >
-                <p
-                  className="
-                    mb-[0.75rem]
-                    text-[0.4375rem]
-                    font-bold
-                    uppercase
-                    tracking-[0.25em]
-                    text-[#8A837C]
-                    sm:text-[0.5rem]
-                  "
-                >
-                  New season / Everyday edit
-                </p>
+  <FiArrowUpRight
+    className="
+      h-3.5
+      w-3.5
+      transition-transform
+      duration-300
+     
+    "
+  />
+</a>
+      </div>
 
-                <h1
-                  className="
-                    font-serif
-                    text-[2.75rem]
-                    leading-[0.86]
-                    tracking-[-0.055em]
-                    text-[#211D1A]
-                    sm:text-[4rem]
-                    lg:text-[4.75rem]
-                  "
-                >
-                  Cloudy
-                  <br />
-                  Styles.
-                </h1>
+      {/* SLIDER CONTROLS */}
+      {heroImages.length > 1 && (
+        <div className="flex items-center gap-3">
+          {heroImages.map((_, index) => (
+            <button
+              key={index}
+              type="button"
+              aria-label={`Go to slide ${index + 1}`}
+              onClick={() => setHeroIndex(index)}
+              className="group flex items-center py-2"
+            >
+              <span
+                className={`
+                  block
+                  h-[1px]
+                  transition-all
+                  duration-500
+                  ${
+                    index === heroIndex
+                      ? "w-10 bg-[#555555]"
+                      : "w-5 bg-white/35 group-hover:w-7 group-hover:bg-white/70"
+                  }
+                `}
+              />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  </div>
+</section>
 
-                <p
-                  className="
-                    mt-[1rem]
-                    max-w-[21.875rem]
-                    text-[0.5625rem]
-                    leading-[1.25rem]
-                    text-[#625B55]
-                    sm:text-[0.625rem]
-                    sm:leading-[1.25rem]
-                  "
-                >
-                  Discover timeless everyday pieces designed around modern
-                  silhouettes, effortless comfort and personal style.
-                </p>
-
-                <a
-                  href="#browse"
-                  className="
-                    group
-                    mt-[1.25rem]
-                    inline-flex
-                    items-center
-                    gap-[0.75rem]
-                    rounded-[0.25rem]
-                    border
-                    border-[#211D1A]
-                    bg-[#211D1A]
-                    px-[1rem]
-                    py-[0.625rem]
-                    text-[0.5rem]
-                    font-bold
-                    uppercase
-                    tracking-[0.12em]
-                    text-white
-                    transition-all
-                    duration-200
-                    hover:bg-[#3A342F]
-                    sm:px-[1.25rem]
-                    sm:py-[0.75rem]
-                  "
-                >
-                  Explore collection
-
-                  <span
-                    className="
-                      flex
-                      h-[1.5rem]
-                      w-[1.5rem]
-                      items-center
-                      justify-center
-                      rounded-[0.1875rem]
-                      bg-white
-                      text-[#211D1A]
-                      transition-transform
-                      duration-200
-                      group-hover:translate-x-[0.125rem]
-                      group-hover:-translate-y-[0.125rem]
-                    "
-                  >
-                    <FiArrowUpRight className="h-[0.875rem] w-[0.875rem]" />
-                  </span>
-                </a>
-              </div>
-
-              {/* SLIDER CONTROLS */}
-
-              {heroImages.length > 1 && (
-                <div
-                  className="
-                    hidden
-                    items-center
-                    gap-[0.5rem]
-                    rounded-[0.25rem]
-                    border
-                    border-[#D8D1C8]
-                    bg-[#F8F6F2]/90
-                    px-[0.75rem]
-                    py-[0.75rem]
-                    backdrop-blur-sm
-                    sm:flex
-                  "
-                >
-                  {heroImages.map((_, index) => (
-                    <button
-                      key={index}
-                      type="button"
-                      aria-label={`Go to slide ${index + 1}`}
-                      onClick={() => setHeroIndex(index)}
-                      className="
-                        group
-                        flex
-                        h-[1rem]
-                        items-center
-                      "
-                    >
-                      <span
-                        className={`
-                          block
-                          h-[0.125rem]
-                          rounded-full
-                          transition-all
-                          duration-500
-                          ${
-                            index === heroIndex
-                              ? "w-[1.75rem] bg-[#211D1A]"
-                              : "w-[0.75rem] bg-[#BDB6AE] group-hover:w-[1.25rem] group-hover:bg-[#625B55]"
-                          }
-                        `}
-                      />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
 
         {/* INTRO */}
 

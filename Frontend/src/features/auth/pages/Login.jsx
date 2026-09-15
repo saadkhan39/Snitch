@@ -70,7 +70,7 @@ const Login = () => {
         {/* Background Fashion Photo */}
         <div className="absolute inset-0 z-0">
           <video
-            src="/model2.mp4"
+            src="/model.mp4"
             autoPlay
             muted
             loop

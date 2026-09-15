@@ -9,6 +9,7 @@ import ProductDetail from "../features/product/pages/ProductDetail"
 import SellerProductDetail from "../features/product/pages/SellerProductDetail"
 import Cart from "../features/cart/pages/Cart"
 import Wishlist from "../features/wishlist/pages/Wishlist"
+import SellerHero from "../features/hero/page/SellerHero"
 
 
 export const routes = createBrowserRouter([
@@ -42,33 +43,41 @@ export const routes = createBrowserRouter([
         element:<Protected><Wishlist/></Protected>
     },
 
-    {
-        path: "/seller",
-        children: [
-            {
-                path: "/seller/create-product",
-                element: (
-                    <Protected role="seller">
-                        <CreateProduct />
-                    </Protected>
-                )
-            },
-            {
-                path: "/seller/dashboard",
-                element: (
-                    <Protected role="seller">
-                        <SellerDashboard />
-                    </Protected>
-                )
-            },
-            {
-                path: "/seller/product/:productId",
-                element: (
-                    <Protected role="seller">
-                        <SellerProductDetail />
-                    </Protected>
-                )
-            }
-        ]
-    }
+   {
+    path: "/seller",
+    children: [
+        {
+            path: "/seller/create-product",
+            element: (
+                <Protected role="seller">
+                    <CreateProduct />
+                </Protected>
+            )
+        },
+        {
+            path: "/seller/dashboard",
+            element: (
+                <Protected role="seller">
+                    <SellerDashboard />
+                </Protected>
+            )
+        },
+        {
+            path: "/seller/product/:productId",
+            element: (
+                <Protected role="seller">
+                    <SellerProductDetail />
+                </Protected>
+            )
+        },
+        {
+            path: "/seller/hero",
+            element: (
+                <Protected role="seller">
+                    <SellerHero />
+                </Protected>
+            )
+        }
+    ]
+}
 ])

@@ -40,7 +40,6 @@ const formatPrice = (price) => {
   }).format(Number(price.amount || 0));
 };
 
-
 // =========================================================
 // NORMALIZE ATTRIBUTES
 // =========================================================
@@ -64,7 +63,6 @@ const normalizeAttributes = (attributes) => {
   return {};
 };
 
-
 // =========================================================
 // SPLIT ATTRIBUTE VALUES
 // =========================================================
@@ -87,7 +85,6 @@ const splitAttributeValues = (value) => {
     .filter(Boolean);
 };
 
-
 // =========================================================
 // GET IMAGE URL
 // =========================================================
@@ -100,7 +97,6 @@ const getImageUrl = (image) => {
     ""
   );
 };
-
 
 // =========================================================
 // PRODUCT DETAIL
@@ -119,41 +115,40 @@ const ProductDetail = () => {
   } = useCart();
 
   const {
-  wishlistItems,
-  handleGetWishlist,
-  handleAddToWishlist,
-  handleRemoveFromWishlist,
-  isWishlisted,
-} = useWishlist();
+    handleGetWishlist,
+    handleAddToWishlist,
+    handleRemoveFromWishlist,
+    isWishlisted,
+  } = useWishlist();
 
-const wishlisted = isWishlisted(productId);
+  const wishlisted = isWishlisted(productId);
 
-// =======================================================
-// WISHLIST
-// =======================================================
+  // =======================================================
+  // WISHLIST
+  // =======================================================
 
-const handleWishlist = async () => {
-  if (!productId) {
-    return;
-  }
-
-  try {
-    if (wishlisted) {
-      await handleRemoveFromWishlist(productId);
-    } else {
-      await handleAddToWishlist(productId);
+  const handleWishlist = async () => {
+    if (!productId) {
+      return;
     }
-  } catch (error) {
-    console.error(
-      "WISHLIST ERROR:",
-      error
-    );
-  }
-};
 
-useEffect(() => {
-  handleGetWishlist();
-}, [productId]);
+    try {
+      if (wishlisted) {
+        await handleRemoveFromWishlist(productId);
+      } else {
+        await handleAddToWishlist(productId);
+      }
+    } catch (error) {
+      console.error(
+        "WISHLIST ERROR:",
+        error
+      );
+    }
+  };
+
+  useEffect(() => {
+    handleGetWishlist();
+  }, [productId]);
 
   // =======================================================
   // STATE
@@ -181,7 +176,6 @@ useEffect(() => {
 
   const [bagPulse, setBagPulse] =
     useState(false);
-
 
   // =======================================================
   // FETCH PRODUCT
@@ -223,7 +217,6 @@ useEffect(() => {
         setSelectedImage(0);
         setSelectedAttributes({});
         setAddedToCart(false);
-
       } catch (err) {
         console.error(
           "Failed to fetch product:",
@@ -238,7 +231,6 @@ useEffect(() => {
               "Unable to load product."
           );
         }
-
       } finally {
         if (mounted) {
           setLoading(false);
@@ -251,9 +243,7 @@ useEffect(() => {
     return () => {
       mounted = false;
     };
-
   }, [productId]);
-
 
   // =======================================================
   // ALL ATTRIBUTE NAMES
@@ -270,7 +260,6 @@ useEffect(() => {
     const names = new Map();
 
     product.variants.forEach((variant) => {
-
       const attributes =
         normalizeAttributes(
           variant?.attributes
@@ -278,17 +267,14 @@ useEffect(() => {
 
       Object.keys(attributes).forEach(
         (key) => {
-
           const normalized =
             key.trim().toLowerCase();
 
           if (!names.has(normalized)) {
-
             names.set(
               normalized,
               key.trim()
             );
-
           }
         }
       );
@@ -297,9 +283,7 @@ useEffect(() => {
     return Array.from(
       names.values()
     );
-
   }, [product]);
-
 
   // =======================================================
   // GET ATTRIBUTE VALUES
@@ -308,7 +292,6 @@ useEffect(() => {
   const getAttributeValues = (
     attributeName
   ) => {
-
     if (
       !product ||
       !Array.isArray(product.variants)
@@ -320,7 +303,6 @@ useEffect(() => {
 
     product.variants.forEach(
       (variant) => {
-
         const attributes =
           normalizeAttributes(
             variant?.attributes
@@ -346,7 +328,6 @@ useEffect(() => {
 
         attributeValues.forEach(
           (value) => {
-
             const cleanValue =
               value.trim();
 
@@ -354,12 +335,10 @@ useEffect(() => {
               cleanValue.toLowerCase();
 
             if (!values.has(normalized)) {
-
               values.set(
                 normalized,
                 cleanValue
               );
-
             }
           }
         );
@@ -371,7 +350,6 @@ useEffect(() => {
     );
   };
 
-
   // =======================================================
   // GET VALUES FROM VARIANT
   // =======================================================
@@ -380,7 +358,6 @@ useEffect(() => {
     variant,
     attributeName
   ) => {
-
     const attributes =
       normalizeAttributes(
         variant?.attributes
@@ -404,13 +381,11 @@ useEffect(() => {
     );
   };
 
-
   // =======================================================
   // FIND SELECTED VARIANT
   // =======================================================
 
   const selectedVariant = useMemo(() => {
-
     if (
       !product ||
       !Array.isArray(product.variants) ||
@@ -440,10 +415,8 @@ useEffect(() => {
     return (
       product.variants.find(
         (variant) => {
-
           return attributeNames.every(
             (attributeName) => {
-
               const selectedValue =
                 selectedAttributes[
                   attributeName
@@ -468,17 +441,14 @@ useEffect(() => {
               );
             }
           );
-
         }
       ) || null
     );
-
   }, [
     product,
     attributeNames,
     selectedAttributes,
   ]);
-
 
   // =======================================================
   // CHECK ATTRIBUTE AVAILABILITY
@@ -488,7 +458,6 @@ useEffect(() => {
     attributeName,
     value
   ) => {
-
     if (
       !product ||
       !Array.isArray(product.variants)
@@ -498,7 +467,6 @@ useEffect(() => {
 
     return product.variants.some(
       (variant) => {
-
         if (!variant) {
           return false;
         }
@@ -540,7 +508,6 @@ useEffect(() => {
             selectedAttribute,
             selectedValue,
           ]) => {
-
             if (
               selectedAttribute ===
               attributeName
@@ -571,7 +538,6 @@ useEffect(() => {
     );
   };
 
-
   // =======================================================
   // SELECT ATTRIBUTE
   // =======================================================
@@ -580,7 +546,6 @@ useEffect(() => {
     attributeName,
     value
   ) => {
-
     setSelectedAttributes(
       (previous) => ({
         ...previous,
@@ -592,7 +557,6 @@ useEffect(() => {
     setAddedToCart(false);
   };
 
-
   // =======================================================
   // HAS VARIANTS
   // =======================================================
@@ -601,14 +565,12 @@ useEffect(() => {
     Array.isArray(product?.variants) &&
     product.variants.length > 0;
 
-
   // =======================================================
   // HAS ATTRIBUTES
   // =======================================================
 
   const hasAttributes =
     attributeNames.length > 0;
-
 
   // =======================================================
   // ALL ATTRIBUTES SELECTED
@@ -623,7 +585,6 @@ useEffect(() => {
         ]
     );
 
-
   // =======================================================
   // ACTIVE PRICE
   // =======================================================
@@ -632,7 +593,6 @@ useEffect(() => {
     selectedVariant?.price ||
     product?.price ||
     null;
-
 
   // =======================================================
   // ACTIVE STOCK
@@ -646,13 +606,11 @@ useEffect(() => {
         : product?.stock ?? 0
     );
 
-
   // =======================================================
   // STOCK STATUS
   // =======================================================
 
   const stockStatus = (() => {
-
     if (
       hasVariants &&
       !allAttributesSelected
@@ -669,9 +627,7 @@ useEffect(() => {
     }
 
     return "known";
-
   })();
-
 
   // =======================================================
   // ACTIVE IMAGES
@@ -681,7 +637,6 @@ useEffect(() => {
     selectedVariant?.images?.length > 0
       ? selectedVariant.images
       : product?.images || [];
-
 
   // =======================================================
   // FORMAT IMAGES
@@ -695,7 +650,6 @@ useEffect(() => {
       .filter(
         (image) => image.url
       );
-
 
   // =======================================================
   // FALLBACK IMAGE
@@ -711,20 +665,16 @@ useEffect(() => {
           },
         ];
 
-
   // =======================================================
   // RESET IMAGE WHEN VARIANT CHANGES
   // =======================================================
 
   useEffect(() => {
-
     setSelectedImage(0);
     setAddedToCart(false);
-
   }, [
     selectedVariant?._id,
   ]);
-
 
   // =======================================================
   // CAN ADD TO CART
@@ -739,14 +689,12 @@ useEffect(() => {
       selectedVariant !== null
     );
 
-
   // =======================================================
   // ADD TO CART
   // =======================================================
 
   const handleAddProductToCart =
     async () => {
-
       if (
         !canAddToCart ||
         addingToCart
@@ -755,17 +703,9 @@ useEffect(() => {
       }
 
       try {
-
         setAddingToCart(true);
 
-
-        // ================================================
-        // IMPORTANT:
-        // SEND EXACT SELECTED COLOR + SIZE
-        // ================================================
-
         const payload = {
-
           productId:
             product?._id,
 
@@ -778,9 +718,7 @@ useEffect(() => {
           selectedAttributes: {
             ...selectedAttributes,
           },
-
         };
-
 
         console.log(
           "ADDING TO CART:",
@@ -792,69 +730,48 @@ useEffect(() => {
           selectedAttributes
         );
 
-
         await handleAddToCart(
           payload
         );
 
-
-        // ================================================
-        // SUCCESS
-        // ================================================
-
         setAddedToCart(true);
-
         setBagPulse(true);
-
 
         setTimeout(() => {
           setBagPulse(false);
         }, 900);
-
-
       } catch (err) {
-
         console.error(
           "FAILED TO ADD PRODUCT TO CART:",
           err
         );
-
       } finally {
-
         setAddingToCart(false);
-
       }
     };
-
 
   // =======================================================
   // LOADING
   // =======================================================
 
   if (loading) {
-
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#F8F6F2] font-['Plus_Jakarta_Sans',sans-serif] text-[#211D1A]">
-
-        <p className="animate-pulse text-[9px] font-semibold uppercase tracking-[0.2em] text-[#8A837C]">
+        <p className="animate-pulse text-[0.5625rem] font-semibold uppercase tracking-[0.2em] text-[#8A837C]">
           Retrieving product...
         </p>
-
       </main>
     );
   }
-
 
   // =======================================================
   // ERROR
   // =======================================================
 
   if (!product) {
-
     return (
       <main className="flex min-h-screen flex-col items-center justify-center bg-[#F8F6F2] font-['Plus_Jakarta_Sans',sans-serif] text-[#211D1A]">
-
-        <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-[#8A837C]">
+        <p className="text-[0.5625rem] font-semibold uppercase tracking-[0.18em] text-[#8A837C]">
           {error || "Product not found"}
         </p>
 
@@ -863,15 +780,13 @@ useEffect(() => {
           onClick={() =>
             navigate(-1)
           }
-          className="mt-5 border border-[#211D1A] px-5 py-3 text-[9px] font-semibold uppercase tracking-[0.14em] transition hover:bg-[#211D1A] hover:text-white"
+          className="mt-[1.25rem] border border-[#211D1A] px-[1.25rem] py-[0.75rem] text-[0.5625rem] font-semibold uppercase tracking-[0.14em] transition hover:bg-[#211D1A] hover:text-white"
         >
           Go back
         </button>
-
       </main>
     );
   }
-
 
   // =======================================================
   // UI
@@ -880,54 +795,61 @@ useEffect(() => {
   return (
     <main className="min-h-screen bg-[#F8F6F2] font-['Plus_Jakarta_Sans',sans-serif] text-[#211D1A]">
 
-      <div className="mx-auto max-w-[1180px] px-4 py-5 sm:px-6 lg:px-8">
+      {/* =================================================
+          FIXED HEADER
+      ================================================= */}
 
-        {/* =================================================
-            HEADER
-        ================================================= */}
+      <header className="fixed left-0 right-0 top-0 z-50 h-[4rem] border-b border-[#E1DBD4] bg-[#F8F6F2]/95 backdrop-blur-md">
 
-        <header className="flex h-12 items-center justify-between border-b border-[#E1DBD4]">
+        <div className="mx-auto flex h-full max-w-[73.75rem] items-center justify-between px-[1rem] sm:px-[1.5rem] lg:px-[2rem]">
 
-          <div className="flex items-center gap-3">
+          {/* LEFT */}
+
+          <div className="flex items-center gap-[0.75rem]">
 
             <button
               type="button"
               aria-label="Open menu"
-              className="flex h-8 w-8 items-center justify-center rounded-[4px] border border-[#D8D1C8] bg-white transition hover:border-[#211D1A]"
+              className="flex h-[2rem] w-[2rem] items-center justify-center rounded-[0.25rem] border border-[#D8D1C8] bg-white transition hover:border-[#211D1A]"
             >
-              <FiMenu className="h-3.5 w-3.5" />
+              <FiMenu className="h-[0.875rem] w-[0.875rem]" />
             </button>
 
-            <span className="hidden text-[8px] font-medium uppercase tracking-[0.18em] text-[#8A837C] sm:block">
+            <span className="hidden text-[0.5rem] font-medium uppercase tracking-[0.18em] text-[#8A837C] sm:block">
               Modern essentials
             </span>
 
           </div>
 
+          {/* LOGO */}
 
           <Link
             to="/"
-            className="text-[18px] font-bold tracking-[0.13em] transition-opacity hover:opacity-70"
+            className="text-[1.125rem] font-bold tracking-[0.13em] transition-opacity hover:opacity-70"
           >
             SNITCH
           </Link>
 
+          {/* RIGHT */}
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-[0.75rem]">
 
-            <Link
-              to="/"
-              className="hidden text-[8px] font-semibold uppercase tracking-[0.14em] text-[#625B55] hover:text-[#211D1A] sm:block"
+            
+
+            {/* WISHLIST */}
+
+            <button
+              type="button"
+              aria-label="Wishlist"
+              onClick={() =>
+                navigate("/wishlist")
+              }
+              className="flex h-[2rem] w-[2rem] items-center justify-center rounded-[0.25rem] border border-[#D8D1C8] bg-white text-[#211D1A] transition-all duration-300 hover:border-[#211D1A] hover:bg-[#211D1A] hover:text-white"
             >
-              Shop
-            </Link>
+              <FiHeart className="h-[0.875rem] w-[0.875rem]" />
+            </button>
 
-            <Link
-              to="/login"
-              className="hidden text-[8px] font-semibold uppercase tracking-[0.14em] text-[#625B55] hover:text-[#211D1A] sm:block"
-            >
-              Sign in
-            </Link>
+            {/* SHOPPING BAG */}
 
             <button
               type="button"
@@ -935,7 +857,7 @@ useEffect(() => {
               onClick={() =>
                 navigate("/cart")
               }
-              className={`relative flex h-8 w-8 items-center justify-center rounded-[4px] border transition-all duration-300 ${
+              className={`relative flex h-[2rem] w-[2rem] items-center justify-center rounded-[0.25rem] border transition-all duration-300 ${
                 bagPulse
                   ? "scale-125 border-[#211D1A] bg-[#211D1A] text-white"
                   : "scale-100 border-[#D8D1C8] bg-white text-[#211D1A] hover:border-[#211D1A] hover:bg-[#211D1A] hover:text-white"
@@ -943,7 +865,7 @@ useEffect(() => {
             >
 
               <FiShoppingBag
-                className={`h-3.5 w-3.5 transition-transform duration-300 ${
+                className={`h-[0.875rem] w-[0.875rem] transition-transform duration-300 ${
                   bagPulse
                     ? "animate-bounce"
                     : ""
@@ -951,11 +873,11 @@ useEffect(() => {
               />
 
               {bagPulse && (
-                <span className="absolute -right-1 -top-1 flex h-2.5 w-2.5">
+                <span className="absolute -right-[0.25rem] -top-[0.25rem] flex h-[0.625rem] w-[0.625rem]">
 
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#B54A42] opacity-75" />
 
-                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#B54A42]" />
+                  <span className="relative inline-flex h-[0.625rem] w-[0.625rem] rounded-full bg-[#B54A42]" />
 
                 </span>
               )}
@@ -964,8 +886,15 @@ useEffect(() => {
 
           </div>
 
-        </header>
+        </div>
 
+      </header>
+
+      {/* =================================================
+          PAGE CONTAINER
+      ================================================= */}
+
+      <div className="mx-auto max-w-[73.75rem] px-[1rem] pb-[1.25rem] pt-[4.25rem] sm:px-[1.5rem] lg:px-[2rem]">
 
         {/* =================================================
             BACK
@@ -976,32 +905,30 @@ useEffect(() => {
           onClick={() =>
             navigate(-1)
           }
-          className="mt-5 flex items-center gap-2 text-[8px] font-semibold uppercase tracking-[0.15em] text-[#8A837C] transition hover:text-[#211D1A]"
+          className="mt-[0.75rem] flex items-center gap-[0.5rem] text-[0.5rem] font-semibold uppercase tracking-[0.15em] text-[#8A837C] transition hover:text-[#211D1A]"
         >
-          <FiArrowLeft className="h-3 w-3" />
+          <FiArrowLeft className="h-[0.75rem] w-[0.75rem]" />
           Back to products
         </button>
-
 
         {/* =================================================
             PRODUCT AREA
         ================================================= */}
 
-        <div className="grid gap-8 py-6 md:grid-cols-[minmax(0,0.95fr)_minmax(320px,0.8fr)] md:gap-12 lg:gap-16 lg:py-8">
+        <div className="grid gap-[2rem] py-[1.5rem] md:grid-cols-[minmax(0,0.95fr)_minmax(20rem,0.8fr)] md:gap-[3rem] lg:gap-[4rem] lg:py-[2rem]">
 
           {/* =================================================
               IMAGE GALLERY
           ================================================= */}
 
-          <section className="flex min-w-0 gap-2.5">
+          <section className="flex min-w-0 gap-[0.625rem]">
 
             {/* THUMBNAILS */}
 
-            <div className="hidden w-[58px] shrink-0 flex-col gap-1.5 sm:flex">
+            <div className="hidden w-[3.625rem] shrink-0 flex-col gap-[0.375rem] sm:flex">
 
               {images.map(
                 (image, index) => (
-
                   <button
                     key={`${image.url}-${index}`}
                     type="button"
@@ -1010,7 +937,7 @@ useEffect(() => {
                         index
                       )
                     }
-                    className={`h-[72px] w-[58px] overflow-hidden rounded-[3px] border bg-white transition ${
+                    className={`h-[4.5rem] w-[3.625rem] overflow-hidden rounded-[0.1875rem] border bg-white transition ${
                       selectedImage ===
                       index
                         ? "border-[#211D1A]"
@@ -1025,18 +952,16 @@ useEffect(() => {
                     />
 
                   </button>
-
                 )
               )}
 
             </div>
 
-
             {/* MAIN IMAGE */}
 
             <div className="min-w-0 flex-1">
 
-              <div className="group relative mx-auto aspect-[4/5] w-full max-w-[440px] overflow-hidden rounded-[4px] bg-[#EAE5E0]">
+              <div className="group relative mx-auto aspect-[4/5] w-full max-w-[27.5rem] overflow-hidden rounded-[0.25rem] bg-[#EAE5E0]">
 
                 <img
                   src={
@@ -1052,10 +977,8 @@ useEffect(() => {
                   className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.015]"
                 />
 
-
                 {images.length > 1 && (
                   <>
-
                     <button
                       type="button"
                       onClick={() =>
@@ -1068,11 +991,10 @@ useEffect(() => {
                         )
                       }
                       aria-label="Previous image"
-                      className="absolute left-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-[3px] border border-[#D8D1C8] bg-white/90 opacity-0 shadow-sm transition group-hover:opacity-100"
+                      className="absolute left-[0.5rem] top-1/2 flex h-[2rem] w-[2rem] -translate-y-1/2 items-center justify-center rounded-[0.1875rem] border border-[#D8D1C8] bg-white/90 opacity-0 shadow-sm transition group-hover:opacity-100"
                     >
-                      <FiChevronLeft className="h-3.5 w-3.5" />
+                      <FiChevronLeft className="h-[0.875rem] w-[0.875rem]" />
                     </button>
-
 
                     <button
                       type="button"
@@ -1086,17 +1008,15 @@ useEffect(() => {
                         )
                       }
                       aria-label="Next image"
-                      className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-[3px] border border-[#D8D1C8] bg-white/90 opacity-0 shadow-sm transition group-hover:opacity-100"
+                      className="absolute right-[0.5rem] top-1/2 flex h-[2rem] w-[2rem] -translate-y-1/2 items-center justify-center rounded-[0.1875rem] border border-[#D8D1C8] bg-white/90 opacity-0 shadow-sm transition group-hover:opacity-100"
                     >
-                      <FiChevronRight className="h-3.5 w-3.5" />
+                      <FiChevronRight className="h-[0.875rem] w-[0.875rem]" />
                     </button>
-
                   </>
                 )}
 
-
                 {images.length > 1 && (
-                  <div className="absolute bottom-3 right-3 bg-[#211D1A]/85 px-2.5 py-1.5 text-[7px] font-semibold uppercase tracking-[0.12em] text-white">
+                  <div className="absolute bottom-[0.75rem] right-[0.75rem] bg-[#211D1A]/85 px-[0.625rem] py-[0.375rem] text-[0.4375rem] font-semibold uppercase tracking-[0.12em] text-white">
                     {selectedImage + 1} /{" "}
                     {images.length}
                   </div>
@@ -1104,14 +1024,12 @@ useEffect(() => {
 
               </div>
 
-
               {/* MOBILE THUMBNAILS */}
 
-              <div className="mt-2.5 flex gap-1.5 overflow-x-auto sm:hidden">
+              <div className="mt-[0.625rem] flex gap-[0.375rem] overflow-x-auto sm:hidden">
 
                 {images.map(
                   (image, index) => (
-
                     <button
                       key={`${image.url}-mobile-${index}`}
                       type="button"
@@ -1120,7 +1038,7 @@ useEffect(() => {
                           index
                         )
                       }
-                      className={`h-[58px] w-[46px] shrink-0 overflow-hidden rounded-[3px] border bg-white ${
+                      className={`h-[3.625rem] w-[2.875rem] shrink-0 overflow-hidden rounded-[0.1875rem] border bg-white ${
                         selectedImage ===
                         index
                           ? "border-[#211D1A]"
@@ -1135,7 +1053,6 @@ useEffect(() => {
                       />
 
                     </button>
-
                   )
                 )}
 
@@ -1145,76 +1062,78 @@ useEffect(() => {
 
           </section>
 
-
           {/* =================================================
               PRODUCT INFORMATION
           ================================================= */}
 
-          <section className="flex flex-col md:pt-2">
+          <section className="flex flex-col md:pt-[0.5rem]">
 
             {/* TITLE */}
 
-            <div className="flex items-start justify-between gap-4 border-b border-[#E1DBD4] pb-5">
+            <div className="flex items-start justify-between gap-[1rem] border-b border-[#E1DBD4] pb-[1.25rem]">
 
               <div>
 
-                <p className="text-[8px] font-semibold uppercase tracking-[0.2em] text-[#8A837C]">
+                <p className="text-[0.5rem] font-semibold uppercase tracking-[0.2em] text-[#8A837C]">
                   Product detail
                 </p>
 
-                <h1 className="mt-2.5 font-serif text-3xl leading-[1.05] tracking-[-0.025em] sm:text-[38px]">
+                <h1 className="mt-[0.625rem] font-serif text-[1.875rem] leading-[1.05] tracking-[-0.025em] sm:text-[2.375rem]">
                   {product?.title ||
                     "Untitled product"}
                 </h1>
 
               </div>
 
-
-             <button
-  type="button"
-  onClick={handleWishlist}
-  aria-label={
-    wishlisted
-      ? "Remove from wishlist"
-      : "Add to wishlist"
-  }
-  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[4px] border border-[#D8D1C8] bg-white transition hover:border-[#211D1A] hover:bg-[#EEEAE5]"
->
-  <FiHeart
-    className={`h-3.5 w-3.5 transition ${
-      wishlisted ? "fill-current" : ""
-    }`}
-  />
-</button>
+              <button
+                type="button"
+                onClick={handleWishlist}
+                aria-label={
+                  wishlisted
+                    ? "Remove from wishlist"
+                    : "Add to wishlist"
+                }
+                className="flex h-[2rem] w-[2rem] shrink-0 items-center justify-center rounded-[0.25rem] border border-[#D8D1C8] bg-white transition hover:border-[#211D1A] hover:bg-[#EEEAE5]"
+              >
+                <FiHeart
+                  className={`h-[0.875rem] w-[0.875rem] transition ${
+                    wishlisted
+                      ? "fill-current"
+                      : ""
+                  }`}
+                />
+              </button>
 
             </div>
 
-
             {/* PRICE */}
 
-            <div className="flex items-center justify-between border-b border-[#E1DBD4] py-4">
+            <div className="flex items-center justify-between border-b border-[#E1DBD4] py-[1rem]">
 
-              <span className="text-base font-semibold sm:text-lg">
+              <span className="text-[1rem] font-semibold sm:text-[1.125rem]">
                 {formatPrice(
                   activePrice
                 )}
               </span>
 
-              {stockStatus === "select" && (
-                <span className="text-[8px] font-semibold uppercase tracking-[0.13em] text-[#8A837C]">
+              {stockStatus ===
+                "select" && (
+                <span className="text-[0.5rem] font-semibold uppercase tracking-[0.13em] text-[#8A837C]">
                   Select options
                 </span>
               )}
 
-              {stockStatus === "unavailable" && (
-                <span className="text-[8px] font-semibold uppercase tracking-[0.13em] text-[#B54A42]">
+              {stockStatus ===
+                "unavailable" && (
+                <span className="text-[0.5rem] font-semibold uppercase tracking-[0.13em] text-[#B54A42]">
                   Combination unavailable
                 </span>
               )}
 
-              {stockStatus === "known" && (
+              {stockStatus ===
+                "known" && (
                 <span
-                  className={`text-[8px] font-semibold uppercase tracking-[0.13em] ${
+                  className={`text-[0.5rem] font-semibold uppercase tracking-[0.13em] ${
                     Number(activeStock) > 0
                       ? "text-[#8A837C]"
                       : "text-[#B54A42]"
@@ -1228,34 +1147,31 @@ useEffect(() => {
 
             </div>
 
-
             {/* =================================================
                 VARIANTS
             ================================================= */}
 
             {hasAttributes && (
-              <div className="border-b border-[#E1DBD4] py-5">
+              <div className="border-b border-[#E1DBD4] py-[1.25rem]">
 
-                <div className="mb-5 flex items-center justify-between">
+                <div className="mb-[1.25rem] flex items-center justify-between">
 
-                  <p className="text-[8px] font-semibold uppercase tracking-[0.18em] text-[#8A837C]">
+                  <p className="text-[0.5rem] font-semibold uppercase tracking-[0.18em] text-[#8A837C]">
                     Select options
                   </p>
 
                   {selectedVariant && (
-                    <span className="text-[8px] font-semibold uppercase tracking-[0.12em] text-[#625B55]">
+                    <span className="text-[0.5rem] font-semibold uppercase tracking-[0.12em] text-[#625B55]">
                       Selected
                     </span>
                   )}
 
                 </div>
 
-
-                <div className="space-y-5">
+                <div className="space-y-[1.25rem]">
 
                   {attributeNames.map(
                     (attributeName) => {
-
                       const values =
                         getAttributeValues(
                           attributeName
@@ -1268,9 +1184,9 @@ useEffect(() => {
                           }
                         >
 
-                          <div className="mb-2.5 flex items-center justify-between">
+                          <div className="mb-[0.625rem] flex items-center justify-between">
 
-                            <span className="text-[9px] font-semibold uppercase tracking-[0.14em]">
+                            <span className="text-[0.5625rem] font-semibold uppercase tracking-[0.14em]">
                               {
                                 attributeName
                               }
@@ -1279,7 +1195,7 @@ useEffect(() => {
                             {selectedAttributes[
                               attributeName
                             ] && (
-                              <span className="text-[8px] uppercase tracking-[0.1em] text-[#8A837C]">
+                              <span className="text-[0.5rem] uppercase tracking-[0.1em] text-[#8A837C]">
                                 {
                                   selectedAttributes[
                                     attributeName
@@ -1290,12 +1206,10 @@ useEffect(() => {
 
                           </div>
 
-
-                          <div className="flex flex-wrap gap-1.5">
+                          <div className="flex flex-wrap gap-[0.375rem]">
 
                             {values.map(
                               (value) => {
-
                                 const selected =
                                   selectedAttributes[
                                     attributeName
@@ -1321,7 +1235,7 @@ useEffect(() => {
                                         value
                                       )
                                     }
-                                    className={`min-w-[48px] border px-3.5 py-2.5 text-[9px] font-semibold uppercase tracking-[0.1em] transition ${
+                                    className={`min-w-[3rem] border px-[0.875rem] py-[0.625rem] text-[0.5625rem] font-semibold uppercase tracking-[0.1em] transition ${
                                       selected
                                         ? "border-[#211D1A] bg-[#211D1A] text-white"
                                         : available
@@ -1344,26 +1258,24 @@ useEffect(() => {
 
                 </div>
 
-
                 {hasVariants &&
                   !allAttributesSelected && (
-                    <p className="mt-5 border-l-2 border-[#B54A42] pl-3 text-[8px] font-semibold uppercase tracking-[0.1em] text-[#B54A42]">
+                    <p className="mt-[1.25rem] border-l-2 border-[#B54A42] pl-[0.75rem] text-[0.5rem] font-semibold uppercase tracking-[0.1em] text-[#B54A42]">
                       Please select all options
                     </p>
                   )}
-
 
                 {selectedVariant &&
                   Number(
                     selectedVariant.stock
                   ) > 0 && (
-                    <div className="mt-5 flex items-center justify-between border-t border-[#E7E2DC] pt-4">
+                    <div className="mt-[1.25rem] flex items-center justify-between border-t border-[#E7E2DC] pt-[1rem]">
 
-                      <span className="text-[8px] uppercase tracking-[0.12em] text-[#8A837C]">
+                      <span className="text-[0.5rem] uppercase tracking-[0.12em] text-[#8A837C]">
                         Variant availability
                       </span>
 
-                      <span className="text-[8px] font-semibold uppercase tracking-[0.12em] text-[#211D1A]">
+                      <span className="text-[0.5rem] font-semibold uppercase tracking-[0.12em] text-[#211D1A]">
                         Available
                       </span>
 
@@ -1373,30 +1285,28 @@ useEffect(() => {
               </div>
             )}
 
-
             {/* DESCRIPTION */}
 
-            <div className="border-b border-[#E1DBD4] py-5">
+            <div className="border-b border-[#E1DBD4] py-[1.25rem]">
 
-              <p className="text-[8px] font-semibold uppercase tracking-[0.18em] text-[#8A837C]">
+              <p className="text-[0.5rem] font-semibold uppercase tracking-[0.18em] text-[#8A837C]">
                 About this piece
               </p>
 
-              <p className="mt-2.5 max-w-xl text-[12px] leading-6 text-[#625B55]">
+              <p className="mt-[0.625rem] max-w-xl text-[0.75rem] leading-[1.5rem] text-[#625B55]">
                 {product?.description ||
                   "A considered essential for your everyday wardrobe."}
               </p>
 
             </div>
 
-
             {/* SHIPPING */}
 
-            <div className="py-5">
+            <div className="py-[1.25rem]">
 
-              <div className="grid gap-2.5 text-[8px] uppercase tracking-[0.11em] text-[#8A837C]">
+              <div className="grid gap-[0.625rem] text-[0.5rem] uppercase tracking-[0.11em] text-[#8A837C]">
 
-                <div className="flex items-center justify-between border-b border-[#E7E2DC] pb-2.5">
+                <div className="flex items-center justify-between border-b border-[#E7E2DC] pb-[0.625rem]">
 
                   <span>
                     Shipping
@@ -1408,8 +1318,7 @@ useEffect(() => {
 
                 </div>
 
-
-                <div className="flex items-center justify-between border-b border-[#E7E2DC] pb-2.5">
+                <div className="flex items-center justify-between border-b border-[#E7E2DC] pb-[0.625rem]">
 
                   <span>
                     Returns
@@ -1420,7 +1329,6 @@ useEffect(() => {
                   </span>
 
                 </div>
-
 
                 <div className="flex items-center justify-between">
 
@@ -1438,17 +1346,18 @@ useEffect(() => {
 
             </div>
 
-
             {/* ACTION BUTTONS */}
 
-            <div className="grid gap-2 sm:grid-cols-2">
+            <div className="grid gap-[0.5rem] sm:grid-cols-2">
 
               <button
                 type="button"
                 disabled={
                   !addedToCart &&
-                  (!canAddToCart ||
-                    addingToCart)
+                  (
+                    !canAddToCart ||
+                    addingToCart
+                  )
                 }
                 onClick={
                   addedToCart
@@ -1458,7 +1367,7 @@ useEffect(() => {
                         )
                     : handleAddProductToCart
                 }
-                className={`flex h-11 items-center justify-center gap-2 rounded-[3px] text-[9px] font-semibold uppercase tracking-[0.14em] text-white transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-40 ${
+                className={`flex h-[2.75rem] items-center justify-center gap-[0.5rem] rounded-[0.1875rem] text-[0.5625rem] font-semibold uppercase tracking-[0.14em] text-white transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-40 ${
                   addedToCart
                     ? "bg-[#211D1A] hover:bg-[#554D47]"
                     : "bg-[#211D1A] hover:bg-[#554D47]"
@@ -1466,9 +1375,9 @@ useEffect(() => {
               >
 
                 {addedToCart ? (
-                  <FiCheck className="h-3.5 w-3.5 animate-[bounce_0.6s_ease-in-out_1]" />
+                  <FiCheck className="h-[0.875rem] w-[0.875rem] animate-[bounce_0.6s_ease-in-out_1]" />
                 ) : (
-                  <FiShoppingBag className="h-3.5 w-3.5" />
+                  <FiShoppingBag className="h-[0.875rem] w-[0.875rem]" />
                 )}
 
                 {addingToCart
@@ -1479,24 +1388,22 @@ useEffect(() => {
 
               </button>
 
-
               <button
                 type="button"
                 disabled={
                   !canAddToCart
                 }
-                className="h-11 rounded-[3px] border border-[#211D1A] bg-transparent text-[9px] font-semibold uppercase tracking-[0.14em] text-[#211D1A] transition hover:bg-[#EEEAE5] disabled:cursor-not-allowed disabled:opacity-40"
+                className="h-[2.75rem] rounded-[0.1875rem] border border-[#211D1A] bg-transparent text-[0.5625rem] font-semibold uppercase tracking-[0.14em] text-[#211D1A] transition hover:bg-[#EEEAE5] disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Buy now
               </button>
 
             </div>
 
-
             {hasVariants &&
               !selectedVariant &&
               !addedToCart && (
-                <p className="mt-3 text-center text-[7px] uppercase tracking-[0.12em] text-[#AAA39B]">
+                <p className="mt-[0.75rem] text-center text-[0.4375rem] uppercase tracking-[0.12em] text-[#AAA39B]">
                   Select color and size to continue
                 </p>
               )}
@@ -1512,4 +1419,3 @@ useEffect(() => {
 };
 
 export default ProductDetail;
-

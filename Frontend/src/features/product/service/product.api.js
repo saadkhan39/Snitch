@@ -15,8 +15,13 @@ export async function getSellerProducts() {
   return response.data?.products ?? response.data;
 }
 
-export async function getAllProducts() {
-  const response = await api.get("/");
+export async function getAllProducts(search = "") {
+  const response = await api.get("/", {
+    params: search.trim()
+      ? { search: search.trim() }
+      : {},
+  });
+
   return response.data?.products ?? response.data;
 }
 

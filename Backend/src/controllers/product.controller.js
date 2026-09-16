@@ -48,16 +48,36 @@ export async function getSellerProducts(req,res){
     })
 }  
 
-export async function getAllProduct(req,res){
-    const products = await productModel.find()
+export async function getAllProduct(req, res) {
+    const { search } = req.query;
+
+    const filter = {};
+
+    if (search?.trim()) {
+        filter.$or = [
+            {
+                title: {
+                    $regex: search.trim(),
+                    $options: "i"
+                }
+            },
+            {
+                description: {
+                    $regex: search.trim(),
+                    $options: "i"
+                }
+            }
+        ];
+    }
+
+    const products = await productModel.find(filter);
 
     res.status(200).json({
         message: "Products fetched successfully",
         success: true,
         products
-    })
+    });
 }
-
 export async function getProductDetails(req,res){
     const { id } = req.params
 

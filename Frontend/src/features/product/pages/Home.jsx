@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useSelector } from "react-redux";
+import { useSelector  } from "react-redux";
 import { Link, useNavigate } from "react-router";
 
 import {
@@ -113,6 +113,7 @@ const ProductImageFallback = () => (
 const Home = () => {
   const navigate = useNavigate();
 
+
   /*
     =====================================================
     WISHLIST
@@ -221,34 +222,34 @@ const Home = () => {
     =====================================================
   */
 
-  useEffect(() => {
-    let isMounted = true;
+useEffect(() => {
+  let isMounted = true;
 
-    const loadProducts = async () => {
-      try {
-        setIsLoading(true);
-        setLoadError(false);
+  const loadProducts = async () => {
+    try {
+      setIsLoading(true);
+      setLoadError(false);
 
-        await handleGetAllProducts();
-      } catch (error) {
-        console.error("Failed to load products:", error);
+      await handleGetAllProducts();
+    } catch (error) {
+      console.error("Failed to load products:", error);
 
-        if (isMounted) {
-          setLoadError(true);
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+      if (isMounted) {
+        setLoadError(true);
       }
-    };
+    } finally {
+      if (isMounted) {
+        setIsLoading(false);
+      }
+    }
+  };
 
-    loadProducts();
+  loadProducts();
 
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  return () => {
+    isMounted = false;
+  };
+}, [handleGetAllProducts]);
 
   /*
     =====================================================
@@ -271,30 +272,17 @@ const Home = () => {
     =====================================================
   */
 
-  const visibleProducts = useMemo(() => {
-    const query = normalizeText(searchTerm);
+ const visibleProducts = useMemo(() => {
+  return products.filter((product) => {
+    const productCategory = normalizeText(product?.category);
 
-    return products.filter((product) => {
-      const productCategory = normalizeText(product?.category);
+    const matchesCategory =
+      activeCategory === "All" ||
+      productCategory === normalizeText(activeCategory);
 
-      const matchesCategory =
-        activeCategory === "All" ||
-        productCategory === normalizeText(activeCategory);
-
-      const searchableText = [
-        product?.title,
-        product?.description,
-        product?.category,
-      ]
-        .filter(Boolean)
-        .join(" ");
-
-      const matchesSearch =
-        !query || normalizeText(searchableText).includes(query);
-
-      return matchesCategory && matchesSearch;
-    });
-  }, [products, activeCategory, searchTerm]);
+    return matchesCategory;
+  });
+}, [products, activeCategory]);
 
   /*
     =====================================================
@@ -478,8 +466,8 @@ const Home = () => {
                 aria-label="Open menu"
                 className="
                   flex
-                  h-[2.25rem]
-                  w-[2.25rem]
+                  h-[2rem]
+                  w-[2rem]
                   items-center
                   justify-center
                   rounded-[0.3125rem]
@@ -488,8 +476,8 @@ const Home = () => {
                   bg-white
                   transition-all
                   duration-200
-                  hover:border-[#211D1A]
-                  hover:bg-[#EEEAE5]
+                  hover:bg-[#211D1A]
+                  hover:text-[#ffffff]
                 "
               >
                 <FiMenu className="h-[1rem] w-[1rem]" />
@@ -774,86 +762,78 @@ const Home = () => {
               New arrivals
             </button>
 
-            <button
-              type="button"
-              onClick={() => handleCategoryShortcut("All")}
-              className="
-                shrink-0
-                rounded-[0.3125rem]
-                border
-                border-[#D8D1C8]
-                bg-white
-                px-[0.875rem]
-                py-[0.5rem]
-                text-[0.5625rem]
-                font-semibold
-                text-[#625B55]
-                transition-all
-                hover:border-[#211D1A]
-                hover:text-[#211D1A]
-              "
-            >
-              Sale
-            </button>
+           
           </div>
 
           {/* SEARCH */}
 
-          <div
-            className="
-              flex
-              w-[9.0625rem]
-              shrink-0
-              items-center
-              gap-[0.5rem]
-              rounded-[0.3125rem]
-              border
-              border-[#D8D1C8]
-              bg-white
-              px-[0.75rem]
-              py-[0.5rem]
-              sm:w-[13.75rem]
-              lg:w-[15.625rem]
-            "
-          >
-            <FiSearch className="h-[0.875rem] w-[0.875rem] shrink-0 text-[#625B55]" />
+         <form
+  onSubmit={(event) => {
+    event.preventDefault();
 
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder="Search products"
-              className="
-                min-w-0
-                flex-1
-                bg-transparent
-                text-[0.5625rem]
-                font-semibold
-                text-[#211D1A]
-                outline-none
-                placeholder:text-[#A39C93]
-              "
-            />
+    const query = searchTerm.trim();
 
-            {searchTerm && (
-              <button
-                type="button"
-                aria-label="Clear search"
-                onClick={() => setSearchTerm("")}
-                className="
-                  flex
-                  shrink-0
-                  items-center
-                  justify-center
-                  text-[#625B55]
-                  transition-colors
-                  hover:text-[#211D1A]
-                "
-              >
-                <FiX className="h-[0.875rem] w-[0.875rem]" />
-              </button>
-            )}
-          </div>
+    if (!query) return;
+
+    navigate(`/search?q=${encodeURIComponent(query)}`);
+  }}
+>
+  <div
+    className="
+      flex
+      w-[9.0625rem]
+      shrink-0
+      items-center
+      gap-[0.5rem]
+      rounded-[0.3125rem]
+      border
+      border-[#D8D1C8]
+      bg-white
+      px-[0.75rem]
+      py-[0.5rem]
+      sm:w-[13.75rem]
+      lg:w-[15.625rem]
+    "
+  >
+    <FiSearch className="h-[0.875rem] w-[0.875rem] shrink-0 text-[#625B55]" />
+
+    <input
+      type="text"
+      value={searchTerm}
+      onChange={(event) => setSearchTerm(event.target.value)}
+      placeholder="Search products"
+      className="
+        min-w-0
+        flex-1
+        bg-transparent
+        text-[0.5625rem]
+        font-semibold
+        text-[#211D1A]
+        outline-none
+        placeholder:text-[#A39C93]
+      "
+    />
+
+    {searchTerm && (
+      <button
+        type="button"
+        aria-label="Clear search"
+        onClick={() => setSearchTerm("")}
+        className="
+          flex
+          shrink-0
+          items-center
+          justify-center
+          text-[#625B55]
+          transition-colors
+          hover:text-[#211D1A]
+        "
+      >
+        <FiX className="h-[0.875rem] w-[0.875rem]" />
+      </button>
+    )}
+  </div>
+</form>
         </div>
 
        

@@ -475,13 +475,39 @@ const Cart = () => {
           {/* BACK */}
 
           <button
-            onClick={() =>
-              navigate(-1)
-            }
-            className="flex h-9 w-9 items-center justify-center border border-[#D8D1C8] bg-white transition hover:border-[#211D1A]"
-          >
-            <FiArrowLeft className="h-4 w-4" />
-          </button>
+                       type="button"
+                       onClick={() =>
+                         navigate(-1)
+                       }
+                       className="
+                         group
+                         flex
+                         items-center
+                         gap-[0.5rem]
+                         text-[0.625rem]
+                         uppercase
+                         tracking-[0.2em]
+                         text-[#514B45]
+                         transition
+                         hover:text-[#211D1A]
+                       "
+                     >
+         
+                       <FiArrowLeft
+                         className="
+                           h-[1rem]
+                           w-[1rem]
+                           transition-transform
+                           duration-300
+                           group-hover:-translate-x-[0.25rem]
+                         "
+                       />
+         
+                       <span className="hidden sm:block">
+                         Back
+                       </span>
+         
+                     </button>
 
           {/* LOGO */}
 

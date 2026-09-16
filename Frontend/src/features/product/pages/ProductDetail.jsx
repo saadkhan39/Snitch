@@ -807,17 +807,44 @@ const ProductDetail = () => {
 
           <div className="flex items-center gap-[0.75rem]">
 
-            <button
-              type="button"
-              aria-label="Open menu"
-              className="flex h-[2rem] w-[2rem] items-center justify-center rounded-[0.25rem] border border-[#D8D1C8] bg-white transition hover:border-[#211D1A]"
-            >
-              <FiMenu className="h-[0.875rem] w-[0.875rem]" />
-            </button>
+            {/* =================================================
+            BACK
+        ================================================= */}
 
-            <span className="hidden text-[0.5rem] font-medium uppercase tracking-[0.18em] text-[#8A837C] sm:block">
-              Modern essentials
-            </span>
+       <button
+                    type="button"
+                    onClick={() =>
+                      navigate(-1)
+                    }
+                    className="
+                      group
+                      flex
+                      items-center
+                      gap-[0.5rem]
+                      text-[0.625rem]
+                      uppercase
+                      tracking-[0.2em]
+                      text-[#514B45]
+                      transition
+                      hover:text-[#211D1A]
+                    "
+                  >
+      
+                    <FiArrowLeft
+                      className="
+                        h-[1rem]
+                        w-[1rem]
+                        transition-transform
+                        duration-300
+                        group-hover:-translate-x-[0.25rem]
+                      "
+                    />
+      
+                    <span className="hidden sm:block">
+                      Back
+                    </span>
+      
+                  </button>
 
           </div>
 
@@ -896,20 +923,7 @@ const ProductDetail = () => {
 
       <div className="mx-auto max-w-[73.75rem] px-[1rem] pb-[1.25rem] pt-[4.25rem] sm:px-[1.5rem] lg:px-[2rem]">
 
-        {/* =================================================
-            BACK
-        ================================================= */}
-
-        <button
-          type="button"
-          onClick={() =>
-            navigate(-1)
-          }
-          className="mt-[0.75rem] flex items-center gap-[0.5rem] text-[0.5rem] font-semibold uppercase tracking-[0.15em] text-[#8A837C] transition hover:text-[#211D1A]"
-        >
-          <FiArrowLeft className="h-[0.75rem] w-[0.75rem]" />
-          Back to products
-        </button>
+       
 
         {/* =================================================
             PRODUCT AREA

@@ -1020,31 +1020,17 @@ useEffect(() => {
           Modern essentials
         </p>
 
-       <h1
-  className="
-    font-sans
-    text-[2.75rem]
-    font-semibold
-    leading-[0.8]
-    tracking-[-0.055em]
-    text-[#F8F4EA]
-    sm:text-[5rem]
-    lg:text-[6.25rem]
-  "
->
-  Made for
-  <br />
-  <span className="font-light">
-    every moment.
-  </span>
-</h1>
-
+     <h2 className="font-serif text-[58px] xl:text-[76px] leading-[0.75] tracking-[-0.035em] text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.08)]">
+            <span className="italic">Made for</span>
+            <br />
+            every moment.
+          </h2>
         <p
           className="
             mt-5
             max-w-[380px]
-            text-[11px]
-            leading-[1.6]
+            text-[14px]
+            leading-[1.4]
             text-white/65
             sm:text-[12px]
           "
@@ -1058,7 +1044,7 @@ useEffect(() => {
   href="#browse"
   className="
     group
-    mt-7
+    mt-4
     inline-flex
     items-center
     gap-3
@@ -1131,7 +1117,7 @@ useEffect(() => {
           id="about"
           className="scroll-mt-[5rem] py-[3.5rem] text-center sm:py-[4rem]"
         >
-          <p className="mb-[0.75rem] text-[0.5rem] font-bold uppercase tracking-[0.25em] text-[#8A837C]">
+          <p className="mb-[0.50rem] text-[0.5rem] font-bold uppercase tracking-[0.25em] text-[#8A837C]">
             The latest edit
           </p>
 
@@ -1154,127 +1140,7 @@ useEffect(() => {
           </p>
         </section>
 
-        {/* EDITORIAL */}
-
-        <section className="grid gap-[0.75rem] sm:grid-cols-[1.15fr_0.85fr]">
-          <article
-            className="
-              overflow-hidden
-              rounded-[0.4375rem]
-              border border-[#E1DBD4]
-              bg-[#E8E9E5]
-              p-[0.5rem]
-            "
-          >
-            <div
-              className="
-                h-[16rem]
-                overflow-hidden
-                rounded-[0.3125rem]
-                bg-[#D7D8D4]
-                sm:h-[20.625rem]
-              "
-            >
-              {featureImage ? (
-                <img
-                  src={featureImage}
-                  alt="Discover new fashion trends"
-                  className="
-                    h-full
-                    w-full
-                    object-cover
-                    transition-transform
-                    duration-700
-                    hover:scale-[1.03]
-                  "
-                />
-              ) : (
-                <div className="flex h-full items-center justify-center">
-                  <FiPackage className="h-[2.5rem] w-[2.5rem] text-[#8A837C]" />
-                </div>
-              )}
-            </div>
-
-            <div className="px-[0.5rem] pb-[0.75rem] pt-[1.25rem]">
-              <p className="mb-[0.5rem] text-[0.5rem] font-bold uppercase tracking-[0.2em] text-[#8A837C]">
-                Editorial / 01
-              </p>
-
-              <h3 className="font-serif text-[1.5rem] italic tracking-[-0.04em]">
-                Discover the limitless
-              </h3>
-
-              <p className="mt-[0.375rem] text-[0.5625rem] text-[#625B55]">
-                — Imagining new fashion trends
-              </p>
-            </div>
-          </article>
-
-          <article
-            className="
-              flex
-              min-h-[24.375rem]
-              flex-col
-              overflow-hidden
-              rounded-[0.4375rem]
-              border
-              border-[#E1DBD4]
-              bg-[#E8E9E5]
-              p-[1.5rem]
-              sm:min-h-0
-            "
-          >
-            <div>
-              <p className="mb-[0.75rem] text-[0.5rem] font-bold uppercase tracking-[0.2em] text-[#8A837C]">
-                Coming soon
-              </p>
-
-              <h3
-                className="
-                  max-w-[17.5rem]
-                  font-serif
-                  text-[1.875rem]
-                  italic
-                  leading-[0.95]
-                  tracking-[-0.05em]
-                "
-              >
-                Hold on, new product is coming!
-              </h3>
-
-              <p className="mt-[1rem] max-w-[15rem] text-[0.5625rem] leading-[1rem] text-[#625B55]">
-                — Bringing you a new era of simple clothes.
-              </p>
-            </div>
-
-            <div
-              className="
-                mt-auto
-                ml-auto
-                w-full
-                max-w-[13.125rem]
-                overflow-hidden
-                rounded-[0.3125rem]
-                border-[0.375rem]
-                border-white
-                bg-[#D7D8D4]
-              "
-            >
-              {secondaryImage ? (
-                <img
-                  src={secondaryImage}
-                  alt="New arrival"
-                  className="aspect-[4/3] w-full object-cover"
-                />
-              ) : (
-                <div className="flex aspect-[4/3] items-center justify-center">
-                  <FiPackage className="h-[1.75rem] w-[1.75rem] text-[#8A837C]" />
-                </div>
-              )}
-            </div>
-          </article>
-        </section>
-
+      
         {/* PRODUCT BROWSE */}
 
         <section id="browse" className="scroll-mt-[5rem] pt-[4rem]">

@@ -369,7 +369,7 @@ const Search = () => {
       <section
         className="
           mx-auto
-          max-w-[96rem]
+          max-w-[40rem]
           px-4
           pb-8
           pt-7

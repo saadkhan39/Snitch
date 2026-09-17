@@ -461,31 +461,10 @@ useEffect(() => {
             {/* LEFT */}
 
             <div className="flex items-center gap-[0.75rem] justify-self-start">
-              <button
-                type="button"
-                aria-label="Open menu"
-                className="
-                  flex
-                  h-[2rem]
-                  w-[2rem]
-                  items-center
-                  justify-center
-                  rounded-[0.3125rem]
-                  border
-                  border-[#D8D1C8]
-                  bg-white
-                  transition-all
-                  duration-200
-                  hover:bg-[#211D1A]
-                  hover:text-[#ffffff]
-                "
-              >
-                <FiMenu className="h-[1rem] w-[1rem]" />
-              </button>
-
+             
               <span
                 className="
-                  hidden
+                  
                   text-[0.5rem]
                   font-medium
                   uppercase

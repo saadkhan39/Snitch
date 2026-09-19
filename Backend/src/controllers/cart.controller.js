@@ -291,11 +291,8 @@ export const addToCart = async (req, res) => {
 };
 
 export const getCart = async (req, res) => {
-
     try {
-
         const user = req.user;
-
 
         let cart = await cartModel
             .findOne({
@@ -303,30 +300,92 @@ export const getCart = async (req, res) => {
             })
             .populate("items.product");
 
-
-        // ==================================================
-        // CREATE EMPTY CART IF NOT EXISTS
-        // ==================================================
-
+        // Create empty cart if it doesn't exist
         if (!cart) {
-
             cart = await cartModel.create({
                 user: user._id,
                 items: []
             });
         }
 
+        // Convert mongoose document into a normal object
+        const cartObject = cart.toObject();
 
-        return res.status(200).json({
+        // Add current price information to every cart item
+        cartObject.items = cartObject.items.map((item) => {
 
-            message:
-                "Cart fetched successfully",
+            const product = item.product;
 
-            success: true,
+            if (!product) {
+                return item;
+            }
 
-            cart
+            // -----------------------------------------
+            // FIND CURRENT VARIANT
+            // -----------------------------------------
+
+            let currentPrice = product.price;
+
+            if (item.variant && product.variants?.length) {
+
+                const currentVariant =
+                    product.variants.find(
+                        (variant) =>
+                            String(variant._id) ===
+                            String(item.variant)
+                    );
+
+                if (currentVariant?.price) {
+                    currentPrice = currentVariant.price;
+                }
+            }
+
+            // -----------------------------------------
+            // PRICE CHANGE
+            // -----------------------------------------
+
+            const oldAmount =
+                Number(item.price?.amount ?? 0);
+
+            const currentAmount =
+                Number(currentPrice?.amount ?? 0);
+
+            let priceChange = null;
+
+            if (currentAmount > oldAmount) {
+
+                priceChange = {
+                    type: "increased",
+                    amount: currentAmount - oldAmount
+                };
+
+            } else if (currentAmount < oldAmount) {
+
+                priceChange = {
+                    type: "decreased",
+                    amount: oldAmount - currentAmount
+                };
+            }
+
+            return {
+                ...item,
+
+                // Price when item was added
+                price: item.price,
+
+                // Current product/variant price
+                currentPrice,
+
+                // Price change information
+                priceChange
+            };
         });
 
+        return res.status(200).json({
+            message: "Cart fetched successfully",
+            success: true,
+            cart: cartObject
+        });
 
     } catch (error) {
 
@@ -335,14 +394,9 @@ export const getCart = async (req, res) => {
             error
         );
 
-
         return res.status(500).json({
-
-            message:
-                "Failed to fetch cart",
-
+            message: "Failed to fetch cart",
             success: false,
-
             error: error.message
         });
     }

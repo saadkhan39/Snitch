@@ -150,3 +150,179 @@ export async function addProductVariant(req, res) {
     })
 
 }
+
+export async function updateProductVariant(req, res) {
+    try {
+        const { productId, variantId } = req.params;
+
+        let {
+            stock,
+            attributes,
+            price,
+            priceCurrency
+        } = req.body;
+
+        console.log("========== UPDATE VARIANT ==========");
+        console.log("productId:", productId);
+        console.log("variantId:", variantId);
+        console.log("req.body:", req.body);
+        console.log("====================================");
+
+        // Find product owned by logged-in seller
+        const product = await productModel.findOne({
+            _id: productId,
+            seller: req.user._id
+        });
+
+        if (!product) {
+            return res.status(404).json({
+                success: false,
+                message: "Product not found"
+            });
+        }
+
+        // Find variant
+        const variant = product.variants.id(variantId);
+
+        if (!variant) {
+            return res.status(404).json({
+                success: false,
+                message: "Variant not found"
+            });
+        }
+
+        // -----------------------------
+        // UPDATE STOCK
+        // -----------------------------
+        if (stock !== undefined && stock !== "") {
+            variant.stock = Number(stock);
+        }
+
+        // -----------------------------
+        // UPDATE ATTRIBUTES
+        // -----------------------------
+        if (attributes !== undefined) {
+
+            if (typeof attributes === "string") {
+                try {
+                    attributes = JSON.parse(attributes);
+                } catch (error) {
+                    return res.status(400).json({
+                        success: false,
+                        message: "Invalid attributes format"
+                    });
+                }
+            }
+
+            const cleanAttributes = {};
+
+            Object.entries(attributes || {}).forEach(([key, value]) => {
+                const cleanKey = String(key).trim();
+                const cleanValue = String(value).trim();
+
+                if (cleanKey && cleanValue) {
+                    cleanAttributes[cleanKey] = cleanValue;
+                }
+            });
+
+            variant.attributes = cleanAttributes;
+        }
+
+        // -----------------------------
+        // UPDATE PRICE
+        // -----------------------------
+        if (price !== undefined && price !== "") {
+
+            const numericPrice = Number(price);
+
+            if (Number.isNaN(numericPrice) || numericPrice < 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid price"
+                });
+            }
+
+            variant.price = {
+                amount: numericPrice,
+                currency:
+                    priceCurrency ||
+                    variant.price?.currency ||
+                    product.price?.currency ||
+                    "INR"
+            };
+        }
+
+        // Save
+        await product.save();
+
+        console.log("Variant updated successfully");
+
+        return res.status(200).json({
+            success: true,
+            message: "Variant updated successfully",
+            product,
+            variant
+        });
+
+    } catch (error) {
+
+        console.error("====================================");
+        console.error("UPDATE VARIANT ERROR");
+        console.error(error);
+        console.error("MESSAGE:", error.message);
+        console.error("STACK:", error.stack);
+        console.error("====================================");
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to update variant",
+            error: error.message
+        });
+    }
+}
+
+export async function deleteProductVariant(req, res) {
+    try {
+        const { productId, variantId } = req.params;
+
+        const product = await productModel.findOne({
+            _id: productId,
+            seller: req.user._id
+        });
+
+        if (!product) {
+            return res.status(404).json({
+                message: "Product not found",
+                success: false
+            });
+        }
+
+        const variant = product.variants.id(variantId);
+
+        if (!variant) {
+            return res.status(404).json({
+                message: "Variant not found",
+                success: false
+            });
+        }
+
+        variant.deleteOne();
+
+        await product.save();
+
+        return res.status(200).json({
+            message: "Variant deleted successfully",
+            success: true,
+            product
+        });
+
+    } catch (error) {
+        console.error("Delete variant error:", error);
+
+        return res.status(500).json({
+            message: "Failed to delete variant",
+            success: false,
+            error: error.message
+        });
+    }
+}

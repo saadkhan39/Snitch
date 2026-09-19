@@ -180,23 +180,29 @@ const Cart = () => {
   };
 
   // ============================================
-  // GET PRICE
+  // GET CURRENT PRICE
   // ============================================
 
   const getItemPrice = (item) => {
-    const variant = getVariant(item);
+    /*
+      Backend now sends:
 
-    if (
-      variant?.price?.amount != null
-    ) {
+      item.price
+      = price saved when item was added
+
+      item.currentPrice
+      = latest product/variant price
+
+      So currentPrice must be used first.
+    */
+
+    if (item?.currentPrice?.amount != null) {
       return Number(
-        variant.price.amount
+        item.currentPrice.amount
       );
     }
 
-    if (
-      item?.price?.amount != null
-    ) {
+    if (item?.price?.amount != null) {
       return Number(
         item.price.amount
       );
@@ -398,9 +404,11 @@ const Cart = () => {
 
               {bagPulse && (
                 <span className="absolute -right-1 -top-1 flex h-2.5 w-2.5">
+
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#B54A42] opacity-75" />
 
                   <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#B54A42]" />
+
                 </span>
               )}
 
@@ -409,6 +417,7 @@ const Cart = () => {
                   {totalItems}
                 </span>
               )}
+
             </button>
 
           </div>
@@ -475,39 +484,39 @@ const Cart = () => {
           {/* BACK */}
 
           <button
-                       type="button"
-                       onClick={() =>
-                         navigate(-1)
-                       }
-                       className="
-                         group
-                         flex
-                         items-center
-                         gap-[0.5rem]
-                         text-[0.625rem]
-                         uppercase
-                         tracking-[0.2em]
-                         text-[#514B45]
-                         transition
-                         hover:text-[#211D1A]
-                       "
-                     >
-         
-                       <FiArrowLeft
-                         className="
-                           h-[1rem]
-                           w-[1rem]
-                           transition-transform
-                           duration-300
-                           group-hover:-translate-x-[0.25rem]
-                         "
-                       />
-         
-                       <span className="hidden sm:block">
-                         Back
-                       </span>
-         
-                     </button>
+            type="button"
+            onClick={() =>
+              navigate(-1)
+            }
+            className="
+              group
+              flex
+              items-center
+              gap-[0.5rem]
+              text-[0.625rem]
+              uppercase
+              tracking-[0.2em]
+              text-[#514B45]
+              transition
+              hover:text-[#211D1A]
+            "
+          >
+
+            <FiArrowLeft
+              className="
+                h-[1rem]
+                w-[1rem]
+                transition-transform
+                duration-300
+                group-hover:-translate-x-[0.25rem]
+              "
+            />
+
+            <span className="hidden sm:block">
+              Back
+            </span>
+
+          </button>
 
           {/* LOGO */}
 
@@ -621,6 +630,10 @@ const Cart = () => {
                   const image =
                     getItemImage(item);
 
+                  /*
+                    This now returns the latest
+                    seller-updated price.
+                  */
                   const price =
                     getItemPrice(item);
 
@@ -766,6 +779,32 @@ const Cart = () => {
                             )}
                           </span>
 
+                          {/* PRICE INCREASE */}
+
+                          {item?.priceChange?.type ===
+                            "increased" && (
+                            <p className="mt-1 text-[10px] font-medium text-red-600">
+                              Price increased by{" "}
+                              {formatPrice(
+                                item.priceChange
+                                  .amount
+                              )}
+                            </p>
+                          )}
+
+                          {/* PRICE DECREASE */}
+
+                          {item?.priceChange?.type ===
+                            "decreased" && (
+                            <p className="mt-1 text-[8px] font-medium text-green-600">
+                              Price dropped by{" "}
+                              {formatPrice(
+                                item.priceChange
+                                  .amount
+                              )}
+                            </p>
+                          )}
+
                         </div>
 
                         {/* BOTTOM */}
@@ -831,7 +870,7 @@ const Cart = () => {
                             <p className="text-[13px] font-semibold">
                               {formatPrice(
                                 price *
-                                quantity
+                                  quantity
                               )}
                             </p>
 
@@ -1080,4 +1119,3 @@ const Cart = () => {
 };
 
 export default Cart;
-

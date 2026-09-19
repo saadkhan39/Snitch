@@ -1,8 +1,8 @@
 import express from "express"
 import multer  from 'multer'
-import { authenticateSeller } from "../middleware/auth.middleware.js"
+import { authenticateSeller, authenticateUser } from "../middleware/auth.middleware.js"
 import { createProductValidator } from "../validator/product.validator.js"
-import { createProduct, getAllProduct, getSellerProducts, getProductDetails,addProductVariant } from '../controllers/product.controller.js';
+import { createProduct, getAllProduct, getSellerProducts, getProductDetails,addProductVariant ,updateProductVariant, deleteProductVariant } from '../controllers/product.controller.js';
 
 const upload = multer({
     storage: multer.memoryStorage(),
@@ -51,5 +51,27 @@ router.get("/detail/:id", getProductDetails)
  */
 router.post("/:productId/variants", authenticateSeller, upload.array('images', 7), addProductVariant)
 
+/**
+ * @route PUT /api/products/:productId/variants/:variantId
+ * @description Update an existing product variant
+ * @access Private (Seller only)
+ */
+router.put(
+  "/:productId/variants/:variantId",
+  authenticateSeller,
+  updateProductVariant
+);
 
+/**
+ * @route DELETE /api/products/:productId/variants/:variantId
+ * @description Delete an existing product variant
+ * @access Private (Seller only)
+ */
+
+
+router.delete(
+  "/:productId/variants/:variantId",
+  authenticateSeller,
+  deleteProductVariant
+);
 export default router

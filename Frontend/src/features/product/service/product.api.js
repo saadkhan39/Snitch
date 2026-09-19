@@ -72,3 +72,34 @@ export async function addProductVariant(
 
   return response.data;
 }
+
+export const updateProductVariant = async (productId, variantId, data) => {
+    try {
+        const response = await api.put(
+            `/${productId}/variants/${variantId}`,
+            data
+        );
+
+        return response.data;
+    } catch (error) {
+        console.error(
+            "Update variant API error:",
+            error.response?.data || error.message
+        );
+
+        throw error;
+    }
+};
+
+export const deleteProductVariant = async (productId, variantId) => {
+  try {
+    const response = await api.delete(
+      `/${productId}/variants/${variantId}`
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Failed to delete product variant:", error);
+    throw error;
+  }
+};

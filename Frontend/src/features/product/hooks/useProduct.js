@@ -4,6 +4,8 @@ import {
   getProductById,
   getSellerProducts,
   addProductVariant,
+  updateProductVariant,
+  deleteProductVariant
 } from "../service/product.api";
 
 import {
@@ -159,6 +161,55 @@ export const useProduct = () => {
 
 
   // =====================================================
+  // UPDATE PRODUCT VARIANT
+  // =====================================================
+
+const handleUpdateProductVariant = async (
+  productId,
+  variantId,
+  data
+) => {
+  try {
+    const response = await updateProductVariant(
+      productId,
+      variantId,
+      data
+    );
+
+    return response;
+  } catch (error) {
+    console.error(
+      "Failed to update product variant:",
+      error
+    );
+    throw error;
+  }
+};
+
+// =====================================================
+  // DELETE PRODUCT VARIANT
+  // =====================================================
+const handleDeleteProductVariant = async (
+  productId,
+  variantId
+) => {
+  try {
+    const response = await deleteProductVariant(
+      productId,
+      variantId
+    );
+
+    return response;
+  } catch (error) {
+    console.error(
+      "Failed to delete product variant:",
+      error
+    );
+    throw error;
+  }
+};
+
+  // =====================================================
   // RETURN
   // =====================================================
 
@@ -168,5 +219,7 @@ export const useProduct = () => {
     handleGetAllProducts,
     handleGetProductById,
     handleAddProductVariant,
+    handleUpdateProductVariant,
+    handleDeleteProductVariant
   };
 };

@@ -40,6 +40,40 @@ const TrashIcon = () => (
   </svg>
 );
 
+const EditIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M12 20h9" />
+    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
+  </svg>
+);
+
+const XIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+);
+
 // =========================================================
 // IMAGE URL HELPER
 // =========================================================
@@ -60,6 +94,8 @@ const SellerProductDetails = () => {
   const {
     handleGetProductById,
     handleAddProductVariant,
+    handleUpdateProductVariant,
+    handleDeleteProductVariant,
   } = useProduct();
 
   // =======================================================
@@ -71,25 +107,30 @@ const SellerProductDetails = () => {
   const [loading, setLoading] = useState(true);
 
   // =======================================================
-  // UI STATE
+  // ADD VARIANT STATE
   // =======================================================
 
-  const [isAddingVariant, setIsAddingVariant] = useState(false);
+  const [isAddingVariant, setIsAddingVariant] =
+    useState(false);
 
-  // IMPORTANT:
-  // This state controls which product image is displayed.
-  const [selectedImage, setSelectedImage] = useState(0);
+  // =======================================================
+  // IMAGE STATE
+  // =======================================================
+
+  const [selectedImage, setSelectedImage] =
+    useState(0);
 
   // =======================================================
   // ATTRIBUTE INPUTS
   // =======================================================
 
-  const [attributeInputs, setAttributeInputs] = useState([
-    {
-      key: "",
-      value: "",
-    },
-  ]);
+  const [attributeInputs, setAttributeInputs] =
+    useState([
+      {
+        key: "",
+        value: "",
+      },
+    ]);
 
   // =======================================================
   // NEW VARIANT
@@ -106,6 +147,32 @@ const SellerProductDetails = () => {
   });
 
   // =======================================================
+  // EDIT VARIANT STATE
+  // =======================================================
+
+  const [editingVariant, setEditingVariant] =
+    useState(null);
+
+  const [editPrice, setEditPrice] = useState("");
+  const [editStock, setEditStock] = useState("");
+
+  const [editAttributeInputs, setEditAttributeInputs] =
+    useState([]);
+
+  const [isUpdatingVariant, setIsUpdatingVariant] =
+    useState(false);
+
+  // =======================================================
+  // DELETE VARIANT STATE
+  // =======================================================
+
+  const [deletingVariant, setDeletingVariant] =
+    useState(null);
+
+  const [isDeletingVariant, setIsDeletingVariant] =
+    useState(false);
+
+  // =======================================================
   // FETCH PRODUCT
   // =======================================================
 
@@ -113,7 +180,8 @@ const SellerProductDetails = () => {
     setLoading(true);
 
     try {
-      const data = await handleGetProductById(productId);
+      const data =
+        await handleGetProductById(productId);
 
       const prod =
         data?.data?.product ||
@@ -123,7 +191,6 @@ const SellerProductDetails = () => {
 
       setProduct(prod);
 
-      // Reset main image whenever product changes
       setSelectedImage(0);
 
       if (Array.isArray(prod?.variants)) {
@@ -171,11 +238,12 @@ const SellerProductDetails = () => {
   // =======================================================
 
   const handleAddNewVariant = async () => {
-    const hasValidAttribute = attributeInputs.some(
-      (attr) =>
-        attr.key.trim() &&
-        attr.value.trim()
-    );
+    const hasValidAttribute =
+      attributeInputs.some(
+        (attr) =>
+          attr.key.trim() &&
+          attr.value.trim()
+      );
 
     if (!hasValidAttribute) {
       alert(
@@ -208,7 +276,6 @@ const SellerProductDetails = () => {
       ...localVariants,
     ];
 
-    // Optimistic UI update
     setLocalVariants([
       ...previousVariants,
       variantToSave,
@@ -222,11 +289,8 @@ const SellerProductDetails = () => {
         variantToSave
       );
 
-      // Refresh product so actual database
-      // variant data is displayed
       await fetchProductDetails();
     } catch (error) {
-      // Rollback optimistic update
       setLocalVariants(previousVariants);
 
       setIsAddingVariant(true);
@@ -239,10 +303,6 @@ const SellerProductDetails = () => {
 
       return;
     }
-
-    // =====================================================
-    // RESET FORM
-    // =====================================================
 
     setAttributeInputs([
       {
@@ -358,6 +418,7 @@ const SellerProductDetails = () => {
       alert(
         "You can only upload up to 7 images."
       );
+
       e.target.value = "";
       return;
     }
@@ -417,18 +478,311 @@ const SellerProductDetails = () => {
   };
 
   // =======================================================
+  // OPEN EDIT MODAL
+  // =======================================================
+
+  const handleEditVariant = (variant) => {
+    setEditingVariant(variant);
+
+    // -----------------------------------------------------
+    // PRICE
+    // -----------------------------------------------------
+
+    const variantPrice =
+      typeof variant.price === "object"
+        ? variant.price?.amount
+        : variant.price;
+
+    setEditPrice(
+      variantPrice ?? ""
+    );
+
+    // -----------------------------------------------------
+    // STOCK
+    // -----------------------------------------------------
+
+    setEditStock(
+      variant.stock ?? 0
+    );
+
+    // -----------------------------------------------------
+    // ATTRIBUTES
+    // -----------------------------------------------------
+
+    const attributesObject =
+      variant.attributes || {};
+
+    const attributeArray =
+      Object.entries(
+        attributesObject
+      ).map(([key, value]) => ({
+        key,
+        value,
+      }));
+
+    setEditAttributeInputs(
+      attributeArray.length
+        ? attributeArray
+        : [
+            {
+              key: "",
+              value: "",
+            },
+          ]
+    );
+  };
+
+  // =======================================================
+  // EDIT ATTRIBUTE CHANGE
+  // =======================================================
+
+  const handleEditAttributeChange = (
+    index,
+    field,
+    value
+  ) => {
+    setEditAttributeInputs((prev) => {
+      const updated = [...prev];
+
+      updated[index] = {
+        ...updated[index],
+        [field]: value,
+      };
+
+      return updated;
+    });
+  };
+
+  // =======================================================
+  // ADD EDIT ATTRIBUTE
+  // =======================================================
+
+  const handleAddEditAttribute = () => {
+    setEditAttributeInputs((prev) => [
+      ...prev,
+      {
+        key: "",
+        value: "",
+      },
+    ]);
+  };
+
+  // =======================================================
+  // REMOVE EDIT ATTRIBUTE
+  // =======================================================
+
+  const handleRemoveEditAttribute = (
+    index
+  ) => {
+    setEditAttributeInputs((prev) =>
+      prev.filter((_, i) => i !== index)
+    );
+  };
+
+  // =======================================================
+  // UPDATE VARIANT
+  // =======================================================
+
+  const handleUpdateVariant = async () => {
+  if (!editingVariant) {
+    return;
+  }
+
+  // -----------------------------
+  // VALIDATE ATTRIBUTES
+  // -----------------------------
+  const validAttributes = editAttributeInputs.filter(
+    (attr) =>
+      attr.key.trim() &&
+      attr.value.trim()
+  );
+
+  if (!validAttributes.length) {
+    alert("At least one valid attribute is required.");
+    return;
+  }
+
+  // Convert attributes array to object
+  const attributes = {};
+
+  validAttributes.forEach(({ key, value }) => {
+    attributes[key.trim()] = value.trim();
+  });
+
+  // -----------------------------
+  // VALIDATE PRICE
+  // -----------------------------
+  const priceValue = String(editPrice)
+    .replace(/[^0-9.]/g, "");
+
+  if (
+    priceValue === "" ||
+    Number.isNaN(Number(priceValue)) ||
+    Number(priceValue) < 0
+  ) {
+    alert("Please enter a valid price.");
+    return;
+  }
+
+  // -----------------------------
+  // VALIDATE STOCK
+  // -----------------------------
+  const stockValue = String(editStock)
+    .replace(/[^0-9]/g, "");
+
+  if (
+    stockValue === "" ||
+    Number.isNaN(Number(stockValue)) ||
+    Number(stockValue) < 0
+  ) {
+    alert("Please enter a valid stock.");
+    return;
+  }
+
+  try {
+    setIsUpdatingVariant(true);
+
+    // -----------------------------
+    // PAYLOAD
+    // -----------------------------
+    const updatedVariant = {
+      price: Number(priceValue),
+
+      priceCurrency:
+        typeof editingVariant.price === "object"
+          ? editingVariant.price?.currency || "INR"
+          : "INR",
+
+      stock: Number(stockValue),
+
+      attributes,
+    };
+
+    console.log(
+      "UPDATE VARIANT PAYLOAD:",
+      updatedVariant
+    );
+
+    // -----------------------------
+    // API
+    // -----------------------------
+    await handleUpdateProductVariant(
+      productId,
+      editingVariant._id,
+      updatedVariant
+    );
+
+    // Close edit modal
+    setEditingVariant(null);
+
+    // Refresh product
+    await fetchProductDetails();
+
+  } catch (error) {
+    console.error(
+      "Failed to update variant:",
+      error
+    );
+
+    console.error(
+      "Backend response:",
+      error?.response?.data
+    );
+
+    alert(
+      error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      error?.message ||
+      "Failed to update variant."
+    );
+
+  } finally {
+    setIsUpdatingVariant(false);
+  }
+};
+
+  // =======================================================
+  // OPEN DELETE MODAL
+  // =======================================================
+
+  const handleOpenDeleteModal = (
+    variant
+  ) => {
+    setDeletingVariant(variant);
+  };
+
+  // =======================================================
+  // CLOSE DELETE MODAL
+  // =======================================================
+
+  const handleCloseDeleteModal = () => {
+    if (isDeletingVariant) {
+      return;
+    }
+
+    setDeletingVariant(null);
+  };
+
+  // =======================================================
+  // DELETE VARIANT
+  // =======================================================
+
+  const handleDeleteVariant = async () => {
+    if (!deletingVariant) {
+      return;
+    }
+
+    try {
+      setIsDeletingVariant(true);
+
+      await handleDeleteProductVariant(
+        productId,
+        deletingVariant._id
+      );
+
+      setLocalVariants((prev) =>
+        prev.filter(
+          (variant) =>
+            variant._id !==
+            deletingVariant._id
+        )
+      );
+
+      setDeletingVariant(null);
+
+      await fetchProductDetails();
+
+    } catch (error) {
+      console.error(
+        "Failed to delete variant:",
+        error
+      );
+
+      alert(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Failed to delete variant."
+      );
+    } finally {
+      setIsDeletingVariant(false);
+    }
+  };
+
+  // =======================================================
   // CLEAN PREVIEW URLS ON UNMOUNT
   // =======================================================
 
   useEffect(() => {
     return () => {
-      newVariant.images.forEach((image) => {
-        if (image?.previewUrl) {
-          URL.revokeObjectURL(
-            image.previewUrl
-          );
+      newVariant.images.forEach(
+        (image) => {
+          if (image?.previewUrl) {
+            URL.revokeObjectURL(
+              image.previewUrl
+            );
+          }
         }
-      });
+      );
     };
   }, []);
 
@@ -473,7 +827,6 @@ const SellerProductDetails = () => {
     }))
     .filter((image) => image.url);
 
-  // Make sure selected index is valid
   const activeImage =
     images[selectedImage]?.url ||
     images[0]?.url ||
@@ -528,13 +881,9 @@ const SellerProductDetails = () => {
 
         <section className="grid gap-8 border-b border-[#E1DBD4] py-8 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:gap-12 md:py-10">
 
-          {/* =================================================
-              PRODUCT IMAGE
-          ================================================= */}
+          {/* PRODUCT IMAGE */}
 
           <div className="w-full max-w-[300px]">
-
-            {/* MAIN IMAGE */}
 
             <div className="aspect-[4/5] max-h-[340px] overflow-hidden rounded-[4px] bg-[#EAE5E0]">
 
@@ -551,10 +900,6 @@ const SellerProductDetails = () => {
               )}
 
             </div>
-
-            {/* =================================================
-                THUMBNAILS
-            ================================================= */}
 
             {images.length > 1 && (
               <div className="mt-2 flex gap-1.5 overflow-x-auto pb-1">
@@ -590,9 +935,7 @@ const SellerProductDetails = () => {
 
           </div>
 
-          {/* =================================================
-              PRODUCT INFO
-          ================================================= */}
+          {/* PRODUCT INFO */}
 
           <div className="flex flex-col justify-center">
 
@@ -609,8 +952,6 @@ const SellerProductDetails = () => {
             <p className="mt-6 max-w-lg text-sm leading-7 text-[#625B55]">
               {product.description}
             </p>
-
-            {/* PRICE */}
 
             <div className="mt-8 flex items-end justify-between border-t border-[#E1DBD4] pt-5">
 
@@ -648,8 +989,6 @@ const SellerProductDetails = () => {
         ================================================= */}
 
         <section className="py-10">
-
-          {/* SECTION HEADER */}
 
           <div className="flex flex-col justify-between gap-5 border-b border-[#E1DBD4] pb-6 sm:flex-row sm:items-end">
 
@@ -689,8 +1028,6 @@ const SellerProductDetails = () => {
           {isAddingVariant && (
             <div className="mt-7 border border-[#E1DBD4] bg-white p-5 sm:p-7 lg:p-8">
 
-              {/* FORM HEADER */}
-
               <div className="flex items-start justify-between border-b border-[#E1DBD4] pb-5">
 
                 <div>
@@ -717,9 +1054,7 @@ const SellerProductDetails = () => {
 
               <div className="grid gap-8 pt-7 lg:grid-cols-2">
 
-                {/* =================================================
-                    LEFT
-                ================================================= */}
+                {/* LEFT */}
 
                 <div className="space-y-7">
 
@@ -835,7 +1170,8 @@ const SellerProductDetails = () => {
                             (prev) => ({
                               ...prev,
                               stock:
-                                e.target.value,
+                                e.target
+                                  .value,
                             })
                           )
                         }
@@ -880,9 +1216,7 @@ const SellerProductDetails = () => {
 
                 </div>
 
-                {/* =================================================
-                    RIGHT - IMAGES
-                ================================================= */}
+                {/* RIGHT - IMAGES */}
 
                 <div>
 
@@ -901,8 +1235,6 @@ const SellerProductDetails = () => {
                     </span>
 
                   </div>
-
-                  {/* IMAGE PREVIEWS */}
 
                   {newVariant.images
                     .length > 0 && (
@@ -954,8 +1286,6 @@ const SellerProductDetails = () => {
                     </div>
                   )}
 
-                  {/* UPLOAD */}
-
                   {newVariant.images
                     .length < 7 && (
                     <label className="mt-3 flex h-28 cursor-pointer flex-col items-center justify-center gap-2 border border-dashed border-[#D0C8BF] bg-[#F8F6F2] text-[#8A837C] transition hover:border-[#211D1A] hover:text-[#211D1A]">
@@ -998,8 +1328,6 @@ const SellerProductDetails = () => {
                 </div>
 
               </div>
-
-              {/* SAVE BUTTON */}
 
               <div className="mt-8 flex justify-end border-t border-[#E1DBD4] pt-6">
 
@@ -1058,6 +1386,22 @@ const SellerProductDetails = () => {
                     const isInStock =
                       variantStock > 0;
 
+                    const variantPrice =
+                      typeof variant.price ===
+                      "object"
+                        ? variant.price
+                            ?.amount
+                        : variant.price;
+
+                    const variantCurrency =
+                      typeof variant.price ===
+                      "object"
+                        ? variant.price
+                            ?.currency
+                        : product.price
+                            ?.currency ||
+                          "INR";
+
                     return (
                       <article
                         key={
@@ -1101,8 +1445,7 @@ const SellerProductDetails = () => {
 
                                 <span className="text-[7px] font-bold uppercase tracking-[0.16em] text-[#8A837C]">
                                   Variant{" "}
-                                  {idx +
-                                    1}
+                                  {idx + 1}
                                 </span>
 
                                 <span
@@ -1154,23 +1497,15 @@ const SellerProductDetails = () => {
 
                               <p className="mt-3 text-[10px] font-semibold text-[#211D1A]">
 
-                                {variant
-                                  .price
-                                  ?.amount ? (
+                                {variantPrice ? (
                                   <>
                                     {
-                                      variant
-                                        .price
-                                        .amount
+                                      variantPrice
                                     }{" "}
                                     <span className="text-[8px] font-normal text-[#8A837C]">
-                                      {variant
-                                        .price
-                                        .currency ||
-                                        product
-                                          .price
-                                          ?.currency ||
-                                        "INR"}
+                                      {
+                                        variantCurrency
+                                      }
                                     </span>
                                   </>
                                 ) : (
@@ -1230,6 +1565,38 @@ const SellerProductDetails = () => {
 
                         </div>
 
+                        {/* ACTIONS */}
+
+                        <div className="flex border-t border-[#E1DBD4]">
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleEditVariant(
+                                variant
+                              )
+                            }
+                            className="flex flex-1 items-center justify-center gap-2 border-r border-[#E1DBD4] py-3 text-[8px] font-bold uppercase tracking-[0.14em] text-[#211D1A] transition hover:bg-[#F8F6F2]"
+                          >
+                            <EditIcon />
+                            Edit
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleOpenDeleteModal(
+                                variant
+                              )
+                            }
+                            className="flex flex-1 items-center justify-center gap-2 py-3 text-[8px] font-bold uppercase tracking-[0.14em] text-red-600 transition hover:bg-red-50"
+                          >
+                            <TrashIcon />
+                            Delete
+                          </button>
+
+                        </div>
+
                       </article>
                     );
                   }
@@ -1243,6 +1610,362 @@ const SellerProductDetails = () => {
         </section>
 
       </div>
+
+      {/* =====================================================
+          EDIT VARIANT MODAL
+      ===================================================== */}
+
+      {editingVariant && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#211D1A]/50 p-4">
+
+          <div className="max-h-[90vh] w-full max-w-xl overflow-y-auto bg-[#F8F6F2]">
+
+            {/* MODAL HEADER */}
+
+            <div className="flex items-start justify-between border-b border-[#E1DBD4] px-6 py-5">
+
+              <div>
+
+                <p className="text-[7px] font-bold uppercase tracking-[0.22em] text-[#8A837C]">
+                  Variant management
+                </p>
+
+                <h3 className="mt-2 font-serif text-2xl leading-none">
+                  Edit variant
+                </h3>
+
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setEditingVariant(null)
+                }
+                disabled={isUpdatingVariant}
+                className="flex h-8 w-8 items-center justify-center text-[#8A837C] transition hover:text-[#211D1A]"
+              >
+                <XIcon />
+              </button>
+
+            </div>
+
+            {/* MODAL BODY */}
+
+            <div className="space-y-7 px-6 py-6">
+
+              {/* ATTRIBUTES */}
+
+              <div>
+
+                <div className="mb-3 flex items-center justify-between">
+
+                  <label className="text-[8px] font-bold uppercase tracking-[0.16em] text-[#625B55]">
+                    Attributes
+                  </label>
+
+                  <span className="text-[8px] uppercase tracking-[0.1em] text-[#AAA39B]">
+                    Color / Size
+                  </span>
+
+                </div>
+
+                <div className="space-y-2">
+
+                  {editAttributeInputs.map(
+                    (attr, index) => (
+                      <div
+                        key={index}
+                        className="flex gap-2"
+                      >
+
+                        <input
+                          type="text"
+                          placeholder="Key"
+                          value={attr.key}
+                          onChange={(e) =>
+                            handleEditAttributeChange(
+                              index,
+                              "key",
+                              e.target.value
+                            )
+                          }
+                          className="h-10 w-1/2 border border-[#D8D1C8] bg-white px-3 text-[10px] outline-none placeholder:text-[#AAA39B] focus:border-[#211D1A]"
+                        />
+
+                        <input
+                          type="text"
+                          placeholder="Value"
+                          value={attr.value}
+                          onChange={(e) =>
+                            handleEditAttributeChange(
+                              index,
+                              "value",
+                              e.target.value
+                            )
+                          }
+                          className="h-10 w-1/2 border border-[#D8D1C8] bg-white px-3 text-[10px] outline-none placeholder:text-[#AAA39B] focus:border-[#211D1A]"
+                        />
+
+                        {editAttributeInputs.length >
+                          1 && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleRemoveEditAttribute(
+                                index
+                              )
+                            }
+                            className="flex h-10 w-10 shrink-0 items-center justify-center border border-[#E1DBD4] text-[#8A837C] hover:border-red-300 hover:bg-red-50 hover:text-red-500"
+                          >
+                            <TrashIcon />
+                          </button>
+                        )}
+
+                      </div>
+                    )
+                  )}
+
+                </div>
+
+                <button
+                  type="button"
+                  onClick={
+                    handleAddEditAttribute
+                  }
+                  className="mt-3 flex items-center gap-1.5 text-[8px] font-bold uppercase tracking-[0.14em] text-[#211D1A]"
+                >
+                  <PlusIcon />
+                  Add attribute
+                </button>
+
+              </div>
+
+              {/* PRICE + STOCK */}
+
+              <div className="grid grid-cols-2 gap-3">
+
+                <div>
+
+                  <label className="mb-2 block text-[8px] font-bold uppercase tracking-[0.14em] text-[#625B55]">
+                    Variant price
+                  </label>
+
+                  <input
+                    type="number"
+                    min="0"
+                    value={editPrice}
+                    onChange={(e) =>
+                      setEditPrice(
+                        e.target.value
+                      )
+                    }
+                    className="h-11 w-full border border-[#D8D1C8] bg-white px-3 text-[11px] outline-none focus:border-[#211D1A]"
+                  />
+
+                </div>
+
+                <div>
+
+                  <label className="mb-2 block text-[8px] font-bold uppercase tracking-[0.14em] text-[#625B55]">
+                    Stock
+                  </label>
+
+                  <input
+                    type="number"
+                    min="0"
+                    value={editStock}
+                    onChange={(e) =>
+                      setEditStock(
+                        e.target.value
+                      )
+                    }
+                    className="h-11 w-full border border-[#D8D1C8] bg-white px-3 text-[11px] outline-none focus:border-[#211D1A]"
+                  />
+
+                </div>
+
+              </div>
+
+              {/* WARNING */}
+
+              <div className="border border-[#E1DBD4] bg-white p-4">
+
+                <p className="text-[8px] font-bold uppercase tracking-[0.12em] text-[#8A837C]">
+                  Variant ID
+                </p>
+
+                <p className="mt-2 break-all text-[9px] text-[#625B55]">
+                  {editingVariant._id}
+                </p>
+
+              </div>
+
+            </div>
+
+            {/* MODAL FOOTER */}
+
+            <div className="flex justify-end gap-3 border-t border-[#E1DBD4] px-6 py-5">
+
+              <button
+                type="button"
+                onClick={() =>
+                  setEditingVariant(null)
+                }
+                disabled={isUpdatingVariant}
+                className="h-10 border border-[#211D1A] px-5 text-[8px] font-bold uppercase tracking-[0.14em] text-[#211D1A]"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={
+                  handleUpdateVariant
+                }
+                disabled={isUpdatingVariant}
+                className="h-10 bg-[#211D1A] px-6 text-[8px] font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#4A4039] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isUpdatingVariant
+                  ? "Updating..."
+                  : "Update variant"}
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+      )}
+
+      {/* =====================================================
+          DELETE CONFIRMATION MODAL
+      ===================================================== */}
+
+      {deletingVariant && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-[#211D1A]/50 p-4">
+
+          <div className="w-full max-w-md bg-[#F8F6F2]">
+
+            {/* HEADER */}
+
+            <div className="flex items-start justify-between border-b border-[#E1DBD4] px-6 py-5">
+
+              <div>
+
+                <p className="text-[7px] font-bold uppercase tracking-[0.22em] text-red-500">
+                  Remove variant
+                </p>
+
+                <h3 className="mt-2 font-serif text-2xl leading-none">
+                  Delete variant?
+                </h3>
+
+              </div>
+
+              <button
+                type="button"
+                onClick={
+                  handleCloseDeleteModal
+                }
+                disabled={isDeletingVariant}
+                className="flex h-8 w-8 items-center justify-center text-[#8A837C]"
+              >
+                <XIcon />
+              </button>
+
+            </div>
+
+            {/* BODY */}
+
+            <div className="px-6 py-6">
+
+              <p className="text-sm leading-6 text-[#625B55]">
+                This variant will be removed from
+                your product. This action cannot be
+                undone.
+              </p>
+
+              {/* ATTRIBUTES */}
+
+              <div className="mt-5 flex flex-wrap gap-2">
+
+                {Object.entries(
+                  deletingVariant.attributes ||
+                    {}
+                ).map(
+                  ([key, value]) => (
+                    <div
+                      key={key}
+                      className="border border-[#E1DBD4] bg-white px-3 py-2"
+                    >
+                      <span className="mr-1 text-[7px] font-bold uppercase tracking-[0.08em] text-[#AAA39B]">
+                        {key}
+                      </span>
+
+                      <span className="text-[8px] font-semibold uppercase tracking-[0.08em] text-[#211D1A]">
+                        {value}
+                      </span>
+                    </div>
+                  )
+                )}
+
+              </div>
+
+              {/* PRICE */}
+
+              <p className="mt-4 text-sm font-semibold text-[#211D1A]">
+
+                {typeof deletingVariant.price ===
+                "object"
+                  ? deletingVariant.price
+                      ?.amount
+                  : deletingVariant.price}{" "}
+                <span className="text-[9px] font-normal text-[#8A837C]">
+                  {typeof deletingVariant.price ===
+                  "object"
+                    ? deletingVariant.price
+                        ?.currency || "INR"
+                    : "INR"}
+                </span>
+
+              </p>
+
+            </div>
+
+            {/* FOOTER */}
+
+            <div className="flex justify-end gap-3 border-t border-[#E1DBD4] px-6 py-5">
+
+              <button
+                type="button"
+                onClick={
+                  handleCloseDeleteModal
+                }
+                disabled={isDeletingVariant}
+                className="h-10 border border-[#211D1A] px-5 text-[8px] font-bold uppercase tracking-[0.14em] text-[#211D1A]"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={
+                  handleDeleteVariant
+                }
+                disabled={isDeletingVariant}
+                className="h-10 bg-red-600 px-6 text-[8px] font-bold uppercase tracking-[0.14em] text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isDeletingVariant
+                  ? "Deleting..."
+                  : "Delete variant"}
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+      )}
 
     </main>
   );

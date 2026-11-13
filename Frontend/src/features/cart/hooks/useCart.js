@@ -30,7 +30,10 @@ export const useCart = () => {
         data?.cart?.items || [];
 
       dispatch(
-        setCart(items)
+        setCart({
+          items,
+          totalPrice: data?.cart?.totalPrice,
+        })
       );
 
       return data;

@@ -41,6 +41,10 @@ const Cart = () => {
     (state) => state.cart?.items || []
   );
 
+  const aggregatedTotalPrice = useSelector(
+    (state) => state.cart?.totalPrice
+  );
+
   const {
     handleGetCart,
     handleDeleteItem,
@@ -294,7 +298,7 @@ const Cart = () => {
   // SUBTOTAL
   // ============================================
 
-  const subtotal = useMemo(() => {
+  const calculatedSubtotal = useMemo(() => {
     return cartItems.reduce(
       (total, item) => {
         const price =
@@ -311,6 +315,14 @@ const Cart = () => {
       0
     );
   }, [cartItems]);
+
+  const subtotal =
+    aggregatedTotalPrice != null &&
+    Number.isFinite(Number(aggregatedTotalPrice))
+      ? Number(aggregatedTotalPrice)
+      : calculatedSubtotal;
+
+  console.log("total price", subtotal);
 
   // ============================================
   // TOTAL ITEMS
@@ -623,6 +635,8 @@ const Cart = () => {
 
               {cartItems.map(
                 (item, index) => {
+
+                  console.log("cartItem", item);
 
                   const product =
                     item?.product;

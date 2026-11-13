@@ -5,14 +5,17 @@ const cartSlice = createSlice({
 
   initialState: {
     items: [],
+    totalPrice: null,
   },
 
   reducers: {
     setCart: (state, action) => {
-      state.items = action.payload || [];
+      state.items = action.payload?.items || [];
+      state.totalPrice = action.payload?.totalPrice ?? null;
     },
     clearCart: (state) => {
       state.items = [];
+      state.totalPrice = null;
     },
      incrementCartItem: (state, action) => {
             const { productId, variantId } = action.payload

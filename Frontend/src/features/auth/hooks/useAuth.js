@@ -1,4 +1,4 @@
-import { useDispatch, useSelector } from "react-redux"
+import {useDispatch ,useSelector} from "react-redux"
 import { register, login, getMe } from '../service/auth.api'
 import { setUser, setError, setLoading } from '../state/auth.slice'
 

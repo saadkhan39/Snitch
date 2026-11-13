@@ -294,22 +294,97 @@ export const getCart = async (req, res) => {
     try {
         const user = req.user;
 
-        let cart = await cartModel
-            .findOne({
+        let [cartObject] = await cartModel.aggregate([
+            {
+                $match: {
+                    user: user._id
+                }
+            },
+            { $unwind: { path: "$items" } },
+            {
+                $lookup: {
+                    from: "products",
+                    localField: "items.product",
+                    foreignField: "_id",
+                    as: "items.product"
+                }
+            },
+            { $unwind: { path: "$items.product" } },
+            {
+                $unwind: {
+                    path: "$items.product.variants"
+                }
+            },
+            {
+                $match: {
+                    $expr: {
+                        $eq: [
+                            "$items.variant",
+                            "$items.product.variants._id"
+                        ]
+                    }
+                }
+            },
+            {
+                $addFields: {
+                    itemPrice: {
+                        price: {
+                            $multiply: [
+                                "$items.quantity",
+                                {
+                                    $ifNull: [
+                                        "$items.product.variants.price.amount",
+                                        "$items.product.price.amount"
+                                    ]
+                                }
+                            ]
+                        },
+                        currency: {
+                            $ifNull: [
+                                "$items.product.variants.price.currency",
+                                "$items.product.price.currency"
+                            ]
+                        }
+                    }
+                }
+            },
+            {
+                $set: {
+                    "items.product.variants": [
+                        "$items.product.variants"
+                    ]
+                }
+            },
+            {
+                $group: {
+                    _id: "$_id",
+                    totalPrice: { $sum: "$itemPrice.price" },
+                    currency: {
+                        $first: "$itemPrice.currency"
+                    },
+                    items: { $push: "$items" }
+                }
+            }
+        ]).option({
+            maxTimeMS: 60000,
+            allowDiskUse: true
+        });
+
+        // An empty cart has no rows after unwinding items.
+        if (!cartObject) {
+            let cart = await cartModel.findOne({
                 user: user._id
-            })
-            .populate("items.product");
-
-        // Create empty cart if it doesn't exist
-        if (!cart) {
-            cart = await cartModel.create({
-                user: user._id,
-                items: []
             });
-        }
 
-        // Convert mongoose document into a normal object
-        const cartObject = cart.toObject();
+            if (!cart) {
+                cart = await cartModel.create({
+                    user: user._id,
+                    items: []
+                });
+            }
+
+            cartObject = cart.toObject();
+        }
 
         // Add current price information to every cart item
         cartObject.items = cartObject.items.map((item) => {

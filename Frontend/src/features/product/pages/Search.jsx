@@ -15,6 +15,7 @@ import {
 
 import { useProduct } from "../hooks/useProduct";
 import { useWishlist } from "../../wishlist/hooks/useWishlist";
+import useRequireAuth from "../../auth/hooks/useRequireAuth";
 
 /* =========================================================
    HELPERS
@@ -76,6 +77,7 @@ const getProductStock = (product) => {
 
 const Search = () => {
   const navigate = useNavigate();
+  const requireAuth = useRequireAuth();
   const [searchParams] = useSearchParams();
 
   const searchQuery =
@@ -189,6 +191,10 @@ const Search = () => {
   ) => {
     event.preventDefault();
     event.stopPropagation();
+
+    if (!requireAuth()) {
+      return;
+    }
 
     const productId = product?._id;
 

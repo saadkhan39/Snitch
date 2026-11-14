@@ -23,6 +23,7 @@ import {
 import { useProduct } from "../hooks/useProduct";
 import { useCart } from "../../cart/hooks/useCart";
 import { useWishlist } from "../../wishlist/hooks/useWishlist";
+import useRequireAuth from "../../auth/hooks/useRequireAuth";
 
 // =========================================================
 // FORMAT PRICE
@@ -105,6 +106,7 @@ const getImageUrl = (image) => {
 const ProductDetail = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
+  const requireAuth = useRequireAuth();
 
   const {
     handleGetProductById,
@@ -128,6 +130,10 @@ const ProductDetail = () => {
   // =======================================================
 
   const handleWishlist = async () => {
+    if (!requireAuth()) {
+      return;
+    }
+
     if (!productId) {
       return;
     }
@@ -695,11 +701,15 @@ const ProductDetail = () => {
 
   const handleAddProductToCart =
     async () => {
+      if (!requireAuth()) {
+        return false;
+      }
+
       if (
         !canAddToCart ||
         addingToCart
       ) {
-        return;
+        return false;
       }
 
       try {
@@ -740,15 +750,25 @@ const ProductDetail = () => {
         setTimeout(() => {
           setBagPulse(false);
         }, 900);
+        return true;
       } catch (err) {
         console.error(
           "FAILED TO ADD PRODUCT TO CART:",
           err
         );
+        return false;
       } finally {
         setAddingToCart(false);
       }
     };
+
+  const handleBuyNow = async () => {
+    const added = await handleAddProductToCart();
+
+    if (added) {
+      navigate("/cart");
+    }
+  };
 
   // =======================================================
   // LOADING
@@ -1404,9 +1424,8 @@ const ProductDetail = () => {
 
               <button
                 type="button"
-                disabled={
-                  !canAddToCart
-                }
+                disabled={!canAddToCart || addingToCart}
+                onClick={handleBuyNow}
                 className="h-[2.75rem] rounded-[0.1875rem] border border-[#211D1A] bg-transparent text-[0.5625rem] font-semibold uppercase tracking-[0.14em] text-[#211D1A] transition hover:bg-[#EEEAE5] disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Buy now

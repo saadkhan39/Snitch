@@ -18,6 +18,7 @@ import {
 import { useProduct } from "../hooks/useProduct";
 import { useWishlist } from "../../wishlist/hooks/useWishlist";
 import useHero from "../../hero/hooks/useHero";
+import useRequireAuth from "../../auth/hooks/useRequireAuth";
 
 const formatPrice = (price) => {
   if (!price) return "Price not available";
@@ -112,6 +113,7 @@ const ProductImageFallback = () => (
 
 const Home = () => {
   const navigate = useNavigate();
+  const requireAuth = useRequireAuth();
 
 
   /*
@@ -386,6 +388,10 @@ useEffect(() => {
   const handleWishlistClick = async (event, product) => {
     event.preventDefault();
     event.stopPropagation();
+
+    if (!requireAuth()) {
+      return;
+    }
 
     const productId = product?._id;
 

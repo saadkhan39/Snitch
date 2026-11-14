@@ -4,7 +4,7 @@ import React, {
   useState,
 } from "react";
 
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import {
   FiArrowLeft,
@@ -17,9 +17,18 @@ import {
 import { useNavigate } from "react-router";
 
 import { useCart } from "../hooks/useCart";
+import { useRazorpay } from "react-razorpay";
+import { clearCart } from "../state/cart.slice";
 
 const Cart = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const {
+    error: razorpayError,
+    isLoading: isRazorpayLoading,
+    Razorpay,
+  } = useRazorpay();
+
 
   // ============================================
   // CART PULSE
@@ -32,6 +41,8 @@ const Cart = () => {
   // ============================================
 
   const [deleteItemId, setDeleteItemId] = useState(null);
+  const [isCreatingOrder, setIsCreatingOrder] = useState(false);
+  const [checkoutError, setCheckoutError] = useState("");
 
   // ============================================
   // CART ITEMS
@@ -50,6 +61,8 @@ const Cart = () => {
     handleDeleteItem,
     handleIncrementCartItem,
     handleDecrementCartItem,
+    handleCreateCartOrder,
+    handleVerifyCartPayment
   } = useCart();
 
   // ============================================
@@ -354,9 +367,88 @@ const Cart = () => {
     navigate("/cart");
   };
 
+  const handleCheckout = async () => {
+    if (isCreatingOrder) {
+      return;
+    }
+
+    setCheckoutError("");
+
+    if (razorpayError || !Razorpay) {
+      setCheckoutError("Payment checkout is unavailable. Please try again later.");
+      return;
+    }
+
+    if (isRazorpayLoading) {
+      return;
+    }
+
+    setIsCreatingOrder(true);
+
+    try {
+      const { order, keyId } = await handleCreateCartOrder();
+
+      if (!order?.id || !keyId) {
+        throw new Error("The payment order could not be created.");
+      }
+
+      const razorpayInstance = new Razorpay({
+        key: keyId,
+        amount: order.amount,
+        currency: order.currency || "INR",
+        name: "Snitch",
+        description: "Order payment",
+        order_id: order.id,
+        handler: async (response) => {
+          try {
+            const verification = await handleVerifyCartPayment(response);
+
+            if (!verification?.success) {
+              throw new Error("Payment could not be verified.");
+            }
+
+            dispatch(clearCart());
+            navigate(
+              `/order-success?order_id=${encodeURIComponent(response.razorpay_order_id)}`,
+              { replace: true }
+            );
+          } catch (verificationError) {
+            console.error(
+              "PAYMENT VERIFICATION ERROR:",
+              verificationError.response?.data || verificationError.message
+            );
+            setCheckoutError(
+              verificationError.response?.data?.message ||
+                "Payment could not be verified. Contact support before trying again."
+            );
+          }
+        },
+        theme: {
+          color: "#211D1A",
+        },
+      });
+
+      razorpayInstance.open();
+    } catch (error) {
+      console.error(
+        "CHECKOUT ERROR:",
+        error.response?.data || error.message
+      );
+      setCheckoutError(
+        error.response?.data?.message ||
+          error.message ||
+          "Unable to start checkout. Please try again."
+      );
+    } finally {
+      setIsCreatingOrder(false);
+    }
+  };
+
   // ============================================
   // EMPTY CART
   // ============================================
+
+
 
   if (cartItems.length === 0) {
     return (
@@ -987,11 +1079,21 @@ const Cart = () => {
 
               {/* CHECKOUT */}
 
+              {checkoutError && (
+                <p role="alert" className="mb-3 text-[10px] text-[#B54A42]">
+                  {checkoutError}
+                </p>
+              )}
+
               <button
                 type="button"
-                className="flex h-12 w-full items-center justify-center bg-[#211D1A] font-['Plus_Jakarta_Sans'] text-[9px] font-semibold uppercase tracking-[0.17em] text-white transition hover:bg-[#4D4742]"
+                onClick={handleCheckout}
+                disabled={isCreatingOrder || isRazorpayLoading}
+                className="flex h-12 w-full items-center justify-center bg-[#211D1A] font-['Plus_Jakarta_Sans'] text-[9px] font-semibold uppercase tracking-[0.17em] text-white transition hover:bg-[#4D4742] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Proceed to checkout
+                {isCreatingOrder || isRazorpayLoading
+                  ? "Opening checkout..."
+                  : "Proceed to checkout"}
               </button>
 
               {/* CONTINUE SHOPPING */}

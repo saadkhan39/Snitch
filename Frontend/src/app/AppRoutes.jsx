@@ -8,6 +8,7 @@ import Home from "../features/product/pages/Home"
 import ProductDetail from "../features/product/pages/ProductDetail"
 import SellerProductDetail from "../features/product/pages/SellerProductDetail"
 import Cart from "../features/cart/pages/Cart"
+import OrderSuccess from "../features/cart/pages/OrderSuccess"
 import Wishlist from "../features/wishlist/pages/Wishlist"
 import SellerHero from "../features/hero/page/SellerHero"
 import Search from "../features/product/pages/Search"
@@ -37,6 +38,10 @@ export const routes = createBrowserRouter([
     {
         path: "/cart",
         element: <Protected><Cart /></Protected>
+    },
+    {
+        path: "/order-success",
+        element: <Protected><OrderSuccess /></Protected>
     },
 
     {

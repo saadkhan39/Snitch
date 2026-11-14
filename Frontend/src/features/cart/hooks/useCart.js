@@ -3,7 +3,9 @@ import {
   getCart,
   deleteItem,
   incrementCartItem,
-  decrementCartItem
+  decrementCartItem,
+  createOrder,
+  verifyPayment
 } from "../service/cart.api";
 
 import { useDispatch } from "react-redux";
@@ -161,12 +163,29 @@ async function handleDecrementCartItem({ productId, variantId }) {
   }
 }
 
+// ============================================
+// CREATE CART ORDER
+// ============================================
+async function handleCreateCartOrder() {  
+  return createOrder();
+}
+
+async function handleVerifyCartPayment(paymentDetails) {
+  return verifyPayment(paymentDetails);
+}
+   
+  
+
+
+
   return {
     handleAddToCart,
     handleGetCart,
     handleDeleteItem,
     handleIncrementCartItem,
-    handleDecrementCartItem
+    handleDecrementCartItem,
+    handleCreateCartOrder,
+    handleVerifyCartPayment
   };
 };
 

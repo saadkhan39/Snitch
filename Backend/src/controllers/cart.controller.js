@@ -1,8 +1,87 @@
 import cartModel from "../models/cart.model.js";
 import productModel from "../models/product.model.js";
 import { stockOfVariant } from "../dao/product.dao.js";
+import { createOrder, verifyPaymentSignature } from "../services/payment.service.js";
+import paymentModel from "../models/payment.model.js";
+import { config } from "../config/config.js";
 
 
+async function getCartDetails(userId) {
+      let cart = (await cartModel.aggregate([
+            {
+                $match: {
+                    user: userId
+                }
+            },
+            { $unwind: { path: "$items" } },
+            {
+                $lookup: {
+                    from: "products",
+                    localField: "items.product",
+                    foreignField: "_id",
+                    as: "items.product"
+                }
+            },
+            { $unwind: { path: "$items.product" } },
+            {
+                $unwind: {
+                    path: "$items.product.variants"
+                }
+            },
+            {
+                $match: {
+                    $expr: {
+                        $eq: [
+                            "$items.variant",
+                            "$items.product.variants._id"
+                        ]
+                    }
+                }
+            },
+            {
+                $addFields: {
+                    itemPrice: {
+                        price: {
+                            $multiply: [
+                                "$items.quantity",
+                                {
+                                    $ifNull: [
+                                        "$items.product.variants.price.amount",
+                                        "$items.product.price.amount"
+                                    ]
+                                }
+                            ]
+                        },
+                        currency: {
+                            $ifNull: [
+                                "$items.product.variants.price.currency",
+                                "$items.product.price.currency"
+                            ]
+                        }
+                    }
+                }
+            },
+            {
+                $set: {
+                    "items.product.variants": [
+                        "$items.product.variants"
+                    ]
+                }
+            },
+            {
+                $group: {
+                    _id: "$_id",
+                    totalPrice: { $sum: "$itemPrice.price" },
+                    currency: {
+                        $first: "$itemPrice.currency"
+                    },
+                    items: { $push: "$items" }
+                }
+            }
+        ]))[0];
+
+        return cart;
+}
 
 export const addToCart = async (req, res) => {
     try {
@@ -58,6 +137,15 @@ export const addToCart = async (req, res) => {
             variantId
         );
 
+        const requestedQuantity = Number(quantity);
+
+        if (!Number.isInteger(requestedQuantity) || requestedQuantity < 1) {
+            return res.status(400).json({
+                message: "Quantity must be a positive integer",
+                success: false
+            });
+        }
+
 
         // ==================================================
         // GET / CREATE CART
@@ -71,6 +159,24 @@ export const addToCart = async (req, res) => {
                 user: req.user._id,
                 items: []
             }));
+
+        const quantityInCartForVariant = cart.items.reduce(
+            (total, item) => {
+                const matchesVariant =
+                    String(item.product) === String(productId) &&
+                    String(item.variant) === String(variantId);
+
+                return total + (matchesVariant ? Number(item.quantity) || 0 : 0);
+            },
+            0
+        );
+
+        if (quantityInCartForVariant + requestedQuantity > stock) {
+            return res.status(400).json({
+                message: `Only ${stock} items left in stock. You already have ${quantityInCartForVariant} in your cart`,
+                success: false
+            });
+        }
 
 
         // ==================================================
@@ -193,28 +299,13 @@ export const addToCart = async (req, res) => {
             // CHECK STOCK
             // ----------------------------------------------
 
-            if (
-                quantityInCart +
-                Number(quantity) >
-                stock
-            ) {
-                return res.status(400).json({
-                    message:
-                        `Only ${stock} items left in stock. ` +
-                        `You already have ${quantityInCart} ` +
-                        `items in your cart`,
-                    success: false
-                });
-            }
-
-
             // ----------------------------------------------
             // UPDATE QUANTITY
             // ----------------------------------------------
 
             existingItem.quantity =
                 quantityInCart +
-                Number(quantity);
+                requestedQuantity;
 
 
             await cart.save();
@@ -231,15 +322,6 @@ export const addToCart = async (req, res) => {
         // NEW ITEM
         // ==================================================
 
-        if (Number(quantity) > stock) {
-            return res.status(400).json({
-                message:
-                    `Only ${stock} items left in stock`,
-                success: false
-            });
-        }
-
-
         // ==================================================
         // PUSH NEW ITEM
         // ==================================================
@@ -253,7 +335,7 @@ export const addToCart = async (req, res) => {
             selectedAttributes:
                 normalizedAttributes,
 
-            quantity: Number(quantity),
+            quantity: requestedQuantity,
 
             // IMPORTANT:
             // Use selected variant price
@@ -293,101 +375,27 @@ export const addToCart = async (req, res) => {
 export const getCart = async (req, res) => {
     try {
         const user = req.user;
-
-        let [cartObject] = await cartModel.aggregate([
-            {
-                $match: {
-                    user: user._id
-                }
-            },
-            { $unwind: { path: "$items" } },
-            {
-                $lookup: {
-                    from: "products",
-                    localField: "items.product",
-                    foreignField: "_id",
-                    as: "items.product"
-                }
-            },
-            { $unwind: { path: "$items.product" } },
-            {
-                $unwind: {
-                    path: "$items.product.variants"
-                }
-            },
-            {
-                $match: {
-                    $expr: {
-                        $eq: [
-                            "$items.variant",
-                            "$items.product.variants._id"
-                        ]
-                    }
-                }
-            },
-            {
-                $addFields: {
-                    itemPrice: {
-                        price: {
-                            $multiply: [
-                                "$items.quantity",
-                                {
-                                    $ifNull: [
-                                        "$items.product.variants.price.amount",
-                                        "$items.product.price.amount"
-                                    ]
-                                }
-                            ]
-                        },
-                        currency: {
-                            $ifNull: [
-                                "$items.product.variants.price.currency",
-                                "$items.product.price.currency"
-                            ]
-                        }
-                    }
-                }
-            },
-            {
-                $set: {
-                    "items.product.variants": [
-                        "$items.product.variants"
-                    ]
-                }
-            },
-            {
-                $group: {
-                    _id: "$_id",
-                    totalPrice: { $sum: "$itemPrice.price" },
-                    currency: {
-                        $first: "$itemPrice.currency"
-                    },
-                    items: { $push: "$items" }
-                }
-            }
-        ]).option({
-            maxTimeMS: 60000,
-            allowDiskUse: true
-        });
+      
+      let cart = await getCartDetails(user._id); 
 
         // An empty cart has no rows after unwinding items.
-        if (!cartObject) {
-            let cart = await cartModel.findOne({
+        if (!cart) {
+            let emptyCart = await cartModel.findOne({
                 user: user._id
             });
 
-            if (!cart) {
-                cart = await cartModel.create({
+            if (!emptyCart) {
+                emptyCart = await cartModel.create({
                     user: user._id,
                     items: []
                 });
             }
 
-            cartObject = cart.toObject();
+            cart = emptyCart.toObject();
         }
 
         // Add current price information to every cart item
-        cartObject.items = cartObject.items.map((item) => {
+        cart.items = cart.items.map((item) => {
 
             const product = item.product;
 
@@ -459,7 +467,7 @@ export const getCart = async (req, res) => {
         return res.status(200).json({
             message: "Cart fetched successfully",
             success: true,
-            cart: cartObject
+            cart: cart
         });
 
     } catch (error) {
@@ -553,22 +561,60 @@ export const incrementCartItemQuantity = async (req, res) => {
         })
     }
 
-    const stock = await stockOfVariant(productId, variantId)
+    const variant = product.variants.id(variantId);
 
-    const itemQuantityInCart = cart.items.find(item => item.product.toString() === productId && item.variant?.toString() === variantId)?.quantity || 0
-
-    if (itemQuantityInCart + 1 > stock) {
-        return res.status(400).json({
-            message: `Only ${stock} items left in stock. and you already have ${itemQuantityInCart} items in your cart`,
+    if (!variant) {
+        return res.status(404).json({
+            message: "Variant not found",
             success: false
-        })
+        });
     }
 
-    await cartModel.findOneAndUpdate(
-        { user: req.user._id, "items.product": productId, "items.variant": variantId },
+    const updatedCart = await cartModel.findOneAndUpdate(
+        {
+            user: req.user._id,
+            items: {
+                $elemMatch: {
+                    product: product._id,
+                    variant: variant._id
+                }
+            },
+            $expr: {
+                $lt: [
+                    {
+                        $sum: {
+                            $map: {
+                                input: {
+                                    $filter: {
+                                        input: "$items",
+                                        as: "cartItem",
+                                        cond: {
+                                            $and: [
+                                                { $eq: ["$$cartItem.product", product._id] },
+                                                { $eq: ["$$cartItem.variant", variant._id] }
+                                            ]
+                                        }
+                                    }
+                                },
+                                as: "cartItem",
+                                in: "$$cartItem.quantity"
+                            }
+                        }
+                    },
+                    variant.stock
+                ]
+            }
+        },
         { $inc: { "items.$.quantity": 1 } },
         { new: true }
-    )
+    );
+
+    if (!updatedCart) {
+        return res.status(400).json({
+            message: "Cart item not found or stock limit reached",
+            success: false
+        });
+    }
 
     return res.status(200).json({
         message: "Cart item quantity incremented successfully",
@@ -643,4 +689,156 @@ export const decrementCartItemQuantity = async (req, res) => {
   }
 };
 
+export const createOrderController = async (req, res) => {
+    try {
+
+     const cart = await getCartDetails(req.user._id);
+
+     if(!cart || cart.items.length === 0){
+        return res.status(400).json({
+            message: "Cart is empty",
+            success: false
+        });     
+     }
+     
+        const amount = Number(cart.totalPrice);
+
+        if (!Number.isFinite(amount) || amount <= 0) {
+            return res.status(400).json({
+                message: "Cart total is invalid",
+                success: false
+            });
+        }
+
+        const currency = cart.currency || "INR";
+        const order = await createOrder(amount, currency);
+
+        await paymentModel.create({
+        user: req.user._id,
+        razorpay: {
+            orderId: order.id,
+        },
+        price: {
+            amount: cart.totalPrice,
+            currency: cart.currency
+        },
+        orderItems: cart.items.map(item => {
+            const variant = item.product.variants?.[0];
+            const itemPrice = variant?.price || item.product.price;
+
+            return {
+                title: item.product.title,
+                productId: item.product._id,
+                variantId: item.variant,
+                quantity: item.quantity,
+                images: variant?.images?.length
+                    ? variant.images
+                    : item.product.images,
+                description: item.product.description,
+                price: {
+                    amount: itemPrice.amount,
+                    currency: itemPrice.currency || currency
+                }
+            };
+        })
+    });
+
+   
+
+        return res.status(200).json({   
+        message: "Order created successfully",
+        success: true,
+        keyId: config.RAZORPAY_KEY_ID,
+        order
+        });
+    }   catch (error) { 
+
+        console.error("CREATE ORDER ERROR:", error);
+
+        return res.status(500).json({
+            message: "Failed to create order",
+            success: false,
+            error: error.message
+        });
+    }       
+};
+
+export const verifyCartPayment = async (req, res) => {
+    try {
+        const {
+            razorpay_order_id: orderId,
+            razorpay_payment_id: paymentId,
+            razorpay_signature: signature
+        } = req.body;
+
+        if (
+            typeof orderId !== "string" ||
+            typeof paymentId !== "string" ||
+            typeof signature !== "string"
+        ) {
+            return res.status(400).json({
+                message: "Missing payment verification details",
+                success: false
+            });
+        }
+
+        const payment = await paymentModel.findOne({
+            user: req.user._id,
+            "razorpay.orderId": orderId
+        });
+
+        if (!payment) {
+            return res.status(404).json({
+                message: "Payment order not found",
+                success: false
+            });
+        }
+
+        if (payment.status === "paid") {
+            await cartModel.updateOne(
+                { user: req.user._id },
+                { $set: { items: [] } }
+            );
+
+            return res.status(200).json({
+                message: "Payment already verified",
+                success: true
+            });
+        }
+
+        const isValid = verifyPaymentSignature({
+            orderId,
+            paymentId,
+            signature
+        });
+
+        if (!isValid) {
+            return res.status(400).json({
+                message: "Invalid payment signature",
+                success: false
+            });
+        }
+
+        payment.status = "paid";
+        payment.razorpay.paymentId = paymentId;
+        payment.razorpay.signature = signature;
+        await payment.save();
+        await cartModel.updateOne(
+            { user: req.user._id },
+            { $set: { items: [] } }
+        );
+
+        return res.status(200).json({
+            message: "Payment verified successfully",
+            success: true
+        });
+    } catch (error) {
+        console.error("VERIFY PAYMENT ERROR:", error);
+
+        return res.status(500).json({
+            message: "Failed to verify payment",
+            success: false
+        });
+    }
+};
 

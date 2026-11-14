@@ -47,4 +47,17 @@ export const decrementCartItem = async ({ productId, variantId }) => {
   return response.data;
 };
 
+export const createOrder = async () => {
+  const response = await api.post("/payment/create/order");
+  return response.data;
+};
+
+export const verifyPayment = async (paymentDetails) => {
+  const response = await api.post(
+    "/payment/verify",
+    paymentDetails
+  );
+
+  return response.data;
+};
 

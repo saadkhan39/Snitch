@@ -2,7 +2,7 @@ import productModel from "../models/product.model.js";
 import { uploadFiles } from "../services/storage.service.js";
 
 export async function createProduct(req,res){
-        const {title,description,priceAmount,priceCurrency} = req.body
+        const {title,category,description,priceAmount,priceCurrency} = req.body
     const rawAttributes = req.body.attributes
     const attributes = typeof rawAttributes === "string"
         ? JSON.parse(rawAttributes)
@@ -19,6 +19,7 @@ export async function createProduct(req,res){
 
     const product = await productModel.create({
         title,
+        category,
         description,
         price:{
             amount: priceAmount,

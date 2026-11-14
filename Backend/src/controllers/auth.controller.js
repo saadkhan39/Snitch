@@ -99,6 +99,15 @@ export const getMe = async (req,res) =>{
   })
 } 
 
+// logout controller
+export const logout = (req, res) => {
+  res.clearCookie("token");
+  return res.status(200).json({
+    success: true,
+    message: "User logged out successfully",
+  });
+};
+
 // google callback
 export const googleCallback = async (req,res) =>{
   const {id ,displayName , emails , photos} = req.user

@@ -1,6 +1,6 @@
 import {Router} from "express"
 import { validateLoginUser, validateRegisterUser } from "../validator/auth.validator.js"
-import { getMe, googleCallback, login, register } from "../controllers/auth.controller.js"
+import { getMe, googleCallback, login, logout, register } from "../controllers/auth.controller.js"
 import passport from "passport"
 import { config } from "../config/config.js"
 import { authenticateUser } from "../middleware/auth.middleware.js"
@@ -13,6 +13,9 @@ router.post("/register",validateRegisterUser,register)
 
 //login api
 router.post("/login",validateLoginUser,login)
+
+//logout api
+router.post("/logout",logout)
 
 //me api
 router.get("/me",authenticateUser,getMe)

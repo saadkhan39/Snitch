@@ -70,15 +70,6 @@ const normalizeText = (value) => {
     .toLowerCase();
 };
 
-const CATEGORIES = [
-  "All",
-  "Outerwear",
-  "Basics",
-  "Tops",
-  "Loungewear",
-  "Accessories",
-];
-
 const ProductCardSkeleton = () => (
   <div className="overflow-hidden rounded-[0.4375rem] border border-[#E5DFD8] bg-white">
     <div className="aspect-[4/5] animate-pulse bg-[#EAE5E0]" />
@@ -150,6 +141,28 @@ const Home = () => {
   const [activeCategory, setActiveCategory] = useState("All");
 
   const [searchTerm, setSearchTerm] = useState("");
+
+  const categories = useMemo(() => {
+    const categoryCounts = new Map();
+
+    products.forEach((product) => {
+      const label = product?.category?.trim() || "Other";
+      const key = normalizeText(label);
+      const current = categoryCounts.get(key);
+
+      categoryCounts.set(key, {
+        label: current?.label || label,
+        count: (current?.count || 0) + 1,
+      });
+    });
+
+    return [
+      { label: "All", count: products.length },
+      ...Array.from(categoryCounts.values()).sort((first, second) =>
+        first.label.localeCompare(second.label)
+      ),
+    ];
+  }, [products]);
 
   /*
     =====================================================
@@ -276,7 +289,7 @@ useEffect(() => {
 
  const visibleProducts = useMemo(() => {
   return products.filter((product) => {
-    const productCategory = normalizeText(product?.category);
+    const productCategory = normalizeText(product?.category || "Other");
 
     const matchesCategory =
       activeCategory === "All" ||
@@ -518,24 +531,29 @@ useEffect(() => {
                 sm:flex
               "
             >
-              <button
-                type="button"
-                onClick={() => {
-                  document.getElementById("browse")?.scrollIntoView({
-                    behavior: "smooth",
-                    block: "start",
-                  });
-                }}
-                className="transition-colors hover:text-[#211D1A]"
-              >
-                SHOP
-              </button>
-
               <Link
-                to="/login"
-                className="transition-colors hover:text-[#211D1A]"
+                to="/account"
+                aria-label="Account"
+                title="Account"
+                className="
+                  flex
+                  h-[2rem]
+                  w-[2rem]
+                  shrink-0
+                  items-center
+                  justify-center
+                  rounded-[0.3125rem]
+                  border
+                  border-[#D8D1C8]
+                  bg-white
+                  text-[#211D1A]
+                  transition-all
+                  hover:border-[#211D1A]
+                  hover:bg-[#211D1A]
+                  hover:text-white
+                "
               >
-                Sign in
+                <FiUser className="h-[0.875rem] w-[0.875rem]" />
               </Link>
 
               <button
@@ -601,8 +619,9 @@ useEffect(() => {
               "
             >
               <Link
-                to="/login"
-                aria-label="Sign in"
+                to="/account"
+                aria-label="Account"
+                title="Account"
                 className="
                   flex
                   h-[2.25rem]
@@ -1176,15 +1195,15 @@ useEffect(() => {
           {/* CATEGORY FILTER */}
 
           <div className="mt-[1.5rem] flex gap-[0.5rem] overflow-x-auto pb-[0.5rem] [scrollbar-width:none]">
-            {CATEGORIES.map((category) => {
-              const isActive = category === activeCategory;
+            {categories.map((category) => {
+              const isActive = category.label === activeCategory;
 
               return (
                 <button
                   type="button"
-                  key={category}
+                  key={category.label}
                   aria-pressed={isActive}
-                  onClick={() => setActiveCategory(category)}
+                  onClick={() => setActiveCategory(category.label)}
                   className={`
                     shrink-0
                     rounded-[0.3125rem]
@@ -1203,7 +1222,7 @@ useEffect(() => {
                     }
                   `}
                 >
-                  {category}
+                  {category.label}
                 </button>
               );
             })}

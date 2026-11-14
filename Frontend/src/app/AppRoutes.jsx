@@ -12,6 +12,7 @@ import OrderSuccess from "../features/cart/pages/OrderSuccess"
 import Wishlist from "../features/wishlist/pages/Wishlist"
 import SellerHero from "../features/hero/page/SellerHero"
 import Search from "../features/product/pages/Search"
+import Account from "../features/auth/pages/Account"
 
 
 export const routes = createBrowserRouter([
@@ -28,6 +29,11 @@ export const routes = createBrowserRouter([
     {
         path: "/login",
         element: <Login />
+    },
+
+    {
+        path: "/account",
+        element: <Account />
     },
 
     {

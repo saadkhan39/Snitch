@@ -5,11 +5,22 @@ import { useProduct } from '../hooks/useProduct'
 
 const MAX_IMAGES = 7
 const CURRENCIES = ['INR', 'USD', 'EUR', 'GBP']
+const PRODUCT_CATEGORIES = [
+  'T-Shirts',
+  'Shirts',
+  'Jeans',
+  'Trousers',
+  'Cargos',
+  'Shorts',
+  'Jackets',
+  'Accessories',
+]
 
 const CreateProduct = () => {
   const { handleCreateProduct } = useProduct()
   const [form, setForm] = useState({
     title: '',
+    category: '',
     description: '',
     priceAmount: '',
     priceCurrency: 'INR',
@@ -62,6 +73,7 @@ const CreateProduct = () => {
     setError('')
     setSuccess('')
     if (!form.title.trim()) return setError('Please enter a product title.')
+    if (!form.category) return setError('Please select a product category.')
     if (!form.priceAmount || Number(form.priceAmount) <= 0)
       return setError('Please enter a valid price.')
     if (images.length === 0) return setError('Please upload at least one product image.')
@@ -70,6 +82,7 @@ const CreateProduct = () => {
 
     const formDataToSend = new FormData()
     formDataToSend.append('title', form.title.trim())
+    formDataToSend.append('category', form.category)
     formDataToSend.append('description', form.description.trim())
     formDataToSend.append('priceAmount', form.priceAmount)
     formDataToSend.append('priceCurrency', form.priceCurrency)
@@ -85,6 +98,7 @@ const CreateProduct = () => {
       setSuccess('Product published successfully!')
       setForm({
         title: '',
+        category: '',
         description: '',
         priceAmount: '',
         priceCurrency: 'INR',
@@ -164,6 +178,26 @@ const CreateProduct = () => {
                 required
                 className={inputCls}
               />
+            </div>
+
+            {/* Category */}
+            <div>
+              <label htmlFor="category" className={labelCls}>Category</label>
+              <select
+                id="category"
+                name="category"
+                value={form.category}
+                onChange={handleChange}
+                required
+                className={`${inputCls} cursor-pointer`}
+              >
+                <option value="" disabled>Select a clothing category</option>
+                {PRODUCT_CATEGORIES.map((category) => (
+                  <option key={category} value={category} className="bg-[#F8F6F2] text-[#211D1A]">
+                    {category}
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* Description */}

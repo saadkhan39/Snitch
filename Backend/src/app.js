@@ -11,6 +11,8 @@ import passport from 'passport'
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 
 const app = express()
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173"
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000"
 
 app.use(express.static("./public"))
 app.use(passport.initialize());
@@ -20,10 +22,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-
-      callbackURL:
-        process.env.GOOGLE_CALLBACK_URL ||
-        "http://localhost:5000/api/auth/google/callback",
+      callbackURL: `${BACKEND_URL}/api/auth/google/callback`,
     },
     (accessToken, refreshToken, profile, done) => {
       return done(null, profile);
@@ -34,11 +33,13 @@ passport.use(
 app.use(morgan("dev"))
 app.use(express.json())
 app.use(cookieParser())
-app.use(cors({
-     origin: "http://localhost:5173",
-    methods: [ "GET", "POST", "PUT", "DELETE" ],
-    credentials: true
-}))
+app.use(
+  cors({
+    origin: FRONTEND_URL,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    credentials: true,
+  })
+)
 app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (_req, res) => {

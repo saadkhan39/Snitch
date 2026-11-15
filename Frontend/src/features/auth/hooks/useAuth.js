@@ -41,17 +41,25 @@ const useAuth = () => {
     async function handleGetMe() {
         try {
             dispatch(setLoading(true))
-            dispatch(setError(null))    
-        const data = await getMe()
-        dispatch(setUser(data?.user || data))
-        return { success: true, data }
+            dispatch(setError(null))
+            const data = await getMe()
+            dispatch(setUser(data?.user || data))
+            return { success: true, data }
         } catch (err) {
+            const status = err?.response?.status
+
+            if (status === 401) {
+                dispatch(setUser(null))
+                dispatch(setError(null))
+                return { success: false, error: 'Not authenticated' }
+            }
+
             const errorMessage = err?.response?.data?.message || err?.message || 'Failed to fetch user data. Please try again.'
             dispatch(setError(errorMessage))
             return { success: false, error: errorMessage }
         } finally {
             dispatch(setLoading(false))
-        }       
+        }
     }
 
     async function handleLogout() {

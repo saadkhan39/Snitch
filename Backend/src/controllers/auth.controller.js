@@ -3,17 +3,8 @@ import userModel from "../models/user.model.js";
 import jwt from "jsonwebtoken";
 import passport from "passport";
 
-async function sendTokenResponse(user, res, message) {
-  const token = await jwt.sign(
-    {
-      id: user._id,
-    },
-    config.JWT_SECRET, {
-        expiresIn: "7d"
-    })
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
-
- 
 async function sendTokenResponse(user, res, message) {
   const token = jwt.sign(
     {
@@ -45,11 +36,6 @@ async function sendTokenResponse(user, res, message) {
     },
   });
 }
-
-
- 
-}
-
 
 // register controller
 export const register = async (req, res) => {
@@ -137,15 +123,13 @@ export const logout = (req, res) => {
 };
 
 // google callback
-
 export const googleCallback = async (req, res) => {
   try {
     const { id, displayName, emails, photos } = req.user;
-
     const email = emails?.[0]?.value;
 
     if (!email) {
-      return res.redirect("/login?error=google_auth_failed");
+      return res.redirect(`${FRONTEND_URL}/login?error=google_auth_failed`);
     }
 
     let user = await userModel.findOne({ email });
@@ -176,11 +160,10 @@ export const googleCallback = async (req, res) => {
       path: "/",
     });
 
-    // Redirect to deployed React homepage
-    res.redirect("/");
+    return res.redirect(FRONTEND_URL);
   } catch (error) {
     console.error("Google OAuth error:", error);
-    res.redirect("/login?error=google_auth_failed");
+    return res.redirect(`${FRONTEND_URL}/login?error=google_auth_failed`);
   }
 };
 

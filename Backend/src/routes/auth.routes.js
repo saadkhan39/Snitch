@@ -21,16 +21,21 @@ router.post("/logout",logout)
 router.get("/me",authenticateUser,getMe)
 
 //google auth
-router.get("/google",
-     passport.authenticate('google', { scope: ['profile', 'email'] })
-)
+router.get(
+  "/google",
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+    session: false,
+  })
+);
 
 //google auth callback
-router.get('/google/callback',
-  passport.authenticate('google', { 
+router.get(
+  "/google/callback",
+  passport.authenticate("google", {
     session: false,
-    failureRedirect: config.NODE_ENV == "development" ? "http://localhost:5173/login" : "/login"
-   }),
+    failureRedirect: "/login?error=google_auth_failed",
+  }),
   googleCallback
 );
 

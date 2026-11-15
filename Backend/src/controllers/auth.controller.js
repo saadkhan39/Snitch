@@ -13,7 +13,25 @@ async function sendTokenResponse(user, res, message) {
     })
 
 
-  res.cookie("token", token);
+ 
+async function sendTokenResponse(user, res, message) {
+  const token = jwt.sign(
+    {
+      id: user._id,
+    },
+    config.JWT_SECRET,
+    {
+      expiresIn: "7d",
+    }
+  );
+
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    path: "/",
+  });
 
   res.status(200).json({
     message,
@@ -26,6 +44,10 @@ async function sendTokenResponse(user, res, message) {
       role: user.role,
     },
   });
+}
+
+
+ 
 }
 
 
@@ -101,7 +123,13 @@ export const getMe = async (req,res) =>{
 
 // logout controller
 export const logout = (req, res) => {
-  res.clearCookie("token");
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+  });
+
   return res.status(200).json({
     success: true,
     message: "User logged out successfully",
@@ -109,33 +137,52 @@ export const logout = (req, res) => {
 };
 
 // google callback
-export const googleCallback = async (req,res) =>{
-  const {id ,displayName , emails , photos} = req.user
- 
-  const email = emails[0].value
-  const profilePic = photos[0].value
 
-  let user = await userModel.findOne({
-    email
-  })
+export const googleCallback = async (req, res) => {
+  try {
+    const { id, displayName, emails, photos } = req.user;
 
-  if(!user){
-    user = await userModel.create({
-      email,
-      googleId:id,
-      fullname:displayName
-    })
-  }
+    const email = emails?.[0]?.value;
 
-  const token = jwt.sign({
+    if (!email) {
+      return res.redirect("/login?error=google_auth_failed");
+    }
+
+    let user = await userModel.findOne({ email });
+
+    if (!user) {
+      user = await userModel.create({
+        email,
+        googleId: id,
+        fullname: displayName,
+      });
+    }
+
+    const token = jwt.sign(
+      {
         id: user._id,
-    }, config.JWT_SECRET, {
-        expiresIn: "7d"
-    })
+      },
+      config.JWT_SECRET,
+      {
+        expiresIn: "7d",
+      }
+    );
 
-    res.cookie("token", token)
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: "/",
+    });
 
-  res.redirect("http://localhost:5173")
-}
+    // Redirect to deployed React homepage
+    res.redirect("/");
+  } catch (error) {
+    console.error("Google OAuth error:", error);
+    res.redirect("/login?error=google_auth_failed");
+  }
+};
+
 
 

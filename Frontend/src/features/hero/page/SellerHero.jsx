@@ -31,7 +31,7 @@ const SellerHero = () => {
       setIsLoadingHero(true);
       setError("");
 
-      const response = await fetch("http://localhost:3000/api/hero", {
+      const response = await fetch("/api/hero", {
         credentials: "include",
       });
 
@@ -157,7 +157,7 @@ const SellerHero = () => {
       });
 
       const response = await fetch(
-        "http://localhost:3000/api/hero/",
+        "/api/hero/",
         {
           method: "POST",
           credentials: "include",

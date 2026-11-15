@@ -13,6 +13,7 @@ import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 const app = express()
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173"
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000"
+const allowedOrigins = [FRONTEND_URL, "http://localhost:5173", "http://localhost:3000"]
 
 app.use(express.static("./public"))
 app.use(passport.initialize());
@@ -35,7 +36,12 @@ app.use(express.json())
 app.use(cookieParser())
 app.use(
   cors({
-    origin: FRONTEND_URL,
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("Not allowed by CORS"));
+    },
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     credentials: true,
   })

@@ -1,26 +1,37 @@
-import {Router} from "express"
-import { validateLoginUser, validateRegisterUser } from "../validator/auth.validator.js"
-import { getMe, googleCallback, login, logout, register } from "../controllers/auth.controller.js"
-import passport from "passport"
-import { config } from "../config/config.js"
-import { authenticateUser } from "../middleware/auth.middleware.js"
 
-const router  = Router()
+import { Router } from "express";
 
+import {
+  validateLoginUser,
+  validateRegisterUser,
+} from "../validator/auth.validator.js";
 
-//register api
-router.post("/register",validateRegisterUser,register)
+import {
+  getMe,
+  googleCallback,
+  login,
+  logout,
+  register,
+} from "../controllers/auth.controller.js";
 
-//login api
-router.post("/login",validateLoginUser,login)
+import passport from "passport";
+import { authenticateUser } from "../middleware/auth.middleware.js";
 
-//logout api
-router.post("/logout",logout)
+const router = Router();
 
-//me api
-router.get("/me",authenticateUser,getMe)
+// Register
+router.post("/register", validateRegisterUser, register);
 
-//google auth
+// Login
+router.post("/login", validateLoginUser, login);
+
+// Logout
+router.post("/logout", logout);
+
+// Get logged-in user
+router.get("/me", authenticateUser, getMe);
+
+// Google authentication
 router.get(
   "/google",
   passport.authenticate("google", {
@@ -29,16 +40,14 @@ router.get(
   })
 );
 
-//google auth callback
+// Google callback
 router.get(
   "/google/callback",
   passport.authenticate("google", {
     session: false,
-    failureRedirect: `${process.env.FRONTEND_URL || "http://localhost:5173"}/login?error=google_auth_failed`,
+    failureRedirect: "/login?error=google_auth_failed",
   }),
   googleCallback
 );
 
-
-
-export default router
+export default router;

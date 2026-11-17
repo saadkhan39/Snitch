@@ -3,8 +3,82 @@ import productModel from "../models/product.model.js";
 import { stockOfVariant } from "../dao/product.dao.js";
 import { createOrder, verifyPaymentSignature } from "../services/payment.service.js";
 import paymentModel from "../models/payment.model.js";
+import orderModel from "../models/order.model.js";
 import { config } from "../config/config.js";
 
+const requiredShippingAddressFields = [
+    "fullName",
+    "phone",
+    "addressLine1",
+    "city",
+    "state",
+    "postalCode",
+    "country"
+];
+
+const normalizeShippingAddress = (address) => {
+    if (!address || typeof address !== "object" || Array.isArray(address)) {
+        return null;
+    }
+
+    const normalized = {};
+    for (const field of requiredShippingAddressFields) {
+        if (typeof address[field] !== "string" || !address[field].trim()) {
+            return null;
+        }
+        normalized[field] = address[field].trim();
+    }
+
+    normalized.addressLine2 =
+        typeof address.addressLine2 === "string"
+            ? address.addressLine2.trim()
+            : "";
+    return normalized;
+};
+
+const ensureOrderForPayment = async (payment) => {
+    const existingOrder = await orderModel.findOne({ payment: payment._id });
+    if (existingOrder) {
+        return existingOrder;
+    }
+
+    const orderData = {
+        payment: payment._id,
+        user: payment.user,
+        razorpay: {
+            orderId: payment.razorpay.orderId,
+            paymentId: payment.razorpay.paymentId
+        },
+        paymentStatus: "paid",
+        price: payment.price,
+        shippingAddress: payment.shippingAddress,
+        items: payment.orderItems.map((item) => ({
+            title: item.title,
+            productId: item.productId,
+            variantId: item.variantId,
+            seller: item.seller,
+            quantity: item.quantity,
+            images: item.images,
+            description: item.description,
+            selectedAttributes: item.selectedAttributes,
+            price: item.price
+        }))
+    };
+
+    try {
+        return await orderModel.create(orderData);
+    } catch (error) {
+        if (error.code !== 11000) {
+            throw error;
+        }
+
+        const order = await orderModel.findOne({ payment: payment._id });
+        if (!order) {
+            throw error;
+        }
+        return order;
+    }
+};
 
 async function getCartDetails(userId) {
       let cart = (await cartModel.aggregate([
@@ -691,6 +765,13 @@ export const decrementCartItemQuantity = async (req, res) => {
 
 export const createOrderController = async (req, res) => {
     try {
+        const shippingAddress = normalizeShippingAddress(req.body?.shippingAddress);
+        if (!shippingAddress) {
+            return res.status(400).json({
+                message: "A complete shipping address is required",
+                success: false
+            });
+        }
 
      const cart = await getCartDetails(req.user._id);
 
@@ -715,6 +796,7 @@ export const createOrderController = async (req, res) => {
 
         await paymentModel.create({
         user: req.user._id,
+        shippingAddress,
         razorpay: {
             orderId: order.id,
         },
@@ -730,11 +812,13 @@ export const createOrderController = async (req, res) => {
                 title: item.product.title,
                 productId: item.product._id,
                 variantId: item.variant,
+                seller: item.product.seller,
                 quantity: item.quantity,
                 images: variant?.images?.length
                     ? variant.images
                     : item.product.images,
                 description: item.product.description,
+                selectedAttributes: item.selectedAttributes || {},
                 price: {
                     amount: itemPrice.amount,
                     currency: itemPrice.currency || currency
@@ -795,6 +879,7 @@ export const verifyCartPayment = async (req, res) => {
         }
 
         if (payment.status === "paid") {
+            const order = await ensureOrderForPayment(payment);
             await cartModel.updateOne(
                 { user: req.user._id },
                 { $set: { items: [] } }
@@ -802,7 +887,8 @@ export const verifyCartPayment = async (req, res) => {
 
             return res.status(200).json({
                 message: "Payment already verified",
-                success: true
+                success: true,
+                orderId: order._id
             });
         }
 
@@ -823,6 +909,7 @@ export const verifyCartPayment = async (req, res) => {
         payment.razorpay.paymentId = paymentId;
         payment.razorpay.signature = signature;
         await payment.save();
+        const order = await ensureOrderForPayment(payment);
         await cartModel.updateOne(
             { user: req.user._id },
             { $set: { items: [] } }
@@ -830,7 +917,8 @@ export const verifyCartPayment = async (req, res) => {
 
         return res.status(200).json({
             message: "Payment verified successfully",
-            success: true
+            success: true,
+            orderId: order._id
         });
     } catch (error) {
         console.error("VERIFY PAYMENT ERROR:", error);

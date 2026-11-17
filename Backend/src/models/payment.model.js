@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import priceSchema from "./priceSchema.js";
+import shippingAddressSchema from "./shippingAddress.schema.js";
 
 
 const paymentSchema = new mongoose.Schema({
@@ -22,14 +23,38 @@ const paymentSchema = new mongoose.Schema({
         ref: "user",
         required: true
     },
+    shippingAddress: {
+        type: shippingAddressSchema,
+        required: true
+    },
     orderItems: [
         {
-            title: String,
-            productId: mongoose.Schema.Types.ObjectId,
+            title: {
+                type: String,
+                required: true
+            },
+            productId: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "product",
+                required: true
+            },
             variantId: mongoose.Schema.Types.ObjectId,
-            quantity: Number,
+            seller: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "user",
+                required: true
+            },
+            quantity: {
+                type: Number,
+                required: true
+            },
             images: [ { url: String } ],
             description: String,
+            selectedAttributes: {
+                type: Map,
+                of: String,
+                default: {}
+            },
             price: priceSchema
         }
     ]

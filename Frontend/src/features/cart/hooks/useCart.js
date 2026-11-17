@@ -166,8 +166,8 @@ async function handleDecrementCartItem({ productId, variantId }) {
 // ============================================
 // CREATE CART ORDER
 // ============================================
-async function handleCreateCartOrder() {  
-  return createOrder();
+async function handleCreateCartOrder(shippingAddress) {  
+  return createOrder(shippingAddress);
 }
 
 async function handleVerifyCartPayment(paymentDetails) {

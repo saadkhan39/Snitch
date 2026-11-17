@@ -43,6 +43,16 @@ const Cart = () => {
   const [deleteItemId, setDeleteItemId] = useState(null);
   const [isCreatingOrder, setIsCreatingOrder] = useState(false);
   const [checkoutError, setCheckoutError] = useState("");
+  const [shippingAddress, setShippingAddress] = useState({
+    fullName: "",
+    phone: "",
+    addressLine1: "",
+    addressLine2: "",
+    city: "",
+    state: "",
+    postalCode: "",
+    country: "",
+  });
 
   // ============================================
   // CART ITEMS
@@ -374,6 +384,20 @@ const Cart = () => {
 
     setCheckoutError("");
 
+    const requiredAddressFields = [
+      "fullName",
+      "phone",
+      "addressLine1",
+      "city",
+      "state",
+      "postalCode",
+      "country",
+    ];
+    if (requiredAddressFields.some((field) => !shippingAddress[field].trim())) {
+      setCheckoutError("Please complete your shipping address before checkout.");
+      return;
+    }
+
     if (razorpayError || !Razorpay) {
       setCheckoutError("Payment checkout is unavailable. Please try again later.");
       return;
@@ -386,7 +410,7 @@ const Cart = () => {
     setIsCreatingOrder(true);
 
     try {
-      const { order, keyId } = await handleCreateCartOrder();
+      const { order, keyId } = await handleCreateCartOrder(shippingAddress);
 
       if (!order?.id || !keyId) {
         throw new Error("The payment order could not be created.");
@@ -403,13 +427,13 @@ const Cart = () => {
           try {
             const verification = await handleVerifyCartPayment(response);
 
-            if (!verification?.success) {
+            if (!verification?.success || !verification.orderId) {
               throw new Error("Payment could not be verified.");
             }
 
             dispatch(clearCart());
             navigate(
-              `/order-success?order_id=${encodeURIComponent(response.razorpay_order_id)}`,
+              `/order-success?order_id=${encodeURIComponent(verification.orderId)}`,
               { replace: true }
             );
           } catch (verificationError) {
@@ -1078,6 +1102,45 @@ const Cart = () => {
               </div>
 
               {/* CHECKOUT */}
+
+              <section className="mb-6 border-t border-[#E1DBD4] pt-5">
+                <h2 className="mb-4 font-['Plus_Jakarta_Sans'] text-[8px] font-semibold uppercase tracking-[0.2em] text-[#8A837C]">
+                  Shipping address
+                </h2>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    ["fullName", "Full name", "text"],
+                    ["phone", "Phone", "tel"],
+                    ["addressLine1", "Address line 1", "text"],
+                    ["addressLine2", "Address line 2 (optional)", "text"],
+                    ["city", "City", "text"],
+                    ["state", "State", "text"],
+                    ["postalCode", "Postal code", "text"],
+                    ["country", "Country", "text"],
+                  ].map(([field, label, type]) => (
+                    <label
+                      key={field}
+                      className={field.startsWith("addressLine") ? "col-span-2" : ""}
+                    >
+                      <span className="mb-1 block text-[8px] uppercase tracking-[0.1em] text-[#8A837C]">
+                        {label}
+                      </span>
+                      <input
+                        type={type}
+                        autoComplete={field === "fullName" ? "name" : undefined}
+                        value={shippingAddress[field]}
+                        onChange={(event) =>
+                          setShippingAddress((currentAddress) => ({
+                            ...currentAddress,
+                            [field]: event.target.value,
+                          }))
+                        }
+                        className="h-10 w-full border border-[#D8D1C8] bg-[#F8F6F2] px-3 text-[10px] text-[#211D1A] outline-none focus:border-[#211D1A]"
+                      />
+                    </label>
+                  ))}
+                </div>
+              </section>
 
               {checkoutError && (
                 <p role="alert" className="mb-3 text-[10px] text-[#B54A42]">
